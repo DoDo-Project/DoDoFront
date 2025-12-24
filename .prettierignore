@@ -1,0 +1,9 @@
+dist
+node_modules
+.vite
+coverage
+*.log
+.eslintcache
+
+.github/
+*.md
