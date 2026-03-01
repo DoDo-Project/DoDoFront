@@ -7,7 +7,7 @@ import { apiConfig } from '@/shared/config';
  */
 export const apiClient = axios.create({
   baseURL: apiConfig.baseURL,
-  //   timeout: apiConfig.timeout ?? 10_000,
+  timeout: apiConfig.timeout,
   headers: {
     'Content-Type': 'application/json',
   },
