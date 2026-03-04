@@ -27,8 +27,8 @@
 
 ### Data Management & Real-time
 <p>
-<img src="https://img.shields.io/badge/Redux-764ABC?style=for-the-badge&logo=redux&logoColor=white">
-<img src="https://img.shields.io/badge/ReactQuery-FF4154?style=for-the-badge&logoColor=white">
+<img src="https://img.shields.io/badge/Zustand-433E38?style=for-the-badge&logo=zustand&logoColor=white">
+<img src="https://img.shields.io/badge/TanStack%20Query-FF4154?style=for-the-badge&logo=reactquery&logoColor=white">
 <img src="https://img.shields.io/badge/WebSocket-0082C9?style=for-the-badge&logoColor=white">
 <img src="https://img.shields.io/badge/FCM-FCA121?style=for-the-badge&logo=firebase&logoColor=white">
 </p>
@@ -53,7 +53,8 @@
 
 ## 📊 프론트엔드 참고자료 출처
 
-👉🏻 **[React + WebSocket 실시간 데이터 처리 예제](https://www.digitalocean.com/community/tutorials/react-websockets)**
+
+
 
 <br>
 
@@ -65,11 +66,6 @@
       <a href="https://github.com/sooloin">
       <img src="https://github.com/sooloin.png" alt="조수빈 프로필" width="150" height="150"/><br>
       <b>조수빈</b>
-    </td>
-    <td align="center">
-      <a href="https://github.com/path-ptj">
-      <img src="https://github.com/right-path-ptj.png" alt="박태정 프로필" width="150" height="150"/><br>
-      <b>박태정</b>
     </td>
   </tr>
 </table>
