@@ -7,6 +7,7 @@ import { LoginPage } from '@/pages/auth/LoginPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
 import { MyDodoPage } from '@/pages/my/MyDodoPage';
+import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { WalkPage } from '@/pages/walk/WalkPage';
 
 export const router = createBrowserRouter([
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
           </RequireAuth>
         ),
       },
+      { path: '*', element: <NotFoundPage /> },
     ],
   },
   {
