@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 
 import { AppLayout } from '@/app/layouts/AppLayout';
 import { AuthLayout } from '@/app/layouts/AuthLayout';
+import { RequireAuth } from '@/app/guards/RequireAuth';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
@@ -15,7 +16,14 @@ export const router = createBrowserRouter([
       { path: '/', element: <MainPage /> },
       { path: '/walk', element: <WalkPage /> },
       { path: '/community', element: <CommunityPage /> },
-      { path: '/my', element: <MyDodoPage /> },
+      {
+        path: '/my',
+        element: (
+          <RequireAuth>
+            <MyDodoPage />
+          </RequireAuth>
+        ),
+      },
     ],
   },
   {
