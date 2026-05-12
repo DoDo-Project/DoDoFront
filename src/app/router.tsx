@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 
 import { AppLayout } from '@/app/layouts/AppLayout';
+import { AuthLayout } from '@/app/layouts/AuthLayout';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
@@ -17,5 +18,9 @@ export const router = createBrowserRouter([
       { path: '/my', element: <MyDodoPage /> },
     ],
   },
-  { path: '/auth', element: <LoginPage /> },
+  {
+    path: '/auth',
+    element: <AuthLayout />,
+    children: [{ index: true, element: <LoginPage /> }],
+  },
 ]);
