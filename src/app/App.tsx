@@ -1,12 +1,8 @@
+import { RouterProvider } from 'react-router-dom';
+
 import '@/app/styles/App.css';
-import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
+import { router } from '@/app/router';
 
-function App() {
-  return (
-    <>
-      <DoDoLogo width={200} height={100} className="mx-auto mt-10" />
-    </>
-  );
+export default function App() {
+  return <RouterProvider router={router} />;
 }
-
-export default App;
