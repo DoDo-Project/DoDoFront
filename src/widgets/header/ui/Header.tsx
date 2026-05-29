@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
+import { LoginModal, type SocialProvider } from '@/features/auth';
 import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
 
 import { useIsLoggedIn } from '../model/useIsLoggedIn';
@@ -8,15 +10,29 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
   ['text-sm transition-colors', isActive ? 'font-semibold text-brand' : 'text-neutral-700 hover:text-brand'].join(' ');
 
 function GuestNav() {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
+  // TODO(#24): provider별 OAuth 인가 URL로 리다이렉트 연결
+  const handleSelectProvider = (provider: SocialProvider) => {
+    console.log('social login provider selected:', provider);
+  };
+
   return (
-    <nav className="flex items-center gap-8" aria-label="비로그인 메뉴">
-      <NavLink to="/" end className={linkClass}>
-        서비스 소개
-      </NavLink>
-      <NavLink to="/auth" className={linkClass}>
-        시작하기
-      </NavLink>
-    </nav>
+    <>
+      <nav className="flex items-center gap-8" aria-label="비로그인 메뉴">
+        <NavLink to="/" end className={linkClass}>
+          서비스 소개
+        </NavLink>
+        <button
+          type="button"
+          onClick={() => setIsLoginOpen(true)}
+          className="text-sm text-neutral-700 transition-colors hover:text-brand"
+        >
+          시작하기
+        </button>
+      </nav>
+      <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={handleSelectProvider} />
+    </>
   );
 }
 
