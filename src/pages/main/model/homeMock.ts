@@ -6,12 +6,6 @@ export type NoticeItem = {
   title: string;
 };
 
-export type QuickLinkItem = {
-  id: string;
-  label: string;
-  to: string;
-};
-
 export type HotTopicItem = {
   id: number;
   title: string;
@@ -23,13 +17,6 @@ export const NOTICES: NoticeItem[] = [
   { id: 3, tag: '안내', title: '산책 중 위험 지역 사용자 제보 요청' },
   { id: 4, tag: '안내', title: '반려동물 프로필 개선 업데이트' },
   { id: 5, tag: '안내', title: '11월 6일 (목) 알려진 문제점 안내 (2025-11-06' },
-];
-
-export const QUICK_LINKS: QuickLinkItem[] = [
-  { id: 'pet', label: '나의 반려동물', to: '/my' },
-  { id: 'walk', label: '산책 기록', to: '/walk' },
-  { id: 'device', label: '디바이스 관리', to: '/my' },
-  { id: 'report', label: '레포트 보관함', to: '/my' },
 ];
 
 export const HOT_TOPICS: HotTopicItem[] = [
