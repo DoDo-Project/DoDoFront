@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
-import { LoginModal, type SocialProvider } from '@/features/auth';
+import { LoginModal, redirectToSocialLogin } from '@/features/auth';
 import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
 
 import { useIsLoggedIn } from '../model/useIsLoggedIn';
@@ -11,11 +11,6 @@ const linkClass = ({ isActive }: { isActive: boolean }) =>
 
 function GuestNav() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
-
-  // TODO(#24): provider별 OAuth 인가 URL로 리다이렉트 연결
-  const handleSelectProvider = (provider: SocialProvider) => {
-    console.log('social login provider selected:', provider);
-  };
 
   return (
     <>
@@ -31,7 +26,7 @@ function GuestNav() {
           시작하기
         </button>
       </nav>
-      <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={handleSelectProvider} />
+      <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={redirectToSocialLogin} />
     </>
   );
 }
