@@ -1,4 +1,14 @@
 export { LoginModal } from './ui/LoginModal';
 export { SocialLoginButton } from './ui/SocialLoginButton';
 export { redirectToSocialLogin, getStoredState, clearStoredState, parseProvider } from './lib/oauth';
-export type { SocialProvider } from './model/types';
+export { socialLogin, registerProfile } from './api/auth';
+export type {
+  SocialProvider,
+  AuthTokens,
+  SocialLoginRequest,
+  SocialLoginSuccess,
+  SocialSignupRequired,
+  SocialLoginResult,
+  RegisterProfileRequest,
+  RegisterProfileResponse,
+} from './model/types';
