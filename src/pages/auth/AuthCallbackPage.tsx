@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 
-import { clearStoredState, getStoredState, parseProvider } from '@/features/auth';
+import { clearStoredState, getStoredState, parseProvider, socialLogin } from '@/features/auth';
 
 type Status = 'loading' | 'error';
 
@@ -19,8 +19,8 @@ export function AuthCallbackPage() {
     if (handledRef.current) return;
     handledRef.current = true;
 
-    // 콜백 처리는 STEP 4에서 비동기(API 호출)로 확장되므로 async 함수로 감싼다.
-    // effect 본문에서 직접 setState하면 렌더가 연쇄되어 린트 규칙에 걸리므로 async 함수 안에서 처리한다.
+    // 콜백 처리는 STEP 4에서 비동기(API 호출)로 확장되므로 async 함수로 감쌈
+    // effect 본문에서 직접 setState하면 렌더가 연쇄되어 린트 규칙에 걸리므로 async 함수 안에서 처리
     const processCallback = async () => {
       const provider = parseProvider(providerParam);
       const code = searchParams.get('code');
@@ -46,7 +46,22 @@ export function AuthCallbackPage() {
         return;
       }
 
-      // TODO(STEP 4): socialLogin(provider, code) 호출 → 200(로그인)/202(회원가입) 분기
+      try {
+        const result = await socialLogin(provider, code);
+
+        if (result.kind === 'LOGIN') {
+          // TODO(STEP 5): 토큰 저장 + 로그인 상태 반영 후 홈으로 이동
+          console.log('[social-login] 기존 회원 로그인 성공', result.data);
+        } else {
+          // TODO(STEP 6): registrationToken 보관 후 추가 정보 입력 화면으로 이동
+          console.log('[social-login] 신규 사용자 → 추가 정보 입력 필요', result.data);
+        }
+      } catch (error) {
+        // TODO(STEP 7): 상태 코드(400~500)별 에러 메시지 세분화
+        console.error('[social-login] 실패', error);
+        setStatus('error');
+        setMessage('로그인에 실패했어요. 잠시 후 다시 시도해주세요.');
+      }
     };
 
     void processCallback();
