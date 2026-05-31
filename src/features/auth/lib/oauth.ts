@@ -28,6 +28,12 @@ function getRedirectUri(provider: SocialProvider): string {
   return `${env.OAUTH_REDIRECT_URI}/${provider.toLowerCase()}`;
 }
 
+// URL 경로 파라미터("google"/"naver")를 SocialProvider로 변환. 유효하지 않으면 null.
+export function parseProvider(value: string | undefined): SocialProvider | null {
+  const upper = value?.toUpperCase();
+  return upper === 'GOOGLE' || upper === 'NAVER' ? upper : null;
+}
+
 // CSRF 방지용 랜덤 state를 생성하고 sessionStorage에 저장
 function createState(): string {
   const state = crypto.randomUUID();
