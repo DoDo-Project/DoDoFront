@@ -47,7 +47,7 @@ interface ChoiceRowProps {
 
 function ChoiceRow({ selected, label, onClick }: ChoiceRowProps) {
   return (
-    <button type="button" onClick={onClick} className="flex items-center gap-2 text-sm text-neutral-700">
+    <button type="button" onClick={onClick} className="flex cursor-pointer items-center gap-2 text-sm text-neutral-700">
       <span
         className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white transition-colors ${
           selected ? 'bg-secondary' : 'bg-neutral-300'

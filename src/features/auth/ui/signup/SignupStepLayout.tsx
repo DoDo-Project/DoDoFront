@@ -32,7 +32,7 @@ export function PrimaryButton({ children, onClick, disabled, loading }: PrimaryB
       type="button"
       onClick={onClick}
       disabled={isDisabled}
-      className={`h-12 w-full rounded-[10px] text-sm font-medium transition-colors ${
+      className={`h-12 w-full cursor-pointer rounded-xl text-sm font-medium transition-colors ${
         isDisabled
           ? 'cursor-not-allowed bg-neutral-200 text-neutral-400'
           : 'cursor-pointer bg-brand text-brand-foreground hover:opacity-90'
@@ -47,22 +47,25 @@ interface SubButtonProps {
   children: ReactNode;
   onClick: () => void;
   disabled?: boolean;
+  loading?: boolean;
 }
 
 // 입력 옆 보조 버튼(중복확인/검색/확인). secondary(옐로우) 색상.
-export function SubButton({ children, onClick, disabled }: SubButtonProps) {
+export function SubButton({ children, onClick, disabled, loading }: SubButtonProps) {
+  const isDisabled = disabled || loading;
+
   return (
     <button
       type="button"
       onClick={onClick}
-      disabled={disabled}
-      className={`h-12 shrink-0 rounded-[10px] px-4 text-sm font-medium transition-colors ${
-        disabled
+      disabled={isDisabled}
+      className={`h-12 shrink-0 rounded-xl px-4 text-sm font-medium transition-colors ${
+        isDisabled
           ? 'cursor-not-allowed bg-neutral-200 text-neutral-400'
           : 'cursor-pointer bg-secondary text-secondary-foreground hover:opacity-90'
       }`}
     >
-      {children}
+      {loading ? '확인 중...' : children}
     </button>
   );
 }

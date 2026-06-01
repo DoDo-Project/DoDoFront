@@ -44,7 +44,7 @@ export function FamilyCodeStep({
 
         <div className="mt-6 flex w-full gap-2">
           <input
-            className="h-12 w-full rounded-[10px] border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none focus:border-brand disabled:bg-neutral-100 disabled:text-neutral-400"
+            className="h-12 w-full cursor-text rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15 disabled:cursor-not-allowed disabled:bg-neutral-100 disabled:text-neutral-400"
             value={code}
             onChange={(event) => onChangeCode(event.target.value)}
             placeholder="가족 코드 입력"
@@ -60,7 +60,7 @@ export function FamilyCodeStep({
         <button
           type="button"
           onClick={() => onToggleSkip(!skip)}
-          className="mt-4 flex items-center gap-2 self-start text-sm text-neutral-700"
+          className="mt-4 flex cursor-pointer items-center gap-2 self-start text-sm text-neutral-700"
         >
           <span
             className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white transition-colors ${

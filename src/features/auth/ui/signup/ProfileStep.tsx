@@ -1,4 +1,7 @@
+import { useState } from 'react';
+
 import { ProfileImagePicker } from './ProfileImagePicker';
+import { RegionSelectModal } from './RegionSelectModal';
 import { PrimaryButton, SignupStepLayout, SubButton } from './SignupStepLayout';
 
 type NicknameStatus = 'idle' | 'valid' | 'invalid';
@@ -14,20 +17,20 @@ interface ProfileStepProps {
   nicknameStatus: NicknameStatus;
   /** invalid일 때만 표시할 안내 문구 */
   nicknameErrorMessage: string;
+  checkingNickname?: boolean;
   onChangeNickname: (value: string) => void;
   onChangeRegion: (value: string) => void;
   onCheckNickname: () => void;
   onSelectProfileImage: (file: File) => void;
-  onSearchRegion: () => void;
   onNext: () => void;
 }
 
 const labelClass = 'text-sm font-medium text-neutral-800';
 const inputClass =
-  'h-12 w-full rounded-[10px] border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none focus:border-brand';
+  'h-12 w-full cursor-text rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15';
 // 읽기 전용: 선택·포커스 불가, 1px 진한 회색 테두리
 const readonlyFieldClass =
-  'flex h-12 w-full select-none items-center rounded-[10px] border border-neutral-300 bg-neutral-100 px-4 text-sm text-neutral-500';
+  'flex h-12 w-full select-none items-center rounded-xl border border-neutral-300 bg-neutral-100 px-4 text-sm text-neutral-500';
 
 export function ProfileStep({
   email,
@@ -39,13 +42,14 @@ export function ProfileStep({
   profileImageError,
   nicknameStatus,
   nicknameErrorMessage,
+  checkingNickname,
   onChangeNickname,
   onChangeRegion,
   onCheckNickname,
   onSelectProfileImage,
-  onSearchRegion,
   onNext,
 }: ProfileStepProps) {
+  const [regionModalOpen, setRegionModalOpen] = useState(false);
   const canProceed = nicknameStatus === 'valid' && region.trim().length > 0;
 
   return (
@@ -89,7 +93,9 @@ export function ProfileStep({
               onChange={(event) => onChangeNickname(event.target.value)}
               placeholder="ex) 도롱이"
             />
-            <SubButton onClick={onCheckNickname}>중복 확인</SubButton>
+            <SubButton onClick={onCheckNickname} loading={checkingNickname} disabled={!nickname.trim()}>
+              중복 확인
+            </SubButton>
           </div>
           {nicknameStatus === 'valid' ? <p className="text-xs text-green-600">사용 가능한 닉네임입니다.</p> : null}
           {nicknameStatus === 'invalid' && nicknameErrorMessage ? (
@@ -102,17 +108,26 @@ export function ProfileStep({
             지역<span className="text-brand">*</span>
           </label>
           <div className="flex gap-2">
-            <input
-              className={inputClass}
-              value={region}
-              onChange={(event) => onChangeRegion(event.target.value)}
-              placeholder="지역을 입력해주세요"
-            />
-            {/* TODO: 지역 검색 모달/API 연동 (현재는 직접 입력) */}
-            <SubButton onClick={onSearchRegion}>검색</SubButton>
+            <button
+              type="button"
+              onClick={() => setRegionModalOpen(true)}
+              className={`${readonlyFieldClass} min-w-0 flex-1 cursor-pointer text-left ${
+                region ? 'text-neutral-800' : 'text-neutral-400'
+              }`}
+            >
+              {region || '지역을 선택해주세요'}
+            </button>
+            <SubButton onClick={() => setRegionModalOpen(true)}>검색</SubButton>
           </div>
         </div>
       </div>
+
+      <RegionSelectModal
+        open={regionModalOpen}
+        initialRegion={region}
+        onClose={() => setRegionModalOpen(false)}
+        onConfirm={onChangeRegion}
+      />
     </SignupStepLayout>
   );
 }

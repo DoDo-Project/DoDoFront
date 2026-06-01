@@ -2,6 +2,7 @@
 import { apiClient } from '@/shared/api/axios';
 
 import type {
+  NicknameCheckResponse,
   RegisterProfileRequest,
   RegisterProfileResponse,
   SocialLoginResult,
@@ -45,6 +46,31 @@ export async function registerProfile(
     headers: {
       Authorization: `Bearer ${registrationToken}`,
     },
+  });
+
+  return response.data;
+}
+
+interface CheckNicknameOptions {
+  /** 가입 단계에서는 registrationToken을 Authorization 헤더로 전달 */
+  authToken?: string;
+}
+
+/**
+ * 닉네임 중복 확인 (GET /users/nickname/check)
+ * - duplicated: false면 사용 가능, true면 이미 사용 중
+ */
+export async function checkNicknameAvailability(
+  nickname: string,
+  options?: CheckNicknameOptions,
+): Promise<NicknameCheckResponse> {
+  const response = await apiClient.get<NicknameCheckResponse>('/users/nickname/check', {
+    params: { nickname },
+    headers: options?.authToken
+      ? {
+          Authorization: `Bearer ${options.authToken}`,
+        }
+      : undefined,
   });
 
   return response.data;

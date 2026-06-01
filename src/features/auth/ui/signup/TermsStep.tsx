@@ -33,7 +33,7 @@ export function TermsStep({ agreed, onChangeAgreed, onNext }: TermsStepProps) {
         <button
           type="button"
           onClick={() => onChangeAgreed(!agreed)}
-          className="flex items-center gap-2 text-left text-sm text-neutral-700"
+          className="flex cursor-pointer items-center gap-2 text-left text-sm text-neutral-700"
         >
           <span
             className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] text-white transition-colors ${
@@ -47,8 +47,12 @@ export function TermsStep({ agreed, onChangeAgreed, onNext }: TermsStepProps) {
         </button>
         {/* TODO: 약관 상세 링크 페이지 연결 */}
         <div className="flex gap-3 pl-7 text-[11px] text-neutral-400 underline">
-          <span>DoDo 이용 약관</span>
-          <span>개인정보 제3자 이용 동의</span>
+          <button type="button" className="cursor-pointer hover:text-neutral-600">
+            DoDo 이용 약관
+          </button>
+          <button type="button" className="cursor-pointer hover:text-neutral-600">
+            개인정보 제3자 이용 동의
+          </button>
         </div>
       </div>
     </SignupStepLayout>

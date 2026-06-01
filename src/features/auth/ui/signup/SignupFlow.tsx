@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react';
+import { isAxiosError } from 'axios';
 
 import { uploadImage } from '@/shared/api/files';
 import { setTokens } from '@/shared/lib/auth/token';
 
-import { registerProfile } from '../../api/auth';
+import { checkNicknameAvailability, registerProfile } from '../../api/auth';
 import { CompleteStep } from './CompleteStep';
 import { FamilyCodeStep } from './FamilyCodeStep';
 import { NotificationStep } from './NotificationStep';
@@ -49,6 +50,7 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
   const [nickname, setNickname] = useState('');
   const [nicknameStatus, setNicknameStatus] = useState<NicknameStatus>('idle');
   const [nicknameErrorMessage, setNicknameErrorMessage] = useState('');
+  const [checkingNickname, setCheckingNickname] = useState(false);
   const [region, setRegion] = useState('');
 
   const [profileImageUrl, setProfileImageUrl] = useState(() => resolveProfileUrl(initialProfileUrl));
@@ -72,8 +74,7 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
     setNicknameErrorMessage('');
   };
 
-  // TODO: 닉네임 중복확인 API 연동. 현재는 형식 검증만 수행한다.
-  const handleCheckNickname = () => {
+  const handleCheckNickname = async () => {
     const trimmed = nickname.trim();
 
     if (!trimmed) {
@@ -88,8 +89,40 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
       return;
     }
 
-    setNicknameStatus('valid');
+    setCheckingNickname(true);
     setNicknameErrorMessage('');
+
+    try {
+      const result = await checkNicknameAvailability(trimmed, { authToken: registrationToken });
+
+      if (result.duplicated) {
+        setNicknameStatus('invalid');
+        setNicknameErrorMessage('이미 사용 중인 닉네임이에요.');
+        return;
+      }
+
+      setNicknameStatus('valid');
+      setNicknameErrorMessage('');
+    } catch (checkError) {
+      if (isAxiosError(checkError) && checkError.response?.status === 400) {
+        const message =
+          typeof checkError.response.data === 'object' &&
+          checkError.response.data !== null &&
+          'message' in checkError.response.data &&
+          typeof checkError.response.data.message === 'string'
+            ? checkError.response.data.message
+            : '닉네임 형식이 올바르지 않아요.';
+        setNicknameStatus('invalid');
+        setNicknameErrorMessage(message);
+        return;
+      }
+
+      console.error('[nickname-check] 실패', checkError);
+      setNicknameStatus('invalid');
+      setNicknameErrorMessage('중복 확인에 실패했어요. 잠시 후 다시 시도해주세요.');
+    } finally {
+      setCheckingNickname(false);
+    }
   };
 
   // TODO: 가족 코드 확인/연결 API 연동. 현재는 입력값이 있으면 연결로 처리한다.
@@ -183,11 +216,11 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
           profileImageError={profileImageError}
           nicknameStatus={nicknameStatus}
           nicknameErrorMessage={nicknameErrorMessage}
+          checkingNickname={checkingNickname}
           onChangeNickname={handleChangeNickname}
           onChangeRegion={setRegion}
           onCheckNickname={handleCheckNickname}
           onSelectProfileImage={handleSelectProfileImage}
-          onSearchRegion={() => {}}
           onNext={() => setStep(Step.Family)}
         />
       );

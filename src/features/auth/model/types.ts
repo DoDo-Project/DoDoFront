@@ -50,3 +50,11 @@ export interface RegisterProfileRequest {
 export interface RegisterProfileResponse extends AuthTokens {
   profileUrl: string;
 }
+
+// ---- 닉네임 중복 확인 (GET /users/nickname/check) ----
+
+export interface NicknameCheckResponse {
+  message: string;
+  nickname: string;
+  duplicated: boolean;
+}
