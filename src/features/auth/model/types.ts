@@ -24,6 +24,8 @@ export interface SocialSignupRequired {
   // 소셜에서 가져온 값. STEP 6 추가 정보 입력 화면에서 안내용으로 활용 가능
   email: string;
   name: string;
+  // 소셜 프로필 이미지 URL. 없으면 기본 플레이스홀더 표시
+  profileUrl?: string;
   // 가입 완료(PUT /users/me/profile) 시 Authorization 헤더로 전달하는 임시 토큰
   registrationToken: string;
   // 임시 토큰 만료까지 남은 시간(ms)

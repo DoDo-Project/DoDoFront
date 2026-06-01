@@ -11,7 +11,7 @@ export function CompleteStep({ onHome }: CompleteStepProps) {
     <SignupStepLayout footer={<PrimaryButton onClick={onHome}>HOME</PrimaryButton>}>
       <div className="flex flex-col items-center text-center">
         <DoDoLogo className="h-9 w-auto" />
-        <h1 className="mt-5 font-display text-2xl font-bold text-neutral-900">회원가입 완료!</h1>
+        <h1 className="mt-5 text-2xl font-semibold text-neutral-900">회원가입 완료!</h1>
         <p className="mt-3 text-sm leading-relaxed text-neutral-500">
           반려동물과의 행복한 하루,
           <br />

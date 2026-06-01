@@ -33,7 +33,7 @@ export function FamilyCodeStep({
         {/* TODO: 가족 일러스트 에셋으로 교체 */}
         <div className="flex h-32 w-32 items-center justify-center rounded-3xl bg-neutral-100 text-5xl">👨‍👩‍👧‍👦</div>
 
-        <h1 className="mt-8 font-display text-xl font-bold leading-snug text-neutral-900">
+        <h1 className="mt-8 text-xl font-semibold leading-snug text-neutral-900">
           가족 코드를 입력하면
           <br />
           서로의 반려동물 정보를

@@ -1,3 +1,4 @@
+import { ProfileImagePicker } from './ProfileImagePicker';
 import { PrimaryButton, SignupStepLayout, SubButton } from './SignupStepLayout';
 
 type NicknameStatus = 'idle' | 'valid' | 'invalid';
@@ -7,10 +8,16 @@ interface ProfileStepProps {
   name: string;
   nickname: string;
   region: string;
+  profileImageUrl: string | null;
+  uploadingProfileImage?: boolean;
+  profileImageError?: string;
   nicknameStatus: NicknameStatus;
+  /** invalid일 때만 표시할 안내 문구 */
+  nicknameErrorMessage: string;
   onChangeNickname: (value: string) => void;
   onChangeRegion: (value: string) => void;
   onCheckNickname: () => void;
+  onSelectProfileImage: (file: File) => void;
   onSearchRegion: () => void;
   onNext: () => void;
 }
@@ -18,17 +25,24 @@ interface ProfileStepProps {
 const labelClass = 'text-sm font-medium text-neutral-800';
 const inputClass =
   'h-12 w-full rounded-[10px] border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none focus:border-brand';
-const readonlyInputClass = 'h-12 w-full rounded-[10px] bg-neutral-100 px-4 text-sm text-neutral-500';
+// 읽기 전용: 선택·포커스 불가, 1px 진한 회색 테두리
+const readonlyFieldClass =
+  'flex h-12 w-full select-none items-center rounded-[10px] border border-neutral-300 bg-neutral-100 px-4 text-sm text-neutral-500';
 
 export function ProfileStep({
   email,
   name,
   nickname,
   region,
+  profileImageUrl,
+  uploadingProfileImage,
+  profileImageError,
   nicknameStatus,
+  nicknameErrorMessage,
   onChangeNickname,
   onChangeRegion,
   onCheckNickname,
+  onSelectProfileImage,
   onSearchRegion,
   onNext,
 }: ProfileStepProps) {
@@ -42,29 +56,26 @@ export function ProfileStep({
         </PrimaryButton>
       }
     >
-      <h1 className="text-center font-display text-2xl font-bold text-neutral-900">회원가입</h1>
-
-      {/* 프로필 이미지. TODO: 이미지 업로드 API 연동 */}
-      <div className="mt-6 flex justify-center">
-        <div className="relative">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-neutral-200 text-3xl text-neutral-400">
-            👤
-          </div>
-          <span className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-xs text-white">
-            ✎
-          </span>
-        </div>
-      </div>
+      <ProfileImagePicker
+        imageUrl={profileImageUrl}
+        uploading={uploadingProfileImage}
+        error={profileImageError}
+        onSelectFile={onSelectProfileImage}
+      />
 
       <div className="mt-8 flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <label className={labelClass}>이메일</label>
-          <input className={readonlyInputClass} value={email} readOnly />
+          <div className={readonlyFieldClass} aria-readonly>
+            {email}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
           <label className={labelClass}>이름</label>
-          <input className={readonlyInputClass} value={name} readOnly />
+          <div className={readonlyFieldClass} aria-readonly>
+            {name}
+          </div>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -80,13 +91,10 @@ export function ProfileStep({
             />
             <SubButton onClick={onCheckNickname}>중복 확인</SubButton>
           </div>
-          {nicknameStatus === 'valid' ? (
-            <p className="text-xs text-green-600">사용 가능한 닉네임입니다.</p>
-          ) : (
-            <p className={`text-xs ${nicknameStatus === 'invalid' ? 'text-red-500' : 'text-blue-500'}`}>
-              닉네임은 2~10자, 한글·영문·숫자만 사용할 수 있어요.
-            </p>
-          )}
+          {nicknameStatus === 'valid' ? <p className="text-xs text-green-600">사용 가능한 닉네임입니다.</p> : null}
+          {nicknameStatus === 'invalid' && nicknameErrorMessage ? (
+            <p className="text-xs text-red-500">{nicknameErrorMessage}</p>
+          ) : null}
         </div>
 
         <div className="flex flex-col gap-2">

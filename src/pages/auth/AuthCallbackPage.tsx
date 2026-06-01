@@ -64,6 +64,7 @@ export function AuthCallbackPage() {
               registrationToken: result.data.registrationToken,
               email: result.data.email,
               name: result.data.name,
+              profileUrl: result.data.profileUrl,
             },
           });
         }

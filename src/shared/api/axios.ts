@@ -19,10 +19,23 @@ export const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config) => {
+    // FormData는 multipart/form-data + boundary가 필요하므로 기본 json Content-Type을 제거한다.
+    if (config.data instanceof FormData) {
+      config.headers = config.headers ?? {};
+      if (typeof config.headers.delete === 'function') {
+        config.headers.delete('Content-Type');
+      } else {
+        delete config.headers['Content-Type'];
+      }
+    }
+
     const token = localStorage.getItem('accessToken');
     if (token) {
-      config.headers = config.headers ?? {}; // undefined 방지
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers = config.headers ?? {};
+      // 요청에 이미 Authorization이 있으면 덮어쓰지 않음 (가입 단계 registrationToken 등)
+      if (!config.headers.Authorization) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
     return config;
   },

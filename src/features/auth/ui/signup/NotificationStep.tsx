@@ -21,7 +21,7 @@ export function NotificationStep({ allow, submitting, error, onChangeAllow, onNe
         {/* TODO: 알림 벨 일러스트 에셋으로 교체 */}
         <div className="flex h-28 w-28 items-center justify-center rounded-3xl bg-neutral-100 text-5xl">🔔</div>
 
-        <h1 className="mt-8 font-display text-xl font-bold leading-snug text-neutral-900">
+        <h1 className="mt-8 text-xl font-semibold leading-snug text-neutral-900">
           중요한 소식이 있을 때
           <br />
           앱에서 알려드릴까요?
