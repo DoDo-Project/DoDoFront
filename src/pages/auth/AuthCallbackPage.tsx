@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 
 import { clearStoredState, getStoredState, parseProvider, socialLogin } from '@/features/auth';
+import { setTokens } from '@/shared/lib/auth/token';
 
 type Status = 'loading' | 'error';
 
 export function AuthCallbackPage() {
   const { provider: providerParam } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [status, setStatus] = useState<Status>('loading');
   const [message, setMessage] = useState('');
@@ -50,8 +52,10 @@ export function AuthCallbackPage() {
         const result = await socialLogin(provider, code);
 
         if (result.kind === 'LOGIN') {
-          // TODO(STEP 5): 토큰 저장 + 로그인 상태 반영 후 홈으로 이동
-          console.log('[social-login] 기존 회원 로그인 성공', result.data);
+          // 토큰을 저장하면 apiClient/RequireAuth/useIsLoggedIn이 이를 읽어 로그인 상태로 인식
+          setTokens(result.data);
+          // 홈으로 이동. replace로 뒤로가기 시 콜백 페이지로 되돌아오지 않게 함
+          navigate('/', { replace: true });
         } else {
           // TODO(STEP 6): registrationToken 보관 후 추가 정보 입력 화면으로 이동
           console.log('[social-login] 신규 사용자 → 추가 정보 입력 필요', result.data);
@@ -65,7 +69,7 @@ export function AuthCallbackPage() {
     };
 
     void processCallback();
-  }, [providerParam, searchParams]);
+  }, [providerParam, searchParams, navigate]);
 
   if (status === 'error') {
     return (
