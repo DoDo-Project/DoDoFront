@@ -57,8 +57,15 @@ export function AuthCallbackPage() {
           // 홈으로 이동. replace로 뒤로가기 시 콜백 페이지로 되돌아오지 않게 함
           navigate('/', { replace: true });
         } else {
-          // TODO(STEP 6): registrationToken 보관 후 추가 정보 입력 화면으로 이동
-          console.log('[social-login] 신규 사용자 → 추가 정보 입력 필요', result.data);
+          // 신규 사용자 → 추가 정보 입력 마법사로 이동. 토큰은 URL 노출 방지를 위해 state로 전달.
+          navigate('/auth/signup', {
+            replace: true,
+            state: {
+              registrationToken: result.data.registrationToken,
+              email: result.data.email,
+              name: result.data.name,
+            },
+          });
         }
       } catch (error) {
         // TODO(STEP 7): 상태 코드(400~500)별 에러 메시지 세분화

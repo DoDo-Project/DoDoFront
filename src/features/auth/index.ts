@@ -1,5 +1,6 @@
 export { LoginModal } from './ui/LoginModal';
 export { SocialLoginButton } from './ui/SocialLoginButton';
+export { SignupFlow } from './ui/signup';
 export { redirectToSocialLogin, getStoredState, clearStoredState, parseProvider } from './lib/oauth';
 export { socialLogin, registerProfile } from './api/auth';
 export type {
