@@ -1,22 +1,34 @@
+import { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 
+import { LoginModal, redirectToSocialLogin } from '@/features/auth';
 import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
 
 import { useIsLoggedIn } from '../model/useIsLoggedIn';
+import { ProfileMenu } from './ProfileMenu';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   ['text-sm transition-colors', isActive ? 'font-semibold text-brand' : 'text-neutral-700 hover:text-brand'].join(' ');
 
 function GuestNav() {
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+
   return (
-    <nav className="flex items-center gap-8" aria-label="비로그인 메뉴">
-      <NavLink to="/" end className={linkClass}>
-        서비스 소개
-      </NavLink>
-      <NavLink to="/auth" className={linkClass}>
-        시작하기
-      </NavLink>
-    </nav>
+    <>
+      <nav className="flex items-center gap-8" aria-label="비로그인 메뉴">
+        <NavLink to="/" end className={linkClass}>
+          서비스 소개
+        </NavLink>
+        <button
+          type="button"
+          onClick={() => setIsLoginOpen(true)}
+          className="text-sm text-neutral-700 transition-colors hover:text-brand"
+        >
+          시작하기
+        </button>
+      </nav>
+      <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={redirectToSocialLogin} />
+    </>
   );
 }
 
@@ -32,13 +44,7 @@ function AuthenticatedNav() {
       <NavLink to="/my" className={linkClass}>
         마이도도
       </NavLink>
-      <Link
-        to="/my"
-        className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100"
-        aria-label="프로필"
-      >
-        <span className="block h-7 w-7 rounded-full bg-neutral-200" aria-hidden />
-      </Link>
+      <ProfileMenu />
     </nav>
   );
 }
