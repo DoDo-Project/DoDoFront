@@ -17,10 +17,10 @@ function ProfileAvatar({ profileUrl }: { profileUrl: string | null }) {
   const showUploadedImage = Boolean(resolvedUrl) && failedUrl !== resolvedUrl;
 
   return (
-    <div className="flex h-30 w-30 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
+    <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 shadow-sm">
       {showUploadedImage ? (
         <img
-          src={resolvedUrl!}
+          src={resolvedUrl}
           alt=""
           className="h-full w-full object-cover"
           onError={() => setFailedUrl(resolvedUrl)}
@@ -37,16 +37,16 @@ export function MyDodoProfileCard({ user, profileUrl, displayName, isLoading = f
   const email = user?.email?.trim() || null;
 
   return (
-    <section className="rounded-[28px] border border-neutral-200 bg-white px-8 py-10 shadow-sm">
+    <section className="px-1">
       <div className="flex flex-col items-center text-center">
         <ProfileAvatar profileUrl={profileUrl} />
 
-        <div className="mt-6 min-h-24">
-          <h2 className="text-[32px] font-semibold leading-tight text-neutral-900">
+        <div className="mt-5 min-h-20">
+          <h2 className="text-[22px] font-semibold leading-tight text-neutral-900">
             {isLoading ? '불러오는 중...' : displayName}
           </h2>
-          <p className="mt-3 text-xl font-medium text-neutral-400">{nickname || '-'}</p>
-          <p className="mt-4 text-xl text-neutral-400">{email || '-'}</p>
+          <p className="mt-2 text-sm font-medium text-neutral-400">{nickname || '-'}</p>
+          <p className="mt-3 text-sm text-neutral-400">{email || '-'}</p>
         </div>
       </div>
     </section>

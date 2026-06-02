@@ -29,10 +29,10 @@ function SidebarButton({
       type="button"
       onClick={() => onSelect(item.key)}
       className={[
-        'w-full rounded-2xl border px-5 py-4 text-lg font-semibold transition-colors',
+        'w-full rounded-xl border px-4 py-3 text-sm font-semibold transition-all',
         active
-          ? 'border-brand text-brand shadow-[0_0_0_1px_var(--color-brand)]'
-          : 'border-neutral-200 text-neutral-800 hover:border-brand hover:text-brand',
+          ? 'border-brand bg-brand/6 text-brand shadow-[0_0_0_1px_var(--color-brand)]'
+          : 'border-neutral-200 bg-white text-neutral-700 hover:border-brand hover:text-brand',
       ].join(' ')}
     >
       {item.label}
@@ -53,8 +53,8 @@ function SidebarSection({
 
   return (
     <section>
-      <h3 className="text-2xl font-semibold text-neutral-900">{SECTION_LABELS[section]}</h3>
-      <div className="mt-6 flex flex-col gap-4">
+      <h3 className="text-lg font-semibold text-neutral-900">{SECTION_LABELS[section]}</h3>
+      <div className="mt-4 flex flex-col gap-3">
         {items.map((item) => (
           <SidebarButton key={item.key} item={item} active={item.key === activeKey} onSelect={onSelect} />
         ))}
@@ -65,8 +65,8 @@ function SidebarSection({
 
 export function MyDodoSidebar({ activeKey, onSelect }: MyDodoSidebarProps) {
   return (
-    <div className="mt-8 border-t border-neutral-200 pt-8">
-      <div className="flex flex-col gap-10">
+    <div className="mt-6 border-t border-neutral-200 pt-6">
+      <div className="flex flex-col gap-8">
         <SidebarSection section="pet" activeKey={activeKey} onSelect={onSelect} />
         <SidebarSection section="account" activeKey={activeKey} onSelect={onSelect} />
       </div>
