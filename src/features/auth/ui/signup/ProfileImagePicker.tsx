@@ -49,7 +49,15 @@ export function ProfileImagePicker({ imageUrl, uploading, error, onSelectFile }:
           <PencilIcon className="h-3.5 w-3.5" aria-hidden />
         </button>
 
-        <input ref={inputRef} id={inputId} type="file" accept="image/*" className="sr-only" onChange={handleChange} />
+        <input
+          ref={inputRef}
+          id={inputId}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          disabled={uploading}
+          onChange={handleChange}
+        />
       </div>
 
       <FormFeedback

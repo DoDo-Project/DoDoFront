@@ -122,6 +122,8 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
   };
 
   const handleSelectProfileImage = async (file: File) => {
+    if (uploadingProfileImage) return;
+
     if (!file.type.startsWith('image/')) {
       setProfileImageError('이미지 파일만 업로드할 수 있어요.');
       return;
