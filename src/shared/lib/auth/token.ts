@@ -21,6 +21,7 @@ export const ACCESS_TOKEN_REFRESH_BUFFER_MS = 60_000;
 interface StoredAuth {
   accessToken: string;
   refreshToken: string;
+  /** 소셜 로그인·가입 응답 — 밀리초 (OpenAPI SocialLoginResponse) */
   accessTokenExpiresIn: number;
   profileUrl: string;
   nickname?: string;
@@ -29,6 +30,7 @@ interface StoredAuth {
 interface ReissueTokens {
   accessToken: string;
   refreshToken: string;
+  /** POST /auth/reissue 응답 — 초 단위 (OpenAPI TokenResponse) */
   accessTokenExpiresIn: number;
 }
 
@@ -48,14 +50,6 @@ function migrateLegacyRefreshToken(): void {
 }
 
 migrateLegacyRefreshToken();
-
-/** 소셜 로그인·가입 응답: accessTokenExpiresIn은 밀리초 (OpenAPI SocialLoginResponse) */
-export function normalizeExpiresInMs(expiresIn: number): number {
-  if (expiresIn < 100_000) {
-    return expiresIn * 1000;
-  }
-  return expiresIn;
-}
 
 function setRefreshToken(refreshToken: string): void {
   sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
@@ -91,7 +85,7 @@ export function isAccessTokenExpired(bufferMs = getRefreshBufferMs()): boolean {
   return remaining <= bufferMs;
 }
 
-// 로그인/가입 완료 응답을 받아 토큰과 부가 정보를 저장
+// 로그인/가입 완료 응답 — accessTokenExpiresIn은 밀리초 (OpenAPI SocialLoginResponse)
 export function setTokens(auth: StoredAuth): void {
   localStorage.setItem(ACCESS_TOKEN_KEY, auth.accessToken);
   setRefreshToken(auth.refreshToken);
@@ -101,14 +95,14 @@ export function setTokens(auth: StoredAuth): void {
     localStorage.setItem(NICKNAME_KEY, auth.nickname);
   }
 
-  setAccessTokenExpiry(normalizeExpiresInMs(auth.accessTokenExpiresIn));
+  setAccessTokenExpiry(auth.accessTokenExpiresIn);
 }
 
 /** POST /auth/reissue 응답 — accessTokenExpiresIn은 초 단위 (OpenAPI TokenResponse) */
 export function setReissueTokens(tokens: ReissueTokens): void {
   localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
   setRefreshToken(tokens.refreshToken);
-  setAccessTokenExpiry(normalizeExpiresInMs(tokens.accessTokenExpiresIn));
+  setAccessTokenExpiry(tokens.accessTokenExpiresIn * 1000);
 }
 
 export function getAccessToken(): string | null {

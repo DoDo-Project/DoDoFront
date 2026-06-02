@@ -4,6 +4,7 @@ export type SocialProvider = 'NAVER' | 'GOOGLE';
 export interface AuthTokens {
   accessToken: string;
   refreshToken: string;
+  /** 소셜 로그인·가입 응답 — 밀리초 (OpenAPI SocialLoginResponse) */
   accessTokenExpiresIn: number;
 }
 
@@ -17,7 +18,7 @@ export interface TokenReissueResponse {
   message: string;
   accessToken: string;
   refreshToken: string;
-  /** OpenAPI 기준 초 단위 — setReissueTokens에서 ms로 정규화 */
+  /** OpenAPI 기준 초 단위 — setReissueTokens에서 ms로 변환 */
   accessTokenExpiresIn: number;
 }
 
