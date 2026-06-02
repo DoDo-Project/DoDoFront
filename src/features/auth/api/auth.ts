@@ -3,6 +3,7 @@ import { apiClient } from '@/shared/api/axios';
 
 import type {
   NicknameCheckResponse,
+  NotificationUpdateResponse,
   RegisterProfileRequest,
   RegisterProfileResponse,
   SocialLoginResult,
@@ -71,6 +72,18 @@ export async function checkNicknameAvailability(
           Authorization: `Bearer ${options.authToken}`,
         }
       : undefined,
+  });
+
+  return response.data;
+}
+
+/**
+ * 알림 수신 여부 변경 (PATCH /users/me/setting/notification)
+ * - 가입 완료 후 accessToken으로 호출 (apiClient 인터셉터)
+ */
+export async function updateNotificationSetting(notificationEnabled: boolean): Promise<NotificationUpdateResponse> {
+  const response = await apiClient.patch<NotificationUpdateResponse>('/users/me/setting/notification', {
+    notificationEnabled,
   });
 
   return response.data;

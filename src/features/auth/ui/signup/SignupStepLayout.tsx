@@ -4,14 +4,18 @@ interface SignupStepLayoutProps {
   children: ReactNode;
   // 하단 고정 버튼 영역(주로 '다음'). 생략 가능.
   footer?: ReactNode;
+  /** 폼 필드가 많은 스텝은 상단 정렬로 불필요한 스크롤을 줄인다 */
+  align?: 'center' | 'top';
 }
 
 // 모든 회원가입 스텝이 공유하는 중앙 정렬 레이아웃.
-export function SignupStepLayout({ children, footer }: SignupStepLayoutProps) {
+export function SignupStepLayout({ children, footer, align = 'center' }: SignupStepLayoutProps) {
   return (
-    <div className="mx-auto flex w-full max-w-sm flex-1 flex-col px-6 pb-10 pt-16">
-      <div className="flex flex-1 flex-col justify-center">{children}</div>
-      {footer ? <div className="mt-8">{footer}</div> : null}
+    <div
+      className={`mx-auto flex w-full max-w-sm flex-1 flex-col px-6 pb-6 ${align === 'top' ? 'pt-8' : 'pt-16 pb-10'}`}
+    >
+      <div className={`flex flex-1 flex-col ${align === 'top' ? 'justify-start' : 'justify-center'}`}>{children}</div>
+      {footer ? <div className={`shrink-0 ${align === 'top' ? 'mt-6' : 'mt-8'}`}>{footer}</div> : null}
     </div>
   );
 }
@@ -88,7 +92,7 @@ const feedbackToneClass: Record<FormFeedbackTone, string> = {
 export function FormFeedback({ message, tone = 'error', className = '' }: FormFeedbackProps) {
   return (
     <p
-      className={`min-h-10 text-xs leading-5 ${feedbackToneClass[tone]} ${message ? '' : 'invisible'} ${className}`}
+      className={`min-h-5 text-xs leading-5 ${feedbackToneClass[tone]} ${message ? '' : 'invisible'} ${className}`}
       aria-live="polite"
     >
       {message || '\u00a0'}

@@ -54,6 +54,7 @@ export function ProfileStep({
 
   return (
     <SignupStepLayout
+      align="top"
       footer={
         <PrimaryButton onClick={onNext} disabled={!canProceed}>
           다음
@@ -67,22 +68,22 @@ export function ProfileStep({
         onSelectFile={onSelectProfileImage}
       />
 
-      <div className="mt-8 flex flex-col gap-5">
-        <div className="flex flex-col gap-2">
+      <div className="mt-6 flex flex-col gap-3">
+        <div className="flex flex-col gap-1.5">
           <label className={labelClass}>이메일</label>
           <div className={readonlyFieldClass} aria-readonly>
             {email}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <label className={labelClass}>이름</label>
           <div className={readonlyFieldClass} aria-readonly>
             {name}
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <label className={labelClass}>
             닉네임<span className="text-brand">*</span>
           </label>
@@ -91,7 +92,7 @@ export function ProfileStep({
               className={inputClass}
               value={nickname}
               onChange={(event) => onChangeNickname(event.target.value)}
-              placeholder="ex) 도롱이"
+              placeholder="ex) 조펭이"
             />
             <SubButton onClick={onCheckNickname} loading={checkingNickname} disabled={!nickname.trim()}>
               중복 확인
@@ -109,7 +110,7 @@ export function ProfileStep({
           />
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-1.5">
           <label className={labelClass}>
             지역<span className="text-brand">*</span>
           </label>

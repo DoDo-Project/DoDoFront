@@ -4,7 +4,7 @@ import { isAxiosError } from 'axios';
 import { uploadImage } from '@/shared/api/files';
 import { setTokens } from '@/shared/lib/auth/token';
 
-import { checkNicknameAvailability, registerProfile } from '../../api/auth';
+import { checkNicknameAvailability, registerProfile, updateNotificationSetting } from '../../api/auth';
 import { CompleteStep } from './CompleteStep';
 import { NotificationStep } from './NotificationStep';
 import { ProfileStep } from './ProfileStep';
@@ -60,8 +60,9 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const profileCompletedRef = useRef(false);
 
-  // 닉네임이 바뀌면 중복확인 결과를 초기화한다.
+  // 닉네임이 바뀌면 중복확인 결과를 초기화
   const handleChangeNickname = (value: string) => {
     setNickname(value);
     setNicknameStatus('idle');
@@ -152,25 +153,37 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
     }
   };
 
-  // 모든 입력을 모아 가입을 완료(registerProfile)한 뒤 완료 화면으로 이동한다.
+  // registerProfile → 알림 설정 저장 순으로 가입을 완료
   const handleSubmit = async () => {
+    if (allowNotification === null) return;
+
     setSubmitting(true);
     setError('');
 
     try {
-      const response = await registerProfile(
-        {
-          nickname: nickname.trim(),
-          region: region.trim(),
-          hasFamily: false,
-        },
-        registrationToken,
-      );
+      if (!profileCompletedRef.current) {
+        const response = await registerProfile(
+          {
+            nickname: nickname.trim(),
+            region: region.trim(),
+            hasFamily: false,
+          },
+          registrationToken,
+        );
 
-      // 가입 완료 → ACTIVE 전환 + 새 토큰 저장 → 로그인 상태로 전환
-      setTokens(response);
+        setTokens(response);
+        profileCompletedRef.current = true;
+      }
+
+      await updateNotificationSetting(allowNotification);
       setStep(Step.Complete);
     } catch (submitError) {
+      if (profileCompletedRef.current) {
+        console.error('[notification-setting] 실패', submitError);
+        setError('알림 설정 저장에 실패했어요. 다시 시도해주세요.');
+        return;
+      }
+
       // TODO(STEP 7): 상태 코드(400~500)별 에러 메시지 세분화
       console.error('[register-profile] 실패', submitError);
       setError('회원가입에 실패했어요. 잠시 후 다시 시도해주세요.');

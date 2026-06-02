@@ -70,3 +70,13 @@ export interface PetFamilyJoinResponse {
   petId: number;
   message: string;
 }
+
+// ---- 알림 수신 여부 변경 (PATCH /users/me/setting/notification) ----
+
+export interface NotificationUpdateRequest {
+  notificationEnabled: boolean;
+}
+
+export interface NotificationUpdateResponse {
+  message: string;
+}
