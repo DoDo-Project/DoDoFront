@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { isAxiosError } from 'axios';
 
 import { uploadImage } from '@/shared/api/files';
-import { setTokens } from '@/shared/lib/auth/token';
+import { setNotificationEnabled, setTokens } from '@/shared/lib/auth/token';
 
 import { checkNicknameAvailability, registerProfile, updateNotificationSetting } from '../../api/auth';
 import { CompleteStep } from './CompleteStep';
@@ -171,11 +171,16 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
           registrationToken,
         );
 
-        setTokens(response);
+        setTokens({
+          ...response,
+          profileUrl: resolveProfileUrl(response.profileUrl) ?? lastProfileImageUrlRef.current ?? '',
+          nickname: nickname.trim(),
+        });
         profileCompletedRef.current = true;
       }
 
       await updateNotificationSetting(allowNotification);
+      setNotificationEnabled(allowNotification);
       setStep(Step.Complete);
     } catch (submitError) {
       if (profileCompletedRef.current) {

@@ -3,6 +3,8 @@ export { SocialLoginButton } from './ui/SocialLoginButton';
 export { SignupFlow } from './ui/signup';
 export { redirectToSocialLogin, getStoredState, clearStoredState, parseProvider } from './lib/oauth';
 export { socialLogin, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
+export { getMyProfile } from './api/users';
+export { useCurrentUser } from './model/useCurrentUser';
 export type {
   SocialProvider,
   AuthTokens,
@@ -15,4 +17,5 @@ export type {
   NicknameCheckResponse,
   NotificationUpdateRequest,
   NotificationUpdateResponse,
+  UserProfile,
 } from './model/types';

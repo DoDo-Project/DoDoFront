@@ -5,6 +5,7 @@ import { LoginModal, redirectToSocialLogin } from '@/features/auth';
 import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
 
 import { useIsLoggedIn } from '../model/useIsLoggedIn';
+import { ProfileMenu } from './ProfileMenu';
 
 const linkClass = ({ isActive }: { isActive: boolean }) =>
   ['text-sm transition-colors', isActive ? 'font-semibold text-brand' : 'text-neutral-700 hover:text-brand'].join(' ');
@@ -43,13 +44,7 @@ function AuthenticatedNav() {
       <NavLink to="/my" className={linkClass}>
         마이도도
       </NavLink>
-      <Link
-        to="/my"
-        className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100"
-        aria-label="프로필"
-      >
-        <span className="block h-7 w-7 rounded-full bg-neutral-200" aria-hidden />
-      </Link>
+      <ProfileMenu />
     </nav>
   );
 }

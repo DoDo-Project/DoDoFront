@@ -80,3 +80,17 @@ export interface NotificationUpdateRequest {
 export interface NotificationUpdateResponse {
   message: string;
 }
+
+// ---- 내 정보 조회 (GET /users/me) ----
+
+export interface UserProfile {
+  message: string;
+  email: string;
+  name: string;
+  nickname: string;
+  region: string;
+  hasFamily: boolean;
+  profileUrl: string;
+  notificationEnabled: boolean;
+  userCreatedAt: string;
+}

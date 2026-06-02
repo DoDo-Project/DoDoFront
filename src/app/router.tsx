@@ -10,6 +10,7 @@ import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
 import { MyDodoPage } from '@/pages/my/MyDodoPage';
+import { NotificationSettingsPage } from '@/pages/my/NotificationSettingsPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { WalkPage } from '@/pages/walk/WalkPage';
 
@@ -25,6 +26,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <MyDodoPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/my/notifications',
+        element: (
+          <RequireAuth>
+            <NotificationSettingsPage />
           </RequireAuth>
         ),
       },

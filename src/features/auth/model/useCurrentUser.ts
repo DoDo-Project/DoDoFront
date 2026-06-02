@@ -1,0 +1,81 @@
+import { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+
+import {
+  getAccessToken,
+  getNickname,
+  getNotificationEnabled,
+  getProfileUrl,
+  syncUserProfile,
+} from '@/shared/lib/auth/token';
+
+import { getMyProfile } from '../api/users';
+import type { UserProfile } from '../model/types';
+
+interface UseCurrentUserResult {
+  user: UserProfile | null;
+  isLoading: boolean;
+  profileUrl: string | null;
+  nickname: string | null;
+  region: string | null;
+  notificationEnabled: boolean | null;
+  displayName: string;
+}
+
+export function useCurrentUser(): UseCurrentUserResult {
+  const location = useLocation();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const hasToken = Boolean(getAccessToken());
+
+  useEffect(() => {
+    if (!hasToken) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadProfile = async () => {
+      setIsLoading(true);
+
+      try {
+        const profile = await getMyProfile();
+        if (cancelled) return;
+        syncUserProfile(profile);
+        setUser(profile);
+      } catch (error) {
+        console.error('[users/me] 조회 실패', error);
+        if (!cancelled) {
+          setUser(null);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [location.pathname, hasToken]);
+
+  const activeUser = hasToken ? user : null;
+  const profileUrl = activeUser?.profileUrl?.trim() || getProfileUrl();
+  const nickname = activeUser?.nickname?.trim() || getNickname();
+  const region = activeUser?.region?.trim() || null;
+  const notificationEnabled = activeUser?.notificationEnabled ?? getNotificationEnabled();
+  const displayName = nickname ? `${nickname}님` : '회원님';
+
+  return {
+    user: activeUser,
+    isLoading: hasToken ? isLoading : false,
+    profileUrl: hasToken ? profileUrl : null,
+    nickname: hasToken ? nickname : null,
+    region: hasToken ? region : null,
+    notificationEnabled: hasToken ? notificationEnabled : null,
+    displayName: hasToken ? displayName : '회원님',
+  };
+}
