@@ -33,7 +33,7 @@ function ProfileAvatar({ profileUrl }: { profileUrl: string | null }) {
 }
 
 export function MyDodoProfileCard({ user, profileUrl, displayName, isLoading = false }: MyDodoProfileCardProps) {
-  const nickname = user?.nickname?.trim() || null;
+  const region = user?.region?.trim() || null;
   const email = user?.email?.trim() || null;
 
   return (
@@ -45,8 +45,8 @@ export function MyDodoProfileCard({ user, profileUrl, displayName, isLoading = f
           <h2 className="text-[22px] font-semibold leading-tight text-neutral-900">
             {isLoading ? '불러오는 중...' : displayName}
           </h2>
-          <p className="mt-2 text-sm font-medium text-neutral-400">{nickname || '-'}</p>
-          <p className="mt-3 text-sm text-neutral-400">{email || '-'}</p>
+          <p className="mt-3 text-sm font-medium text-neutral-400">{region || '-'}</p>
+          <p className="mt-2 text-sm text-neutral-400">{email || '-'}</p>
         </div>
       </div>
     </section>
