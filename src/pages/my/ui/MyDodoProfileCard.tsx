@@ -15,16 +15,16 @@ function ProfileAvatar({ profileUrl }: { profileUrl: string | null }) {
   const [failedUrl, setFailedUrl] = useState<string | null>(null);
 
   const resolvedUrl = profileUrl?.trim() || null;
-  const showUploadedImage = Boolean(resolvedUrl) && failedUrl !== resolvedUrl;
+  const activeImageUrl = resolvedUrl && failedUrl !== resolvedUrl ? resolvedUrl : null;
 
   return (
     <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 shadow-sm">
-      {showUploadedImage ? (
+      {activeImageUrl ? (
         <img
-          src={resolvedUrl}
+          src={activeImageUrl}
           alt=""
           className="h-full w-full object-cover"
-          onError={() => setFailedUrl(resolvedUrl)}
+          onError={() => setFailedUrl(activeImageUrl)}
         />
       ) : (
         <img src={profileDefaultIllustration} alt="" className="h-full w-full object-cover" draggable={false} />
