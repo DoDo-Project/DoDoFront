@@ -89,7 +89,7 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
 
     if (!NICKNAME_REGEX.test(trimmed)) {
       setNicknameStatus('invalid');
-      setNicknameErrorMessage('닉네임은 2~10자, 한글·영문·숫자만 사용할 수 있어요.');
+      setNicknameErrorMessage('닉네임은 2~10자, 한글·영문·숫자, 띄어쓰기만 사용할 수 있어요.');
       return;
     }
 
