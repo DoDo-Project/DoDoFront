@@ -61,17 +61,21 @@ export function NotificationSettingsPage() {
           displayName={displayName}
           isLoading={isLoading}
           activeKey={activeKey}
-          onSelect={() => {}}
         />
       }
       content={
         <div className="space-y-6">
-          <div className="rounded-[22px] border border-neutral-200 bg-neutral-50/70 px-6 py-6">
-            <p className="text-xs font-semibold tracking-[0.24em] text-brand">NOTICE</p>
-            <h1 className="mt-3 text-2xl font-semibold text-neutral-900">알림함</h1>
-            <p className="mt-3 text-sm leading-6 text-neutral-500">
-              중요한 소식과 반려동물 관련 알림을 어떤 방식으로 받을지 여기에서 설정할 수 있어요.
-            </p>
+          <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white">
+            <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
+              <p className="text-xs font-semibold tracking-[0.24em] text-brand">NOTICE</p>
+              <h1 className="mt-3 text-2xl font-semibold text-neutral-900">알림함</h1>
+            </div>
+
+            <div className="px-6 py-6 sm:px-8">
+              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+                중요한 소식과 반려동물 관련 알림을 어떤 방식으로 받을지 이곳에서 설정할 수 있어요.
+              </p>
+            </div>
           </div>
 
           <div className="grid gap-4">
@@ -113,10 +117,8 @@ function ChoiceCard({ title, description, selected, disabled = false, onClick }:
       onClick={onClick}
       disabled={disabled}
       className={[
-        'w-full rounded-[20px] border px-5 py-5 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60',
-        selected
-          ? 'border-brand bg-brand/6 shadow-[0_0_0_1px_var(--color-brand)]'
-          : 'border-neutral-200 bg-white hover:border-brand/50',
+        'w-full rounded-[20px] border bg-white px-5 py-5 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60',
+        selected ? 'border-brand shadow-[0_0_0_1px_var(--color-brand)]' : 'border-neutral-200 hover:border-brand/50',
       ].join(' ')}
     >
       <div className="flex items-start gap-4">

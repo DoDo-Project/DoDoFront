@@ -9,7 +9,6 @@ interface MyDodoSidebarPanelProps {
   displayName: string;
   isLoading?: boolean;
   activeKey: MyDodoMenuKey;
-  onSelect: (key: MyDodoMenuKey) => void;
 }
 
 export function MyDodoSidebarPanel({
@@ -18,12 +17,11 @@ export function MyDodoSidebarPanel({
   displayName,
   isLoading = false,
   activeKey,
-  onSelect,
 }: MyDodoSidebarPanelProps) {
   return (
     <div className="rounded-[24px] border border-neutral-200 bg-white px-5 py-6 shadow-sm">
       <MyDodoProfileCard user={user} profileUrl={profileUrl} displayName={displayName} isLoading={isLoading} />
-      <MyDodoSidebar activeKey={activeKey} onSelect={onSelect} />
+      <MyDodoSidebar activeKey={activeKey} />
     </div>
   );
 }

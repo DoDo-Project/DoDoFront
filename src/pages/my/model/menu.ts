@@ -14,7 +14,6 @@ export interface MyDodoMenuItem {
   key: MyDodoMenuKey;
   label: string;
   section: MyDodoMenuSection;
-  path?: string;
 }
 
 export interface MyDodoContent {
@@ -38,7 +37,7 @@ export const MY_DODO_MENU_ITEMS: MyDodoMenuItem[] = [
   { key: 'walk-history', label: '산책 기록', section: 'pet' },
   { key: 'ai-report', label: 'AI 레포트', section: 'pet' },
   { key: 'profile-edit', label: '회원정보 수정', section: 'account' },
-  { key: 'notifications', label: '알림함', section: 'account', path: '/my/notifications' },
+  { key: 'notifications', label: '알림함', section: 'account' },
   { key: 'logout', label: '로그아웃', section: 'account' },
 ];
 
@@ -81,8 +80,8 @@ export const MY_DODO_CONTENT_BY_KEY: Record<MyDodoMenuKey, MyDodoContent> = {
   },
   notifications: {
     badge: 'NOTICE',
-    title: '알림함 준비 중',
-    description: '헤더 프로필 메뉴와 같은 알림함 화면으로 연결되도록 구조를 정리했습니다.',
+    title: '알림함',
+    description: '중요한 소식과 반려동물 관련 알림을 어떤 방식으로 받을지 이곳에서 설정할 수 있어요.',
     actionLabel: '알림함 열기',
   },
   logout: {
@@ -93,7 +92,23 @@ export const MY_DODO_CONTENT_BY_KEY: Record<MyDodoMenuKey, MyDodoContent> = {
   },
 };
 
+export function getMyDodoMenuHref(key: MyDodoMenuKey): string {
+  if (key === 'notifications') {
+    return '/my/notifications';
+  }
+
+  return `/my?menu=${key}`;
+}
+
 export function getMyDodoMenuKeyByPathname(pathname: string): MyDodoMenuKey {
-  const matched = MY_DODO_MENU_ITEMS.find((item) => item.path && pathname.startsWith(item.path));
+  if (pathname.startsWith('/my/notifications')) {
+    return 'notifications';
+  }
+
+  return MY_DODO_DEFAULT_MENU_KEY;
+}
+
+export function getMyDodoMenuKeyFromSearch(menu: string | null): MyDodoMenuKey {
+  const matched = MY_DODO_MENU_ITEMS.find((item) => item.key === menu);
   return matched?.key ?? MY_DODO_DEFAULT_MENU_KEY;
 }
