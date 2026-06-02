@@ -9,6 +9,7 @@ import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 import { setNotificationEnabled, syncUserProfile } from '@/shared/lib/auth/token';
+import { Skeleton } from '@/shared/ui';
 
 export function NotificationSettingsPage() {
   const location = useLocation();
@@ -64,41 +65,88 @@ export function NotificationSettingsPage() {
         />
       }
       content={
-        <div className="space-y-6">
-          <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white">
-            <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
-              <p className="text-xs font-semibold tracking-[0.24em] text-brand">NOTICE</p>
-              <h1 className="mt-3 text-2xl font-semibold text-neutral-900">알림함</h1>
+        isLoading ? (
+          <NotificationSettingsSkeleton />
+        ) : (
+          <div className="space-y-6">
+            <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white">
+              <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
+                <p className="text-xs font-semibold tracking-[0.24em] text-brand">NOTICE</p>
+                <h1 className="mt-3 text-2xl font-semibold text-neutral-900">알림함</h1>
+              </div>
+
+              <div className="px-6 py-6 sm:px-8">
+                <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+                  중요한 소식과 반려동물 관련 알림을 어떤 방식으로 받을지 이곳에서 설정할 수 있어요.
+                </p>
+              </div>
             </div>
 
-            <div className="px-6 py-6 sm:px-8">
-              <p className="text-sm leading-7 text-neutral-600 sm:text-base">
-                중요한 소식과 반려동물 관련 알림을 어떤 방식으로 받을지 이곳에서 설정할 수 있어요.
-              </p>
+            <div className="grid gap-4">
+              <ChoiceCard
+                title="알림 받기"
+                description="산책, 건강, 가족 관련 주요 알림을 계속 받아볼 수 있어요."
+                selected={enabled === true}
+                disabled={saving || isLoading}
+                onClick={() => handleChange(true)}
+              />
+              <ChoiceCard
+                title="지금은 받지 않기"
+                description="필수 공지를 제외한 알림 수신을 잠시 멈출 수 있어요."
+                selected={enabled === false}
+                disabled={saving || isLoading}
+                onClick={() => handleChange(false)}
+              />
             </div>
-          </div>
 
-          <div className="grid gap-4">
-            <ChoiceCard
-              title="알림 받기"
-              description="산책, 건강, 가족 관련 주요 알림을 계속 받아볼 수 있어요."
-              selected={enabled === true}
-              disabled={saving || isLoading}
-              onClick={() => handleChange(true)}
-            />
-            <ChoiceCard
-              title="지금은 받지 않기"
-              description="필수 공지를 제외한 알림 수신을 잠시 멈출 수 있어요."
-              selected={enabled === false}
-              disabled={saving || isLoading}
-              onClick={() => handleChange(false)}
-            />
+            {error ? <p className="text-sm text-red-500">{error}</p> : null}
           </div>
-
-          {error ? <p className="text-sm text-red-500">{error}</p> : null}
-        </div>
+        )
       }
     />
+  );
+}
+
+function NotificationSettingsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white">
+        <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
+          <Skeleton className="h-3 w-14 rounded-md" />
+          <Skeleton className="mt-4 h-8 w-28 rounded-lg" />
+        </div>
+
+        <div className="px-6 py-6 sm:px-8">
+          <div className="space-y-3">
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-4 w-10/12 rounded-md" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-4">
+        <NotificationChoiceSkeleton />
+        <NotificationChoiceSkeleton />
+      </div>
+    </div>
+  );
+}
+
+function NotificationChoiceSkeleton() {
+  return (
+    <div className="w-full rounded-[20px] border border-neutral-200 bg-white px-5 py-5">
+      <div className="flex items-start gap-4">
+        <Skeleton className="mt-0.5 h-5 w-5 rounded-full" />
+
+        <div className="flex-1">
+          <Skeleton className="h-5 w-28 rounded-md" />
+          <div className="mt-3 space-y-2">
+            <Skeleton className="h-4 w-full rounded-md" />
+            <Skeleton className="h-4 w-8/12 rounded-md" />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
