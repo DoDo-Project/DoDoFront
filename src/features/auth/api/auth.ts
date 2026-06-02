@@ -22,10 +22,11 @@ const SIGNUP_REQUIRED_STATUS = 202;
  * - 202: 신규 사용자 → registrationToken 발급, 추가 정보 입력 필요 (kind: 'SIGNUP_REQUIRED')
  */
 export async function socialLogin(provider: SocialProvider, code: string): Promise<SocialLoginResult> {
-  const response = await apiClient.post<SocialLoginSuccess | SocialSignupRequired>('/auth/social-login', {
-    provider,
-    code,
-  });
+  const response = await apiClient.post<SocialLoginSuccess | SocialSignupRequired>(
+    '/auth/social-login',
+    { provider, code },
+    { skipAuthAttach: true, skipAuthRefresh: true },
+  );
 
   if (response.status === SIGNUP_REQUIRED_STATUS) {
     return { kind: 'SIGNUP_REQUIRED', data: response.data as SocialSignupRequired };

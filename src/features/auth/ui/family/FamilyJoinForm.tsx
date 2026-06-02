@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { isAxiosError } from 'axios';
+
+import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 
 import { requestFamilyJoin } from '../../api/pets';
 import familyIllustration from '../../assets/family.svg';
@@ -44,44 +45,16 @@ export function FamilyJoinForm({ onHome }: FamilyJoinFormProps) {
       await requestFamilyJoin(trimmed);
       setApplied(true);
     } catch (joinError) {
-      if (isAxiosError(joinError)) {
-        const status = joinError.response?.status;
-        const message =
-          typeof joinError.response?.data === 'object' &&
-          joinError.response.data !== null &&
-          'message' in joinError.response.data &&
-          typeof joinError.response.data.message === 'string'
-            ? joinError.response.data.message
-            : null;
-
-        if (status === 404) {
-          setErrorMessage(message ?? '만료되었거나 존재하지 않는 초대 코드예요.');
-          return;
-        }
-
-        if (status === 409) {
-          setErrorMessage(message ?? '이미 가족으로 등록되어 있어요.');
-          return;
-        }
-
-        if (status === 400) {
-          setErrorMessage(message ?? '잘못된 요청이에요. 코드를 확인해주세요.');
-          return;
-        }
-
-        if (status === 401) {
-          setErrorMessage(message ?? '로그인이 필요해요. 다시 시도해주세요.');
-          return;
-        }
-
-        if (status === 500) {
-          setErrorMessage(message ?? '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
-          return;
-        }
-      }
-
       console.error('[family-join] 실패', joinError);
-      setErrorMessage('가족 신청에 실패했어요. 잠시 후 다시 시도해주세요.');
+      setErrorMessage(
+        getApiErrorMessage(joinError, '가족 신청에 실패했어요. 잠시 후 다시 시도해주세요.', {
+          400: '잘못된 요청이에요. 코드를 확인해주세요.',
+          401: '로그인이 필요해요. 다시 시도해주세요.',
+          404: '만료되었거나 존재하지 않는 초대 코드예요.',
+          409: '이미 가족으로 등록되어 있어요.',
+          500: '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
+        }),
+      );
     } finally {
       setConfirming(false);
     }

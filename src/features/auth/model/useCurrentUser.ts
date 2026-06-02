@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import {
   getAccessToken,
@@ -23,13 +22,15 @@ interface UseCurrentUserResult {
 }
 
 export function useCurrentUser(): UseCurrentUserResult {
-  const location = useLocation();
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const hasToken = Boolean(getAccessToken());
+  const accessToken = getAccessToken();
+  const hasToken = Boolean(accessToken);
 
   useEffect(() => {
-    if (!hasToken) {
+    if (!accessToken) {
+      setUser(null);
+      setIsLoading(false);
       return;
     }
 
@@ -60,7 +61,7 @@ export function useCurrentUser(): UseCurrentUserResult {
     return () => {
       cancelled = true;
     };
-  }, [location.pathname, hasToken]);
+  }, [accessToken]);
 
   const activeUser = hasToken ? user : null;
   const profileUrl = activeUser?.profileUrl?.trim() || getProfileUrl();

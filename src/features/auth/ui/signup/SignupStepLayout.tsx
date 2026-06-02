@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
 
+import { LoadingSpinner } from '@/shared/ui/LoadingSpinner';
+
 interface SignupStepLayoutProps {
   children: ReactNode;
   // 하단 고정 버튼 영역(주로 '다음'). 생략 가능.
@@ -42,7 +44,14 @@ export function PrimaryButton({ children, onClick, disabled, loading }: PrimaryB
           : 'cursor-pointer bg-brand text-brand-foreground hover:opacity-90'
       }`}
     >
-      {loading ? '처리 중...' : children}
+      {loading ? (
+        <span className="inline-flex items-center justify-center gap-2">
+          <LoadingSpinner size="sm" className="text-brand-foreground" label="처리 중" />
+          <span>처리 중</span>
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }
@@ -69,7 +78,14 @@ export function SubButton({ children, onClick, disabled, loading }: SubButtonPro
           : 'cursor-pointer bg-secondary text-secondary-foreground hover:opacity-90'
       }`}
     >
-      {loading ? '확인 중...' : children}
+      {loading ? (
+        <span className="inline-flex items-center justify-center gap-2">
+          <LoadingSpinner size="sm" className="text-secondary-foreground" label="확인 중" />
+          <span>확인 중</span>
+        </span>
+      ) : (
+        children
+      )}
     </button>
   );
 }

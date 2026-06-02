@@ -7,6 +7,20 @@ export interface AuthTokens {
   accessTokenExpiresIn: number;
 }
 
+// ---- 토큰 재발급 (POST /auth/reissue) ----
+
+export interface TokenReissueRequest {
+  refreshToken: string;
+}
+
+export interface TokenReissueResponse {
+  message: string;
+  accessToken: string;
+  refreshToken: string;
+  /** OpenAPI 기준 초 단위 — setReissueTokens에서 ms로 정규화 */
+  accessTokenExpiresIn: number;
+}
+
 // ---- 소셜 로그인 (POST /auth/social-login) ----
 
 export interface SocialLoginRequest {

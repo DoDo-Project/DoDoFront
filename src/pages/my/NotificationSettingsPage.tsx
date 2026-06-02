@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { isAxiosError } from 'axios';
 
 import { updateNotificationSetting } from '@/features/auth/api/auth';
+import { NOTIFICATION_SETTING_STATUS_MESSAGES } from '@/features/auth/lib/apiErrorMessages';
 import { useCurrentUser } from '@/features/auth/model/useCurrentUser';
+import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 import { setNotificationEnabled, syncUserProfile } from '@/shared/lib/auth/token';
 
 // TODO: 알림함 UI(수신 목록) 추가 + 알림 ON/OFF 설정을 같은 페이지에서 관리
@@ -38,18 +39,13 @@ export function NotificationSettingsPage() {
       setEnabled(next);
     } catch (changeError) {
       console.error('[notification-setting] 실패', changeError);
-      if (isAxiosError(changeError)) {
-        const message =
-          typeof changeError.response?.data === 'object' &&
-          changeError.response.data !== null &&
-          'message' in changeError.response.data &&
-          typeof changeError.response.data.message === 'string'
-            ? changeError.response.data.message
-            : null;
-        setError(message ?? '알림 설정 변경에 실패했어요.');
-        return;
-      }
-      setError('알림 설정 변경에 실패했어요. 잠시 후 다시 시도해주세요.');
+      setError(
+        getApiErrorMessage(
+          changeError,
+          '알림 설정 변경에 실패했어요. 잠시 후 다시 시도해주세요.',
+          NOTIFICATION_SETTING_STATUS_MESSAGES,
+        ),
+      );
     } finally {
       setSaving(false);
     }

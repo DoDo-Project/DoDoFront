@@ -1,10 +1,18 @@
 import { useRef, useState } from 'react';
-import { isAxiosError } from 'axios';
+import { Link } from 'react-router-dom';
 
 import { uploadImage } from '@/shared/api/files';
+import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/api/errorMessage';
 import { setNotificationEnabled, setTokens } from '@/shared/lib/auth/token';
 
 import { checkNicknameAvailability, registerProfile, updateNotificationSetting } from '../../api/auth';
+import {
+  NICKNAME_CHECK_STATUS_MESSAGES,
+  NOTIFICATION_SETTING_STATUS_MESSAGES,
+  REGISTER_PROFILE_STATUS_MESSAGES,
+} from '../../lib/apiErrorMessages';
+import { resolveApiAuthError, type AuthErrorPresentation } from '../../lib/authErrorPresentation';
+import { AuthErrorScreen } from '../status/AuthErrorScreen';
 import { CompleteStep } from './CompleteStep';
 import { NotificationStep } from './NotificationStep';
 import { ProfileStep } from './ProfileStep';
@@ -60,6 +68,7 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [fatalError, setFatalError] = useState<AuthErrorPresentation | null>(null);
   const profileCompletedRef = useRef(false);
 
   // 닉네임이 바뀌면 중복확인 결과를 초기화
@@ -99,22 +108,14 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
       setNicknameStatus('valid');
       setNicknameErrorMessage('');
     } catch (checkError) {
-      if (isAxiosError(checkError) && checkError.response?.status === 400) {
-        const message =
-          typeof checkError.response.data === 'object' &&
-          checkError.response.data !== null &&
-          'message' in checkError.response.data &&
-          typeof checkError.response.data.message === 'string'
-            ? checkError.response.data.message
-            : '닉네임 형식이 올바르지 않아요.';
-        setNicknameStatus('invalid');
-        setNicknameErrorMessage(message);
-        return;
-      }
-
       console.error('[nickname-check] 실패', checkError);
       setNicknameStatus('invalid');
-      setNicknameErrorMessage('중복 확인에 실패했어요. 잠시 후 다시 시도해주세요.');
+      setNicknameErrorMessage(
+        getApiErrorMessage(checkError, '중복 확인에 실패했어요. 잠시 후 다시 시도해주세요.', {
+          400: '닉네임 형식이 올바르지 않아요.',
+          ...NICKNAME_CHECK_STATUS_MESSAGES,
+        }),
+      );
     } finally {
       setCheckingNickname(false);
     }
@@ -185,17 +186,48 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
     } catch (submitError) {
       if (profileCompletedRef.current) {
         console.error('[notification-setting] 실패', submitError);
-        setError('알림 설정 저장에 실패했어요. 다시 시도해주세요.');
+        setError(
+          getApiErrorMessage(
+            submitError,
+            '알림 설정 저장에 실패했어요. 다시 시도해주세요.',
+            NOTIFICATION_SETTING_STATUS_MESSAGES,
+          ),
+        );
         return;
       }
 
-      // TODO(STEP 7): 상태 코드(400~500)별 에러 메시지 세분화
       console.error('[register-profile] 실패', submitError);
-      setError('회원가입에 실패했어요. 잠시 후 다시 시도해주세요.');
+      const presentation = resolveApiAuthError(
+        submitError,
+        '회원가입에 실패했어요. 잠시 후 다시 시도해주세요.',
+        REGISTER_PROFILE_STATUS_MESSAGES,
+      );
+      const status = getApiErrorStatus(submitError);
+      if (status === 401 || status === 409) {
+        setFatalError(presentation);
+        return;
+      }
+      setError(presentation.message);
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (fatalError) {
+    return (
+      <AuthErrorScreen
+        presentation={fatalError}
+        primaryAction={
+          <Link
+            to="/auth"
+            className="inline-flex h-12 w-full items-center justify-center rounded-xl bg-brand text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
+          >
+            처음부터 로그인하기
+          </Link>
+        }
+      />
+    );
+  }
 
   switch (step) {
     case Step.Terms:
