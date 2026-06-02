@@ -6,6 +6,7 @@ import { RequireAuth } from '@/app/guards/RequireAuth';
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { SignupPage } from '@/pages/auth/SignupPage';
+import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
 import { MyDodoPage } from '@/pages/my/MyDodoPage';
@@ -37,6 +38,14 @@ export const router = createBrowserRouter([
       { index: true, element: <LoginPage /> },
       { path: 'callback/:provider', element: <AuthCallbackPage /> },
       { path: 'signup', element: <SignupPage /> },
+      {
+        path: 'family/join',
+        element: (
+          <RequireAuth>
+            <FamilyJoinPage />
+          </RequireAuth>
+        ),
+      },
     ],
   },
 ]);

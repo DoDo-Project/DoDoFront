@@ -1,5 +1,7 @@
 import { useId, useRef, useState, type ChangeEvent } from 'react';
 
+import { FormFeedback } from './SignupStepLayout';
+
 interface ProfileImagePickerProps {
   imageUrl: string | null;
   uploading?: boolean;
@@ -50,8 +52,10 @@ export function ProfileImagePicker({ imageUrl, uploading, error, onSelectFile }:
         <input ref={inputRef} id={inputId} type="file" accept="image/*" className="sr-only" onChange={handleChange} />
       </div>
 
-      {uploading ? <p className="text-xs text-neutral-500">이미지 업로드 중...</p> : null}
-      {error ? <p className="text-xs text-red-500">{error}</p> : null}
+      <FormFeedback
+        message={error || (uploading ? '이미지 업로드 중...' : undefined)}
+        tone={error ? 'error' : 'neutral'}
+      />
     </div>
   );
 }

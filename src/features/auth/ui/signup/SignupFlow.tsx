@@ -6,7 +6,6 @@ import { setTokens } from '@/shared/lib/auth/token';
 
 import { checkNicknameAvailability, registerProfile } from '../../api/auth';
 import { CompleteStep } from './CompleteStep';
-import { FamilyCodeStep } from './FamilyCodeStep';
 import { NotificationStep } from './NotificationStep';
 import { ProfileStep } from './ProfileStep';
 import { TermsStep } from './TermsStep';
@@ -19,9 +18,8 @@ type NicknameStatus = 'idle' | 'valid' | 'invalid';
 const Step = {
   Terms: 0,
   Profile: 1,
-  Family: 2,
-  Notification: 3,
-  Complete: 4,
+  Notification: 2,
+  Complete: 3,
 } as const;
 type Step = (typeof Step)[keyof typeof Step];
 
@@ -57,10 +55,6 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
   const lastProfileImageUrlRef = useRef(profileImageUrl);
   const [uploadingProfileImage, setUploadingProfileImage] = useState(false);
   const [profileImageError, setProfileImageError] = useState('');
-
-  const [familyCode, setFamilyCode] = useState('');
-  const [familyConnected, setFamilyConnected] = useState(false);
-  const [skipFamily, setSkipFamily] = useState(false);
 
   const [allowNotification, setAllowNotification] = useState<boolean | null>(null);
 
@@ -125,21 +119,6 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
     }
   };
 
-  // TODO: 가족 코드 확인/연결 API 연동. 현재는 입력값이 있으면 연결로 처리한다.
-  const handleConfirmFamilyCode = () => {
-    if (familyCode.trim().length > 0) {
-      setFamilyConnected(true);
-    }
-  };
-
-  const handleToggleSkipFamily = (value: boolean) => {
-    setSkipFamily(value);
-    if (value) {
-      setFamilyConnected(false);
-      setFamilyCode('');
-    }
-  };
-
   const handleSelectProfileImage = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       setProfileImageError('이미지 파일만 업로드할 수 있어요.');
@@ -183,7 +162,7 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
         {
           nickname: nickname.trim(),
           region: region.trim(),
-          hasFamily: familyConnected,
+          hasFamily: false,
         },
         registrationToken,
       );
@@ -221,19 +200,6 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
           onChangeRegion={setRegion}
           onCheckNickname={handleCheckNickname}
           onSelectProfileImage={handleSelectProfileImage}
-          onNext={() => setStep(Step.Family)}
-        />
-      );
-
-    case Step.Family:
-      return (
-        <FamilyCodeStep
-          code={familyCode}
-          connected={familyConnected}
-          skip={skipFamily}
-          onChangeCode={setFamilyCode}
-          onConfirmCode={handleConfirmFamilyCode}
-          onToggleSkip={handleToggleSkipFamily}
           onNext={() => setStep(Step.Notification)}
         />
       );

@@ -69,3 +69,29 @@ export function SubButton({ children, onClick, disabled, loading }: SubButtonPro
     </button>
   );
 }
+
+type FormFeedbackTone = 'success' | 'error' | 'neutral';
+
+interface FormFeedbackProps {
+  message?: string;
+  tone?: FormFeedbackTone;
+  className?: string;
+}
+
+const feedbackToneClass: Record<FormFeedbackTone, string> = {
+  success: 'text-green-600',
+  error: 'text-red-500',
+  neutral: 'text-neutral-500',
+};
+
+/** 안내/에러 문구 영역. min-height를 유지해 메시지 표시 시 레이아웃이 밀리지 않는다. */
+export function FormFeedback({ message, tone = 'error', className = '' }: FormFeedbackProps) {
+  return (
+    <p
+      className={`min-h-10 text-xs leading-5 ${feedbackToneClass[tone]} ${message ? '' : 'invisible'} ${className}`}
+      aria-live="polite"
+    >
+      {message || '\u00a0'}
+    </p>
+  );
+}

@@ -1,4 +1,4 @@
-import { PrimaryButton, SignupStepLayout } from './SignupStepLayout';
+import { FormFeedback, PrimaryButton, SignupStepLayout } from './SignupStepLayout';
 
 interface NotificationStepProps {
   allow: boolean | null;
@@ -33,7 +33,7 @@ export function NotificationStep({ allow, submitting, error, onChangeAllow, onNe
           <ChoiceRow selected={allow === false} label="지금 안 받을래요" onClick={() => onChangeAllow(false)} />
         </div>
 
-        {error ? <p className="mt-4 text-xs text-red-500">{error}</p> : null}
+        <FormFeedback className="mt-4 w-full text-left" message={error} tone="error" />
       </div>
     </SignupStepLayout>
   );

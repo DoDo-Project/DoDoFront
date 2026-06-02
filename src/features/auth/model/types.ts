@@ -58,3 +58,15 @@ export interface NicknameCheckResponse {
   nickname: string;
   duplicated: boolean;
 }
+
+// ---- 가족 초대 수락 신청 (POST /pets/family) ----
+
+export interface PetFamilyJoinRequest {
+  /** 영문 대문자 + 숫자 6자리 */
+  code: string;
+}
+
+export interface PetFamilyJoinResponse {
+  petId: number;
+  message: string;
+}

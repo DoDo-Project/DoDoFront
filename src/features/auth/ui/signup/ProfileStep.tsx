@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { ProfileImagePicker } from './ProfileImagePicker';
 import { RegionSelectModal } from './RegionSelectModal';
-import { PrimaryButton, SignupStepLayout, SubButton } from './SignupStepLayout';
+import { PrimaryButton, SignupStepLayout, SubButton, FormFeedback } from './SignupStepLayout';
 
 type NicknameStatus = 'idle' | 'valid' | 'invalid';
 
@@ -97,10 +97,16 @@ export function ProfileStep({
               중복 확인
             </SubButton>
           </div>
-          {nicknameStatus === 'valid' ? <p className="text-xs text-green-600">사용 가능한 닉네임입니다.</p> : null}
-          {nicknameStatus === 'invalid' && nicknameErrorMessage ? (
-            <p className="text-xs text-red-500">{nicknameErrorMessage}</p>
-          ) : null}
+          <FormFeedback
+            message={
+              nicknameStatus === 'valid'
+                ? '사용 가능한 닉네임입니다.'
+                : nicknameStatus === 'invalid'
+                  ? nicknameErrorMessage
+                  : undefined
+            }
+            tone={nicknameStatus === 'valid' ? 'success' : 'error'}
+          />
         </div>
 
         <div className="flex flex-col gap-2">
