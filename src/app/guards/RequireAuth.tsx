@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 
-import { clearTokens, getAccessToken, getRefreshToken } from '@/shared/lib/auth/token';
+import { clearTokens, getAccessToken } from '@/shared/lib/auth/token';
 
 type RequireAuthProps = {
   children: ReactNode;
@@ -10,12 +10,9 @@ type RequireAuthProps = {
 export function RequireAuth({ children }: RequireAuthProps) {
   const location = useLocation();
   const hasAccess = typeof window !== 'undefined' && Boolean(getAccessToken());
-  const hasRefresh = typeof window !== 'undefined' && Boolean(getRefreshToken());
 
-  if (!hasAccess || !hasRefresh) {
-    if (hasAccess && !hasRefresh) {
-      clearTokens();
-    }
+  if (!hasAccess) {
+    clearTokens();
     return <Navigate to="/auth" replace state={{ from: location }} />;
   }
 

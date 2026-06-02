@@ -159,6 +159,7 @@ export function syncUserProfile(profile: {
   }
 }
 
+/** access + refresh 모두 있을 때만 true (reissue 가능한 완전한 세션) */
 export function hasAuthSession(): boolean {
   return Boolean(getAccessToken()) && Boolean(getRefreshToken());
 }
