@@ -62,7 +62,8 @@ function MyDodoContent({
           ) : (
             <button
               type="button"
-              className="mt-8 inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90"
+              disabled
+              className="mt-8 inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {content.actionLabel}
             </button>

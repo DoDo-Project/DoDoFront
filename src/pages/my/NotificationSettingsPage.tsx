@@ -166,7 +166,7 @@ function ChoiceCard({ title, description, selected, disabled = false, onClick }:
       disabled={disabled}
       className={[
         'w-full rounded-[20px] border bg-white px-5 py-5 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60',
-        selected ? 'border-brand shadow-[0_0_0_1px_var(--color-brand)]' : 'border-neutral-200 hover:border-brand/50',
+        selected ? 'border-brand ring-1 ring-brand' : 'border-neutral-200 hover:border-brand/50',
       ].join(' ')}
     >
       <div className="flex items-start gap-4">

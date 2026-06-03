@@ -16,7 +16,7 @@ function menuItemClass(active: boolean) {
   return [
     'block w-full rounded-xl border px-4 py-3 text-center text-sm font-semibold transition-all',
     active
-      ? 'border-brand bg-white text-brand shadow-[0_0_0_1px_var(--color-brand)]'
+      ? 'border-brand bg-white text-brand ring-1 ring-brand'
       : 'border-neutral-200 bg-white text-neutral-700 hover:border-brand/60 hover:text-brand',
   ].join(' ');
 }
