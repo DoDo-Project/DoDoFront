@@ -25,13 +25,7 @@ export function PetEditPage() {
     content = <PetDetailSkeleton />;
   } else if (editForm.isError || numericPetId === null || !editForm.pet) {
     content = (
-      <PetDetailError
-        title="반려동물 수정 정보를 불러오지 못했습니다"
-        description="잠시 후 다시 시도해 주세요. 문제가 계속되면 네트워크 상태와 로그인 정보를 함께 확인해 주세요."
-        onRetry={() => {
-          void editForm.refetch();
-        }}
-      />
+      <PetDetailError message="잠시 후 다시 시도해 주세요. 문제가 계속되면 네트워크 상태와 로그인 정보를 함께 확인해 주세요." />
     );
   } else {
     content = (

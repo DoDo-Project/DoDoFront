@@ -14,7 +14,7 @@ export function useUpdatePet() {
 
   return useMutation<UpdatePetResponse, unknown, UpdatePetVariables>({
     mutationFn: ({ petId, payload }) => updatePet(petId, payload),
-    onSuccess: (data, variables) => {
+    onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
         queryKey: ['pets', 'list'],
       });
