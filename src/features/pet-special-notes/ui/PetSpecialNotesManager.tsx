@@ -120,7 +120,13 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-4 py-4">
+      <form
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleCreate();
+        }}
+        className="rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-4 py-4"
+      >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <select
             value={formType}
@@ -140,15 +146,14 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
             className="h-11 flex-1 rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-brand"
           />
           <button
-            type="button"
-            onClick={() => void handleCreate()}
+            type="submit"
             disabled={isMutating || !formContent.trim()}
             className="inline-flex h-11 min-w-24 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             추가
           </button>
         </div>
-      </div>
+      </form>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap gap-2">
