@@ -55,9 +55,11 @@ export function validatePetRegistrationForm(form: PetRegistrationFormState, age:
     nextErrors.birth = '올바른 생년월일을 입력해 주세요.';
   }
 
+  const heartRateNum = Number(form.referenceHeartRate);
+
   if (!form.referenceHeartRate.trim()) {
     nextErrors.referenceHeartRate = '기준 심박수를 입력해 주세요.';
-  } else if (Number(form.referenceHeartRate) <= 0) {
+  } else if (Number.isNaN(heartRateNum) || heartRateNum <= 0) {
     nextErrors.referenceHeartRate = '기준 심박수는 1 이상이어야 합니다.';
   }
 
