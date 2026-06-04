@@ -132,6 +132,32 @@ export interface CreatePetResponse {
   petId: number;
 }
 
+export interface UpdatePetRequest {
+  registrationNumber: string | number | null;
+  imageFileUrl?: string | null;
+  sex: PetSex;
+  age: number;
+  petName: string;
+  breed: string;
+  referenceHeartRate: number;
+  deviceId: string;
+}
+
+export interface UpdatePetResponse {
+  message: string;
+  petId: number;
+  registrationNumber: string | number | null;
+  imageFileUrl?: string | null;
+  sex: PetSex;
+  age: number;
+  birth: string;
+  petName: string;
+  species: PetSpecies;
+  breed: string;
+  referenceHeartRate: number;
+  deviceId: string;
+}
+
 export interface PetFamilyMember {
   userId: string;
   userName: string;

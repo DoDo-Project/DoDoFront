@@ -6,6 +6,8 @@ import type {
   PetDetailResponse,
   PetFamilyJoinResponse,
   PetListResponse,
+  UpdatePetRequest,
+  UpdatePetResponse,
 } from '../model/types';
 
 interface RequestFamilyJoinOptions {
@@ -72,6 +74,15 @@ export async function getPetList(params?: GetPetListParams): Promise<PetListResp
  */
 export async function getPetDetail(petId: number): Promise<PetDetailResponse> {
   const response = await apiClient.get<PetDetailResponse>(`/pets/${petId}`);
+
+  return response.data;
+}
+
+/**
+ * 반려동물 정보 수정 (PATCH /pets/{petId})
+ */
+export async function updatePet(petId: number, payload: UpdatePetRequest): Promise<UpdatePetResponse> {
+  const response = await apiClient.patch<UpdatePetResponse>(`/pets/${petId}`, payload);
 
   return response.data;
 }

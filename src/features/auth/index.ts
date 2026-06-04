@@ -17,6 +17,7 @@ export { useCreatePet } from './model/useCreatePet';
 export { useCurrentUser } from './model/useCurrentUser';
 export { usePetDetail } from './model/usePetDetail';
 export { usePetList } from './model/usePetList';
+export { useUpdatePet } from './model/useUpdatePet';
 export type {
   SocialProvider,
   AuthTokens,
@@ -26,6 +27,8 @@ export type {
   SocialLoginResult,
   CreatePetRequest,
   CreatePetResponse,
+  UpdatePetRequest,
+  UpdatePetResponse,
   RegisterProfileRequest,
   RegisterProfileResponse,
   NicknameCheckResponse,
