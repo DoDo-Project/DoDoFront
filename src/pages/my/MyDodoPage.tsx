@@ -19,21 +19,20 @@ function MyDodoContent({
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[320px] items-center">
-        <div className="w-full overflow-hidden rounded-[16px] border border-neutral-200 bg-white">
-          <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
-            <Skeleton className="h-3 w-14 rounded-md" />
-            <Skeleton className="mt-4 h-8 w-64 rounded-lg" />
-          </div>
+      <div className="space-y-6">
+        <div>
+          <Skeleton className="h-3 w-16 rounded-md" />
+          <Skeleton className="mt-4 h-8 w-56 rounded-lg" />
+        </div>
 
-          <div className="px-6 py-8 sm:px-8">
-            <div className="max-w-2xl space-y-3">
+        <div className="w-full overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+          <div className="px-6 py-6 sm:px-8">
+            <Skeleton className="h-6 w-44 rounded-lg" />
+            <div className="mt-4 max-w-2xl space-y-3">
               <Skeleton className="h-4 w-full rounded-md" />
               <Skeleton className="h-4 w-11/12 rounded-md" />
               <Skeleton className="h-4 w-7/12 rounded-md" />
             </div>
-
-            <Skeleton className="mt-4 h-12 w-40 rounded-xl" />
           </div>
         </div>
       </div>
@@ -41,22 +40,23 @@ function MyDodoContent({
   }
 
   return (
-    <div className="flex min-h-[320px] items-center">
-      <div className="w-full overflow-hidden rounded-[16px] border border-neutral-200 bg-white">
-        <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
-          <p className="text-xs font-semibold tracking-[0.24em] text-brand">{content.badge}</p>
-          <h1 className="mt-3 text-2xl font-semibold text-neutral-900 sm:text-[28px]">{content.title}</h1>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs font-semibold tracking-[0.24em] text-brand">{content.badge}</p>
+        <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">{content.title}</h1>
+      </div>
 
-        <div className="px-6 py-8 sm:px-8">
+      <div className="w-full overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+        <div className="flex min-h-[220px] flex-col gap-5 px-6 py-6 sm:px-8 sm:py-7 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
-            <p className="text-sm leading-7 text-neutral-600 sm:text-base">{content.description}</p>
+            <h2 className="text-[18px] font-medium text-neutral-950">기능 준비 중</h2>
+            <p className="mt-3 text-sm leading-7 text-neutral-600">{content.description}</p>
           </div>
 
           {actionHref ? (
             <Link
               to={actionHref}
-              className="mt-4 inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90"
+              className="inline-flex h-10 min-w-28 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
             >
               {content.actionLabel}
             </Link>
@@ -64,7 +64,7 @@ function MyDodoContent({
             <button
               type="button"
               disabled
-              className="mt-4 inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex h-10 min-w-28 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {content.actionLabel}
             </button>

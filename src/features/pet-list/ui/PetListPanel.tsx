@@ -68,7 +68,7 @@ function ActionButtonDisabled({ label }: { label: string }) {
       type="button"
       disabled
       className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-70 sm:w-28"
-      title="반려동물 몸무게 기록 추가 API와 함께 다음 단계에서 연결 예정"
+      title="반려동물 몸무게 기록 추가 API와 연결 예정입니다."
     >
       {label}
     </button>
@@ -97,7 +97,6 @@ function PetCard({ pet }: { pet: PetListItem }) {
               <p>
                 {formatSpeciesLabel(pet.species)} <span className="text-neutral-500">{pet.breed}</span>
               </p>
-              <p>{pet.weight}</p>
             </div>
           </div>
         </div>
@@ -114,10 +113,10 @@ function PetCard({ pet }: { pet: PetListItem }) {
 export function PetListPanel({ pets, totalElements, isRefreshing = false }: PetListPanelProps) {
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-[18px] font-medium text-neutral-950">반려동물 리스트</h1>
-          <p className="mt-1 text-sm text-neutral-500">등록된 반려동물 정보를 한눈에 확인할 수 있어요.</p>
+          <p className="text-xs font-semibold tracking-[0.24em] text-brand">PET LIST</p>
+          <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">반려동물 리스트</h1>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">
