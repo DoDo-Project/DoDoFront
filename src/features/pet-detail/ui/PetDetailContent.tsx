@@ -26,7 +26,7 @@ function InfoCard({ title, children, fullWidth = false }: { title: string; child
   );
 }
 
-function PetImage({ src, alt, species }: { src: string; alt: string; species: string }) {
+function PetImage({ src, alt, species }: { src: string | null; alt: string; species: string }) {
   const fallbackImage = species === 'FELINE' ? petDefaultCatIllustration : petDefaultIllustration;
 
   return (
