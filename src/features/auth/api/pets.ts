@@ -45,7 +45,7 @@ export async function getPetList(params?: GetPetListParams): Promise<PetListResp
     params: {
       page: params?.page ?? 0,
       size: params?.size ?? 10,
-      ...(params?.sort ? { sort: params.sort } : {}),
+      sort: params?.sort ?? 'registrationCreatedAt,desc',
     },
   });
 
