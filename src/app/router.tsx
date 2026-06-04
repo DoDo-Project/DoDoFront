@@ -14,6 +14,7 @@ import { PetEditPage } from '@/pages/my/PetEditPage';
 import { MyDodoPage } from '@/pages/my/MyDodoPage';
 import { NotificationSettingsPage } from '@/pages/my/NotificationSettingsPage';
 import { PetRegistrationPage } from '@/pages/my/PetRegistrationPage';
+import { PetSpecialNotesPage } from '@/pages/my/PetSpecialNotesPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { WalkPage } from '@/pages/walk/WalkPage';
 
@@ -61,6 +62,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <PetEditPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/my/pets/:petId/notes',
+        element: (
+          <RequireAuth>
+            <PetSpecialNotesPage />
           </RequireAuth>
         ),
       },

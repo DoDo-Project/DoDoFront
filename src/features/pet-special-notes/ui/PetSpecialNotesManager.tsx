@@ -12,13 +12,16 @@ import {
 
 import { formatPetSpecialNoteTypeLabel, PET_SPECIAL_NOTE_TYPE_OPTIONS } from '../lib/constants';
 
-interface PetSpecialNotesSectionProps {
+interface PetSpecialNotesManagerProps {
   petId: number;
-  fallbackCount?: number;
+  pageSize?: number;
 }
 
-export function PetSpecialNotesSection({ petId, fallbackCount = 0 }: PetSpecialNotesSectionProps) {
-  const { data, isLoading, isError, error, refetch } = usePetSpecialNoteList(petId, { page: 0, size: 10 });
+export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotesManagerProps) {
+  const { data, isLoading, isError, error, refetch } = usePetSpecialNoteList(petId, {
+    page: 0,
+    size: pageSize,
+  });
   const { mutateAsync: createNote, isPending: isCreating } = useCreatePetSpecialNote();
   const { mutateAsync: updateNote, isPending: isUpdating } = useUpdatePetSpecialNote();
   const { mutateAsync: deleteNote, isPending: isDeleting } = useDeletePetSpecialNote();
@@ -31,7 +34,7 @@ export function PetSpecialNotesSection({ petId, fallbackCount = 0 }: PetSpecialN
   const [submitError, setSubmitError] = useState('');
 
   const notes = data?.notes ?? [];
-  const noteCount = data?.totalElements ?? fallbackCount;
+  const noteCount = data?.totalElements ?? 0;
   const isMutating = isCreating || isUpdating || isDeleting;
 
   const editingNote = useMemo(

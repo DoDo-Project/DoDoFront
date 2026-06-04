@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { PetDetailResponse } from '@/features/auth';
-import { PetSpecialNotesSection } from '@/features/pet-special-notes';
+import { PetSpecialNotesPreview } from '@/features/pet-special-notes';
 import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.svg';
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 
@@ -156,7 +156,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
         </InfoCard>
 
         <InfoCard title={`특이사항 (${pet.specialNotesCount})`} fullWidth>
-          <PetSpecialNotesSection petId={pet.petId} fallbackCount={pet.specialNotesCount} />
+          <PetSpecialNotesPreview petId={pet.petId} fallbackCount={pet.specialNotesCount} />
         </InfoCard>
       </div>
     </div>
