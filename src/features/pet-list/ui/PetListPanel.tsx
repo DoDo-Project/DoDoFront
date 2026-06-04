@@ -99,7 +99,7 @@ function PetCard({ pet }: { pet: PetListItem }) {
               </p>
               <p className="text-neutral-800">
                 <span className="text-neutral-500">성별 </span>
-                {pet.sex === 'MALE' ? '수컷' : pet.sex === 'FEMALE' ? '암컷' : '중성화'}
+                {getSexLabel(pet.sex)}
               </p>
             </div>
           </div>
