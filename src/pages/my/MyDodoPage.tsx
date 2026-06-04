@@ -3,14 +3,14 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, usePetList } from '@/features/auth';
 import { MY_DODO_CONTENT_BY_KEY, getMyDodoMenuHref, getMyDodoMenuKeyFromSearch } from '@/pages/my/model/menu';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
-import { PetListPanel } from '@/pages/my/ui/PetListPanel';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
+import { PetListPanel } from '@/pages/my/ui/PetListPanel';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/api/errorMessage';
 import { Skeleton } from '@/shared/ui';
 
 const PET_LIST_STATUS_MESSAGES: Partial<Record<number, string>> = {
   400: '요청 값을 다시 확인해 주세요.',
-  401: '로그인이 필요합니다. 다시 로그인해 주세요.',
+  401: '로그인이 필요한 기능입니다. 다시 로그인해 주세요.',
   403: '반려동물 목록을 조회할 권한이 없습니다.',
   404: '사용자 정보를 찾을 수 없습니다.',
   500: '반려동물 목록 조회 중 서버 오류가 발생했습니다.',
@@ -93,13 +93,12 @@ function PetListEmptyState() {
             현재 등록된 반려동물이 없습니다.
           </p>
 
-          <button
-            type="button"
-            disabled
-            className="mt-4 inline-flex min-w-56 items-center justify-center rounded-2xl bg-brand px-8 py-4 text-[16px] font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+          <Link
+            to="/my/pets/new"
+            className="mt-4 inline-flex min-w-56 items-center justify-center rounded-2xl bg-brand px-8 py-4 text-[16px] font-medium text-brand-foreground transition-opacity hover:opacity-90"
           >
             등록하기
-          </button>
+          </Link>
         </div>
       </div>
     </section>

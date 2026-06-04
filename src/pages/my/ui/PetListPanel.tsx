@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 import profileDefaultIllustration from '@/features/auth/assets/profile-default.svg';
 import type { PetListItem } from '@/features/auth/model/types';
 
@@ -17,6 +19,11 @@ function formatSpeciesLabel(species: string) {
   if (species === 'CANINE') return '강아지';
   if (species === 'FELINE') return '고양이';
   return species;
+}
+
+function formatBirthLabel(birth: string) {
+  const date = birth.slice(0, 10).replaceAll('-', '. ');
+  return date.endsWith('. ') ? date.slice(0, -2) : date;
 }
 
 function PetImage({ src, alt }: { src: string; alt: string }) {
@@ -69,7 +76,7 @@ function HeroPetCard({ pet, isPrimary }: { pet: PetListItem; isPrimary: boolean 
 
             <div className="mt-3 space-y-1.5 text-[18px] font-semibold text-neutral-900">
               <p>
-                {pet.birth} <span className="font-medium text-neutral-500">(만 {pet.age}세)</span>
+                {formatBirthLabel(pet.birth)} <span className="font-medium text-neutral-500">(만 {pet.age}세)</span>
               </p>
               <p>
                 {formatSpeciesLabel(pet.species)} <span className="font-medium text-neutral-500">{pet.breed}</span>
@@ -98,13 +105,12 @@ function AddPetCard() {
           리스트에 더 추가해 보세요 :D
         </p>
 
-        <button
-          type="button"
-          disabled
-          className="mt-8 inline-flex min-w-60 items-center justify-center rounded-2xl bg-brand px-8 py-4 text-[18px] font-semibold text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+        <Link
+          to="/my/pets/new"
+          className="mt-8 inline-flex min-w-60 items-center justify-center rounded-2xl bg-brand px-8 py-4 text-[18px] font-semibold text-brand-foreground transition-opacity hover:opacity-90"
         >
           등록하기
-        </button>
+        </Link>
       </div>
     </section>
   );
