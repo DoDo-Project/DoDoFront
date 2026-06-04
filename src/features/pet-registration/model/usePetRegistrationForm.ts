@@ -85,7 +85,7 @@ export function usePetRegistrationForm() {
     setErrors(nextErrors);
     setSubmitError('');
 
-    if (Object.keys(nextErrors).length > 0 || age === null || uploadingImage) {
+    if (Object.keys(nextErrors).length > 0 || age === null || uploadingImage || isPending) {
       return;
     }
 
