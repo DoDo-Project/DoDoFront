@@ -88,6 +88,31 @@ export interface PetFamilyJoinResponse {
 
 // ---- 알림 수신 여부 변경 (PATCH /users/me/setting/notification) ----
 
+export type PetSpecies = 'CANINE' | 'FELINE' | string;
+export type PetSex = 'MALE' | 'FEMALE' | string;
+
+export interface PetListItem {
+  petId: number;
+  petName: string;
+  imageFileUrl: string;
+  species: PetSpecies;
+  breed: string;
+  sex: PetSex;
+  age: number;
+  birth: string;
+  weight: number;
+  registrationNumber: number;
+}
+
+export interface PetListResponse {
+  message: string;
+  pets: PetListItem[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
 export interface NotificationUpdateRequest {
   notificationEnabled: boolean;
 }
