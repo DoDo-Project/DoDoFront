@@ -118,14 +118,12 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
             >
               목록으로
             </Link>
-            <button
-              type="button"
-              disabled
-              title="몸무게 기록 추가/조회 API 연결은 다음 이슈에서 진행 예정"
-              className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-70 sm:w-28"
+            <Link
+              to={`/my/pets/${pet.petId}/edit`}
+              className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 sm:w-28"
             >
-              수정 준비
-            </button>
+              정보 수정
+            </Link>
           </div>
         </div>
       </section>
