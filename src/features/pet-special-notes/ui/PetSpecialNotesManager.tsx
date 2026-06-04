@@ -207,7 +207,13 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
             return (
               <article key={note.noteId} className="rounded-[18px] border border-neutral-200 bg-white px-4 py-3.5">
                 {isEditing ? (
-                  <div className="space-y-3">
+                  <form
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void handleSaveEdit();
+                    }}
+                    className="space-y-3"
+                  >
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                       <select
                         value={editingType}
@@ -226,10 +232,9 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
                         className="h-10 flex-1 rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand"
                       />
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex justify-end gap-2">
                       <button
-                        type="button"
-                        onClick={() => void handleSaveEdit()}
+                        type="submit"
                         disabled={isMutating || !editingContent.trim()}
                         className="inline-flex h-9 min-w-20 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                       >
@@ -244,7 +249,7 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
                         취소
                       </button>
                     </div>
-                  </div>
+                  </form>
                 ) : (
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                     <div className="min-w-0">
