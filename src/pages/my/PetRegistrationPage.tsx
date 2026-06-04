@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useCurrentUser } from '@/features/auth';
@@ -35,6 +36,9 @@ export function PetRegistrationPage() {
 }
 
 function PetRegistrationContent() {
+  const [birth, setBirth] = useState('');
+  const age = useMemo(() => calculateInternationalAge(birth), [birth]);
+
   return (
     <div className="space-y-6">
       <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
@@ -45,8 +49,8 @@ function PetRegistrationContent() {
 
         <div className="px-6 py-6 sm:px-8">
           <p className="max-w-2xl text-sm leading-7 text-neutral-600 sm:text-base">
-            반려동물의 기본 정보와 디바이스 정보를 입력해 등록을 시작해보세요. 등록이 완료되면 상세 페이지에서 최근
-            활동, 특이사항, 체중 정보까지 이어서 확인할 수 있습니다.
+            반려동물의 기본 정보와 디바이스 정보를 입력해 등록을 시작해보세요. 생년월일을 입력하면 만 나이는 자동으로
+            계산됩니다.
           </p>
         </div>
       </section>
@@ -58,12 +62,18 @@ function PetRegistrationContent() {
         </div>
 
         <div className="grid gap-5 px-6 py-6 sm:px-8 lg:grid-cols-2">
-          <Field label="반려동물 이름" placeholder="예: 보리" />
-          <Field label="품종" placeholder="예: 말티즈" />
-          <SelectField label="종" options={SPECIES_OPTIONS} />
-          <SelectField label="성별" options={SEX_OPTIONS} />
-          <Field label="나이" type="number" placeholder="예: 5" />
-          <Field label="생년월일" type="date" />
+          <Field label="반려동물 이름" placeholder="예: 보리" required />
+          <Field label="품종" placeholder="예: 말티즈" required />
+          <SelectField label="종" options={SPECIES_OPTIONS} required />
+          <SelectField label="성별" options={SEX_OPTIONS} required />
+          <Field
+            label="생년월일"
+            type="date"
+            required
+            value={birth}
+            onChange={(event) => setBirth(event.target.value)}
+          />
+          <ReadonlyField label="만 나이" value={age === null ? '생년월일을 입력하면 자동 계산돼요' : `만 ${age}세`} />
           <Field label="등록번호" placeholder="없다면 비워둘 수 있어요" />
         </div>
       </section>
@@ -75,10 +85,14 @@ function PetRegistrationContent() {
         </div>
 
         <div className="grid gap-5 px-6 py-6 sm:px-8 lg:grid-cols-2">
-          <Field label="디바이스 ID" placeholder="예: ABC123XYZ" />
-          <Field label="기준 심박수" type="number" placeholder="예: 85" />
+          <Field label="디바이스 ID" placeholder="예: ABC123XYZ" required />
+          <Field label="기준 심박수" type="number" placeholder="예: 85" required />
         </div>
       </section>
+
+      <p className="text-sm text-neutral-500">
+        <span className="font-semibold text-brand">*</span> 표시는 필수 입력 항목입니다.
+      </p>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Link
@@ -99,34 +113,56 @@ function PetRegistrationContent() {
   );
 }
 
-interface FieldProps {
+interface BaseFieldProps {
   label: string;
-  placeholder?: string;
-  type?: 'text' | 'number' | 'date';
+  required?: boolean;
 }
 
-function Field({ label, placeholder, type = 'text' }: FieldProps) {
+interface FieldProps extends BaseFieldProps {
+  placeholder?: string;
+  type?: 'text' | 'number' | 'date';
+  value?: string;
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+}
+
+function Field({ label, placeholder, type = 'text', value, onChange, required = false }: FieldProps) {
   return (
     <label className="block">
-      <span className="text-sm font-semibold text-neutral-800">{label}</span>
+      <LabelText label={label} required={required} />
       <input
         type={type}
         placeholder={placeholder}
+        value={value}
+        onChange={onChange}
         className="mt-2 h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-brand"
       />
     </label>
   );
 }
 
-interface SelectFieldProps {
-  label: string;
+interface ReadonlyFieldProps extends BaseFieldProps {
+  value: string;
+}
+
+function ReadonlyField({ label, value, required = false }: ReadonlyFieldProps) {
+  return (
+    <div className="block">
+      <LabelText label={label} required={required} />
+      <div className="mt-2 flex h-12 w-full items-center rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-700">
+        {value}
+      </div>
+    </div>
+  );
+}
+
+interface SelectFieldProps extends BaseFieldProps {
   options: readonly { value: string; label: string }[];
 }
 
-function SelectField({ label, options }: SelectFieldProps) {
+function SelectField({ label, options, required = false }: SelectFieldProps) {
   return (
     <label className="block">
-      <span className="text-sm font-semibold text-neutral-800">{label}</span>
+      <LabelText label={label} required={required} />
       <select className="mt-2 h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand">
         <option value="">선택해 주세요</option>
         {options.map((option) => (
@@ -137,4 +173,33 @@ function SelectField({ label, options }: SelectFieldProps) {
       </select>
     </label>
   );
+}
+
+function LabelText({ label, required }: BaseFieldProps) {
+  return (
+    <span className="text-sm font-semibold text-neutral-800">
+      {label}
+      {required ? <span className="ml-1 text-brand">*</span> : null}
+    </span>
+  );
+}
+
+function calculateInternationalAge(birth: string): number | null {
+  if (!birth) return null;
+
+  const today = new Date();
+  const birthDate = new Date(birth);
+
+  if (Number.isNaN(birthDate.getTime())) {
+    return null;
+  }
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age -= 1;
+  }
+
+  return Math.max(age, 0);
 }
