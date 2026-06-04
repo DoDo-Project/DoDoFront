@@ -22,8 +22,8 @@ function formatSpeciesLabel(species: string) {
 }
 
 function formatBirthLabel(birth: string) {
-  const date = birth.slice(0, 10).replaceAll('-', '. ');
-  return date.endsWith('. ') ? date.slice(0, -2) : date;
+  const [year = '', month = '', day = ''] = birth.slice(0, 10).split('-');
+  return [year, month, day].filter(Boolean).join('. ');
 }
 
 function PetImage({ src, alt }: { src: string; alt: string }) {
@@ -42,12 +42,24 @@ function PetImage({ src, alt }: { src: string; alt: string }) {
   );
 }
 
-function ActionButton({ label, disabled = true }: { label: string; disabled?: boolean }) {
+function ActionButtonLink({ label, to }: { label: string; to: string }) {
+  return (
+    <Link
+      to={to}
+      className="inline-flex h-16 w-full items-center justify-center rounded-[20px] border border-neutral-200 bg-white px-5 text-[18px] font-semibold text-neutral-900 transition-colors hover:border-brand/50 hover:text-brand sm:w-44"
+    >
+      {label}
+    </Link>
+  );
+}
+
+function ActionButtonDisabled({ label }: { label: string }) {
   return (
     <button
       type="button"
-      disabled={disabled}
-      className="inline-flex h-16 w-full items-center justify-center rounded-[20px] border border-neutral-200 bg-white px-5 text-[18px] font-semibold text-neutral-900 transition-colors hover:border-brand/50 disabled:cursor-not-allowed disabled:opacity-70 sm:w-44"
+      disabled
+      className="inline-flex h-16 w-full items-center justify-center rounded-[20px] border border-neutral-200 bg-white px-5 text-[18px] font-semibold text-neutral-900 disabled:cursor-not-allowed disabled:opacity-70 sm:w-44"
+      title="반려동물 몸무게 기록 추가 API와 함께 다음 단계에서 연결 예정"
     >
       {label}
     </button>
@@ -87,8 +99,8 @@ function HeroPetCard({ pet, isPrimary }: { pet: PetListItem; isPrimary: boolean 
         </div>
 
         <div className="flex flex-col gap-3 sm:items-end">
-          <ActionButton label="상세 정보" />
-          <ActionButton label="체중 관리" />
+          <ActionButtonLink label="상세 정보" to={`/my/pets/${pet.petId}`} />
+          <ActionButtonDisabled label="체중 관리" />
         </div>
       </div>
     </article>

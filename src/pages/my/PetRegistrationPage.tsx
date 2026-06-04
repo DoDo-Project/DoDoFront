@@ -1,10 +1,13 @@
-import { useMemo, useState, type ChangeEventHandler, type FormEvent } from 'react';
+import { useId, useMemo, useRef, useState, type ChangeEvent, type ChangeEventHandler, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
+import profileDefaultIllustration from '@/features/auth/assets/profile-default.svg';
 import { useCreatePet, useCurrentUser } from '@/features/auth';
-import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
-import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
+import { uploadImage } from '@/shared/api/files';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
+
+import { MyDodoLayout } from './ui/MyDodoLayout';
+import { MyDodoSidebarPanel } from './ui/MyDodoSidebarPanel';
 
 const SPECIES_OPTIONS = [
   { value: 'CANINE', label: '강아지' },
@@ -23,6 +26,8 @@ const CREATE_PET_STATUS_MESSAGES: Partial<Record<number, string>> = {
   409: '이미 등록된 반려동물 정보이거나 디바이스가 사용 중일 수 있어요.',
   500: '반려동물 등록 중 서버 오류가 발생했습니다.',
 };
+
+const MAX_PET_IMAGE_SIZE = 5 * 1024 * 1024;
 
 interface PetRegistrationFormState {
   petName: string;
@@ -81,6 +86,10 @@ function PetRegistrationContent() {
   const [form, setForm] = useState<PetRegistrationFormState>(INITIAL_FORM_STATE);
   const [errors, setErrors] = useState<PetRegistrationErrors>({});
   const [submitError, setSubmitError] = useState('');
+  const [petImageUrl, setPetImageUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState('');
+  const lastPetImageUrlRef = useRef<string | null>(null);
   const age = useMemo(() => calculateInternationalAge(form.birth), [form.birth]);
 
   const handleFieldChange =
@@ -101,6 +110,39 @@ function PetRegistrationContent() {
       setSubmitError('');
     };
 
+  const handleSelectPetImage = async (file: File) => {
+    if (uploadingImage) return;
+
+    if (!file.type.startsWith('image/')) {
+      setImageError('이미지 파일만 업로드할 수 있어요.');
+      return;
+    }
+
+    if (file.size > MAX_PET_IMAGE_SIZE) {
+      setImageError('5MB 이하 이미지로 업로드해 주세요.');
+      return;
+    }
+
+    setUploadingImage(true);
+    setImageError('');
+
+    const previewUrl = URL.createObjectURL(file);
+    setPetImageUrl(previewUrl);
+
+    try {
+      const uploadedUrl = await uploadImage(file);
+      URL.revokeObjectURL(previewUrl);
+      setPetImageUrl(uploadedUrl);
+      lastPetImageUrlRef.current = uploadedUrl;
+    } catch (error) {
+      URL.revokeObjectURL(previewUrl);
+      setPetImageUrl(lastPetImageUrlRef.current);
+      setImageError(getApiErrorMessage(error, '이미지 업로드에 실패했어요. 잠시 후 다시 시도해 주세요.'));
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -108,12 +150,13 @@ function PetRegistrationContent() {
     setErrors(nextErrors);
     setSubmitError('');
 
-    if (Object.keys(nextErrors).length > 0 || age === null) {
+    if (Object.keys(nextErrors).length > 0 || age === null || uploadingImage) {
       return;
     }
 
     try {
       const result = await createPet({
+        imageUrl: lastPetImageUrlRef.current ?? petImageUrl ?? null,
         petName: form.petName.trim(),
         species: form.species,
         sex: form.sex,
@@ -148,8 +191,24 @@ function PetRegistrationContent() {
         <div className="px-6 py-6 sm:px-8">
           <p className="max-w-2xl text-sm leading-7 text-neutral-600 sm:text-base">
             반려동물의 기본 정보와 디바이스 정보를 입력해 등록을 시작해보세요. 생년월일을 입력하면 만 나이는 자동으로
-            계산됩니다.
+            계산되고, 사진은 미리 업로드한 URL을 등록 정보에 함께 사용합니다.
           </p>
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+        <div className="border-b border-neutral-100 px-6 py-5 sm:px-8">
+          <h2 className="text-lg font-semibold text-neutral-950">프로필 이미지</h2>
+          <p className="mt-1 text-sm text-neutral-500">반려동물 사진을 업로드하면 대표 이미지로 사용할 수 있어요.</p>
+        </div>
+
+        <div className="px-6 py-6 sm:px-8">
+          <PetImagePicker
+            imageUrl={petImageUrl}
+            uploading={uploadingImage}
+            error={imageError}
+            onSelectFile={handleSelectPetImage}
+          />
         </div>
       </section>
 
@@ -253,13 +312,77 @@ function PetRegistrationContent() {
         </Link>
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || uploadingImage}
           className="inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {isPending ? '등록 중...' : '등록하기'}
+          {uploadingImage ? '이미지 업로드 중...' : isPending ? '등록 중...' : '등록하기'}
         </button>
       </div>
     </form>
+  );
+}
+
+function PetImagePicker({
+  imageUrl,
+  uploading = false,
+  error,
+  onSelectFile,
+}: {
+  imageUrl: string | null;
+  uploading?: boolean;
+  error?: string;
+  onSelectFile: (file: File) => void;
+}) {
+  const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
+  const showImage = Boolean(imageUrl) && failedImageUrl !== imageUrl;
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) onSelectFile(file);
+    event.target.value = '';
+  };
+
+  return (
+    <div className="flex flex-col items-center">
+      <div className="relative">
+        {showImage ? (
+          <img
+            src={imageUrl!}
+            alt="반려동물 이미지 미리보기"
+            className={`h-28 w-28 rounded-[28px] object-cover ${uploading ? 'opacity-60' : ''}`}
+            onError={() => imageUrl && setFailedImageUrl(imageUrl)}
+          />
+        ) : (
+          <img src={profileDefaultIllustration} alt="" className="h-28 w-28 rounded-[28px]" draggable={false} />
+        )}
+
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          disabled={uploading}
+          className="absolute bottom-0 right-0 inline-flex h-9 w-9 items-center justify-center rounded-full bg-brand text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="반려동물 이미지 업로드"
+        >
+          +
+        </button>
+
+        <input
+          ref={inputRef}
+          id={inputId}
+          type="file"
+          accept="image/*"
+          className="sr-only"
+          disabled={uploading}
+          onChange={handleChange}
+        />
+      </div>
+
+      <p className="mt-3 text-sm text-neutral-500">PNG, JPG 형식 / 최대 5MB</p>
+      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
+      {!error && uploading ? <p className="mt-2 text-sm text-neutral-500">이미지를 업로드하는 중이에요...</p> : null}
+    </div>
   );
 }
 
@@ -295,11 +418,7 @@ function Field({ label, placeholder, type = 'text', value, onChange, required = 
   );
 }
 
-interface ReadonlyFieldProps extends BaseFieldProps {
-  value: string;
-}
-
-function ReadonlyField({ label, value, required = false }: ReadonlyFieldProps) {
+function ReadonlyField({ label, value, required = false }: BaseFieldProps & { value: string }) {
   return (
     <div className="block">
       <LabelText label={label} required={required} />
@@ -310,14 +429,19 @@ function ReadonlyField({ label, value, required = false }: ReadonlyFieldProps) {
   );
 }
 
-interface SelectFieldProps extends BaseFieldProps {
+function SelectField({
+  label,
+  options,
+  required = false,
+  value,
+  onChange,
+  error,
+}: BaseFieldProps & {
   options: readonly { value: string; label: string }[];
   value: string;
   onChange: ChangeEventHandler<HTMLSelectElement>;
   error?: string;
-}
-
-function SelectField({ label, options, required = false, value, onChange, error }: SelectFieldProps) {
+}) {
   return (
     <label className="block">
       <LabelText label={label} required={required} />

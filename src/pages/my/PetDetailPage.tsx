@@ -6,6 +6,23 @@ import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 import { Skeleton } from '@/shared/ui';
 
+function formatSpeciesLabel(species: string) {
+  if (species === 'CANINE') return '강아지';
+  if (species === 'FELINE') return '고양이';
+  return species;
+}
+
+function formatSexLabel(sex: string) {
+  if (sex === 'MALE') return '수컷';
+  if (sex === 'FEMALE') return '암컷';
+  if (sex === 'NEUTER') return '중성화';
+  return sex;
+}
+
+function formatDateLabel(value: string) {
+  return value.slice(0, 10);
+}
+
 export function PetDetailPage() {
   const { petId } = useParams();
   const parsedPetId = petId ? Number(petId) : null;
@@ -45,15 +62,15 @@ export function PetDetailPage() {
                 <div className="space-y-3 text-sm leading-7 text-neutral-700 sm:text-base">
                   <p>
                     <strong className="mr-2 text-neutral-950">종</strong>
-                    {data.species} / {data.breed}
+                    {formatSpeciesLabel(data.species)} / {data.breed}
                   </p>
                   <p>
                     <strong className="mr-2 text-neutral-950">성별</strong>
-                    {data.sex}
+                    {formatSexLabel(data.sex)}
                   </p>
                   <p>
                     <strong className="mr-2 text-neutral-950">생년월일</strong>
-                    {data.birth.slice(0, 10)}
+                    {formatDateLabel(data.birth)}
                   </p>
                   <p>
                     <strong className="mr-2 text-neutral-950">나이</strong>만 {data.age}세
@@ -82,6 +99,7 @@ export function PetDetailPage() {
                   <button
                     type="button"
                     disabled
+                    title="몸무게 기록 추가/조회 API 연결은 다음 이슈에서 진행 예정"
                     className="inline-flex h-12 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-brand-foreground disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     수정 준비 중
@@ -104,7 +122,7 @@ export function PetDetailPage() {
                 content={
                   data.weightInfo
                     ? `현재 ${data.weightInfo.currentWeight}kg · ${data.weightInfo.weightTrend}`
-                    : '체중 정보가 아직 없습니다.'
+                    : '체중 정보가 아직 없습니다. TODO: 반려동물 몸무게 기록 추가 API와 연결 예정'
                 }
               />
               <InfoCard
