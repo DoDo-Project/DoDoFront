@@ -106,7 +106,10 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
                 <p>
                   {formatPetSpeciesLabel(pet.species)} <span className="text-neutral-500">{pet.breed}</span>
                 </p>
-                <p>{formatPetSexLabel(pet.sex)}</p>
+                <p>
+                  <span className="text-neutral-500">성별 </span>
+                  {formatPetSexLabel(pet.sex)}
+                </p>
               </div>
             </div>
           </div>

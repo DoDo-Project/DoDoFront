@@ -37,7 +37,7 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
   const fallbackImage = species === 'FELINE' ? petDefaultCatIllustration : petDefaultIllustration;
 
   return (
-    <div className="flex h-22 w-22 shrink-0 items-center justify-center overflow-hidden rounded-[20px] bg-neutral-100 sm:h-24 sm:w-24">
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-neutral-100 sm:h-28 sm:w-28">
       <img
         src={src || fallbackImage}
         alt={alt}
@@ -77,14 +77,14 @@ function ActionButtonDisabled({ label }: { label: string }) {
 
 function PetCard({ pet }: { pet: PetListItem }) {
   return (
-    <article className="overflow-hidden rounded-[22px] border border-neutral-200 bg-white shadow-sm">
-      <div className="flex flex-col gap-4 px-5 py-5 sm:px-6 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
+    <article className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+      <div className="flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <PetImage src={pet.imageFileUrl} alt={pet.petName} species={pet.species} />
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-[18px] font-medium text-neutral-950">
+              <h2 className="text-[20px] font-medium text-neutral-950">
                 {pet.petName}
                 <span className={`ml-1 ${getSexColorClass(pet.sex)}`}>{getSexLabel(pet.sex)}</span>
               </h2>
@@ -96,6 +96,10 @@ function PetCard({ pet }: { pet: PetListItem }) {
               </p>
               <p>
                 {formatSpeciesLabel(pet.species)} <span className="text-neutral-500">{pet.breed}</span>
+              </p>
+              <p className="text-neutral-800">
+                <span className="text-neutral-500">성별 </span>
+                {pet.sex === 'MALE' ? '수컷' : pet.sex === 'FEMALE' ? '암컷' : '중성화'}
               </p>
             </div>
           </div>
