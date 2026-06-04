@@ -162,7 +162,7 @@ export interface PetDetailResponse {
   message: string;
   petId: number;
   petName: string;
-  imageFileUrl: string;
+  imageFileUrl: string | null;
   species: PetSpecies;
   breed: string;
   sex: PetSex;
