@@ -191,9 +191,11 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
           </button>
         </div>
       ) : visibleNotes.length === 0 ? (
-        <p className="text-sm leading-7 text-neutral-600">
-          {filterType === 'ALL' ? '등록된 특이사항이 없습니다.' : '선택한 타입의 특이사항이 없습니다.'}
-        </p>
+        <article className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-3">
+          <p className="text-sm leading-6 text-neutral-600">
+            {filterType === 'ALL' ? '등록된 특이사항이 없습니다.' : '선택한 타입의 특이사항이 없습니다.'}
+          </p>
+        </article>
       ) : (
         <div className="space-y-2.5">
           {visibleNotes.map((note) => {

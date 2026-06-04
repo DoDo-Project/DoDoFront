@@ -8,9 +8,13 @@ interface PetSpecialNotesPreviewProps {
 }
 
 export function PetSpecialNotesPreview({ petId, fallbackCount = 0 }: PetSpecialNotesPreviewProps) {
-  const { data, isLoading } = usePetSpecialNoteList(petId, { page: 0, size: 3 });
+  const { data, isLoading } = usePetSpecialNoteList(petId, {
+    page: 0,
+    size: 3,
+    sort: 'createdAt,desc',
+  });
 
-  const notes = data?.notes ?? [];
+  const notes = (data?.notes ?? []).slice(0, 3);
   const totalElements = data?.totalElements ?? fallbackCount;
 
   return (
@@ -20,7 +24,9 @@ export function PetSpecialNotesPreview({ petId, fallbackCount = 0 }: PetSpecialN
       {isLoading ? (
         <p className="text-sm text-neutral-500">특이사항을 불러오는 중이에요...</p>
       ) : notes.length === 0 ? (
-        <p className="text-sm leading-7 text-neutral-600">등록된 특이사항이 없습니다.</p>
+        <article className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-3">
+          <p className="text-sm leading-6 text-neutral-600">등록된 특이사항이 없습니다.</p>
+        </article>
       ) : (
         <div className="space-y-2.5">
           {notes.map((note) => (

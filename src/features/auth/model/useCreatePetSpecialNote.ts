@@ -11,7 +11,7 @@ export function useCreatePetSpecialNote() {
     mutationFn: createPetSpecialNote,
     onSuccess: (_, variables) => {
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.pets.significantList(variables.petId),
+        queryKey: ['pets', variables.petId, 'significant', 'list'],
       });
       void queryClient.invalidateQueries({
         queryKey: queryKeys.pets.detail(variables.petId),
