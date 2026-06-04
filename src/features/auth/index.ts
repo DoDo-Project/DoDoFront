@@ -13,7 +13,9 @@ export { AuthLoadingScreen } from './ui/status/AuthLoadingScreen';
 export { AuthErrorScreen } from './ui/status/AuthErrorScreen';
 export { socialLogin, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
 export { getMyProfile } from './api/users';
+export { useCreatePet } from './model/useCreatePet';
 export { useCurrentUser } from './model/useCurrentUser';
+export { usePetDetail } from './model/usePetDetail';
 export { usePetList } from './model/usePetList';
 export type {
   SocialProvider,
@@ -22,13 +24,20 @@ export type {
   SocialLoginSuccess,
   SocialSignupRequired,
   SocialLoginResult,
+  CreatePetRequest,
+  CreatePetResponse,
   RegisterProfileRequest,
   RegisterProfileResponse,
   NicknameCheckResponse,
   NotificationUpdateRequest,
   NotificationUpdateResponse,
+  PetDetailResponse,
+  PetFamilyMember,
+  PetLastActivity,
   PetListItem,
   PetListResponse,
+  PetSpecialNote,
+  PetWeightInfo,
   TokenReissueRequest,
   TokenReissueResponse,
   UserProfile,

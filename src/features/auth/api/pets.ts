@@ -1,6 +1,12 @@
 import { apiClient } from '@/shared/api/axios';
 
-import type { PetFamilyJoinResponse, PetListResponse } from '../model/types';
+import type {
+  CreatePetRequest,
+  CreatePetResponse,
+  PetDetailResponse,
+  PetFamilyJoinResponse,
+  PetListResponse,
+} from '../model/types';
 
 interface RequestFamilyJoinOptions {
   /** 가입 단계에서는 registrationToken을 Authorization 헤더로 전달 */
@@ -11,6 +17,15 @@ export interface GetPetListParams {
   page?: number;
   size?: number;
   sort?: string;
+}
+
+/**
+ * 반려동물 등록 (POST /pets)
+ */
+export async function createPet(payload: CreatePetRequest): Promise<CreatePetResponse> {
+  const response = await apiClient.post<CreatePetResponse>('/pets', payload);
+
+  return response.data;
 }
 
 /**
@@ -48,6 +63,15 @@ export async function getPetList(params?: GetPetListParams): Promise<PetListResp
       sort: params?.sort ?? 'registrationCreatedAt,desc',
     },
   });
+
+  return response.data;
+}
+
+/**
+ * 반려동물 상세 조회 (GET /pets/{petId})
+ */
+export async function getPetDetail(petId: number): Promise<PetDetailResponse> {
+  const response = await apiClient.get<PetDetailResponse>(`/pets/${petId}`);
 
   return response.data;
 }
