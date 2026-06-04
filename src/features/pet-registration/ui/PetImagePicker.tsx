@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type ChangeEvent } from 'react';
 
-import profileDefaultIllustration from '@/features/auth/assets/profile-default.svg';
+import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 
 interface PetImagePickerProps {
   imageUrl: string | null;
@@ -32,7 +32,7 @@ export function PetImagePicker({ imageUrl, uploading = false, error, onSelectFil
             onError={() => imageUrl && setFailedImageUrl(imageUrl)}
           />
         ) : (
-          <img src={profileDefaultIllustration} alt="" className="h-28 w-28 rounded-[28px]" draggable={false} />
+          <img src={petDefaultIllustration} alt="" className="h-28 w-28 rounded-[28px]" draggable={false} />
         )}
 
         <button

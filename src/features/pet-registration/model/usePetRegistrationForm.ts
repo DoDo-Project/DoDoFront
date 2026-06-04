@@ -89,9 +89,12 @@ export function usePetRegistrationForm() {
       return;
     }
 
+    const resolvedImageUrl = lastPetImageUrlRef.current ?? petImageUrl ?? null;
+
     try {
       const result = await createPet({
-        imageUrl: lastPetImageUrlRef.current ?? petImageUrl ?? null,
+        imageUrl: resolvedImageUrl,
+        imageFileUrl: resolvedImageUrl,
         petName: form.petName.trim(),
         species: form.species,
         sex: form.sex,

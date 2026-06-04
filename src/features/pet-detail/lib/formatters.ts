@@ -14,3 +14,9 @@ export function formatPetSexLabel(sex: string) {
 export function formatPetDateLabel(value: string) {
   return value.slice(0, 10);
 }
+
+export function formatPetSexAccentClass(sex: string) {
+  if (sex === 'MALE') return 'text-sky-500';
+  if (sex === 'FEMALE') return 'text-rose-300';
+  return 'text-neutral-400';
+}

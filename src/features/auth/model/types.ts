@@ -114,7 +114,8 @@ export interface PetListResponse {
 }
 
 export interface CreatePetRequest {
-  imageUrl: string | null;
+  imageUrl?: string | null;
+  imageFileUrl?: string | null;
   registrationNumber: string | null;
   sex: PetSex;
   age: number;
