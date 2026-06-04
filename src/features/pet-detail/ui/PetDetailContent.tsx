@@ -13,7 +13,19 @@ import {
   formatPetSpeciesLabel,
 } from '../lib/formatters';
 
-function InfoCard({ title, children, fullWidth = false }: { title: string; children: ReactNode; fullWidth?: boolean }) {
+function InfoCard({
+  title,
+  children,
+  fullWidth = false,
+  action,
+  contentClassName = 'mt-3',
+}: {
+  title: string;
+  children: ReactNode;
+  fullWidth?: boolean;
+  action?: ReactNode;
+  contentClassName?: string;
+}) {
   return (
     <section
       className={[
@@ -21,8 +33,11 @@ function InfoCard({ title, children, fullWidth = false }: { title: string; child
         fullWidth ? 'lg:col-span-2' : '',
       ].join(' ')}
     >
-      <h2 className="text-[17px] font-medium text-neutral-950">{title}</h2>
-      <div className="mt-3">{children}</div>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-[17px] font-medium text-neutral-950">{title}</h2>
+        {action}
+      </div>
+      <div className={contentClassName}>{children}</div>
     </section>
   );
 }
@@ -155,7 +170,20 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
           </p>
         </InfoCard>
 
-        <InfoCard title={`특이사항 (${pet.specialNotesCount})`} fullWidth>
+        <InfoCard
+          title="특이사항"
+          fullWidth
+          contentClassName="mt-2"
+          action={
+            <Link
+              to={`/my/pets/${pet.petId}/notes`}
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
+            >
+              전체 보기
+              {/* <span aria-hidden>{'>'}</span> */}
+            </Link>
+          }
+        >
           <PetSpecialNotesPreview petId={pet.petId} fallbackCount={pet.specialNotesCount} />
         </InfoCard>
       </div>
