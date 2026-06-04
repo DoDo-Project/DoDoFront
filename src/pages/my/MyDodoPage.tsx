@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom';
 
-import { useCurrentUser } from '@/features/auth/model/useCurrentUser';
+import { useCurrentUser, usePetList } from '@/features/auth';
 import { MY_DODO_CONTENT_BY_KEY, getMyDodoMenuHref, getMyDodoMenuKeyFromSearch } from '@/pages/my/model/menu';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
@@ -74,6 +74,68 @@ function MyDodoContent({
   );
 }
 
+function PetListEmptyState() {
+  return (
+    <div className="flex min-h-[320px] items-center">
+      <div className="w-full overflow-hidden rounded-[24px] border border-neutral-200 bg-white">
+        <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
+          <p className="text-xs font-semibold tracking-[0.24em] text-brand">PET</p>
+          <h1 className="mt-3 text-2xl font-semibold text-neutral-900 sm:text-[28px]">등록된 반려동물이 없습니다</h1>
+        </div>
+
+        <div className="px-6 py-10 text-center sm:px-8">
+          <p className="mx-auto max-w-xl text-sm leading-7 text-neutral-600 sm:text-base">
+            반려동물을 등록하면 이곳에서 목록과 상세 정보를 한눈에 관리할 수 있어요.
+          </p>
+
+          <button
+            type="button"
+            disabled
+            className="mt-8 inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            등록하기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PetListContent() {
+  const { data, isLoading, isError } = usePetList({ page: 0, size: 10 });
+
+  if (isLoading) {
+    return <MyDodoContent activeKey="pet-list" isLoading />;
+  }
+
+  if (isError) {
+    return (
+      <div className="flex min-h-[320px] items-center">
+        <div className="w-full overflow-hidden rounded-[24px] border border-red-100 bg-white">
+          <div className="border-b border-red-100 bg-red-50 px-6 py-5 sm:px-8">
+            <p className="text-xs font-semibold tracking-[0.24em] text-red-500">ERROR</p>
+            <h1 className="mt-3 text-2xl font-semibold text-neutral-900 sm:text-[28px]">
+              반려동물 목록을 불러오지 못했습니다
+            </h1>
+          </div>
+
+          <div className="px-6 py-8 sm:px-8">
+            <p className="text-sm leading-7 text-neutral-600 sm:text-base">
+              잠시 후 다시 시도해 주세요. 문제가 계속되면 네트워크 상태와 로그인 정보를 함께 확인해 주세요.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!data || data.pets.length === 0) {
+    return <PetListEmptyState />;
+  }
+
+  return <MyDodoContent activeKey="pet-list" />;
+}
+
 export function MyDodoPage() {
   const [searchParams] = useSearchParams();
   const activeKey = getMyDodoMenuKeyFromSearch(searchParams.get('menu'));
@@ -90,7 +152,7 @@ export function MyDodoPage() {
           activeKey={activeKey}
         />
       }
-      content={<MyDodoContent activeKey={activeKey} isLoading={isLoading} />}
+      content={activeKey === 'pet-list' ? <PetListContent /> : <MyDodoContent activeKey={activeKey} />}
     />
   );
 }
