@@ -3,6 +3,7 @@ export const queryKeys = {
     list: (params?: { page?: number; size?: number; sort?: string }) =>
       ['pets', 'list', params?.page ?? 0, params?.size ?? 10, params?.sort ?? 'registrationCreatedAt,desc'] as const,
     detail: (petId: number) => ['pets', petId, 'detail'] as const,
-    significantList: (petId: number) => ['pets', petId, 'significant', 'list'] as const,
+    significantList: (petId: number, params?: { page?: number; size?: number; sort?: string }) =>
+      ['pets', petId, 'significant', 'list', params?.page ?? 0, params?.size ?? 10, params?.sort ?? ''] as const,
   },
 } as const;

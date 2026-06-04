@@ -90,6 +90,15 @@ export interface PetFamilyJoinResponse {
 
 export type PetSpecies = 'CANINE' | 'FELINE' | string;
 export type PetSex = 'MALE' | 'FEMALE' | 'NEUTER' | string;
+export type PetSpecialNoteType =
+  | 'HOSPITAL'
+  | 'MEDICATION'
+  | 'ALLERGY'
+  | 'FOOD'
+  | 'BEHAVIOR'
+  | 'SYMPTOM'
+  | 'ETC'
+  | string;
 
 export interface PetListItem {
   petId: number;
@@ -175,8 +184,43 @@ export interface PetLastActivity {
 export interface PetSpecialNote {
   noteId: number;
   noteContent: string;
-  noteType: string;
+  noteType: PetSpecialNoteType;
   createdAt: string;
+}
+
+export interface PetSpecialNoteListResponse {
+  message: string;
+  notes: PetSpecialNote[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface CreatePetSpecialNoteRequest {
+  petId: number;
+  noteContent: string;
+  noteType: PetSpecialNoteType;
+}
+
+export interface CreatePetSpecialNoteResponse {
+  message: string;
+  noteId: number;
+}
+
+export interface UpdatePetSpecialNoteRequest {
+  noteContent: string;
+  noteType: PetSpecialNoteType;
+}
+
+export interface UpdatePetSpecialNoteResponse {
+  message: string;
+  noteId: number;
+}
+
+export interface DeletePetSpecialNoteResponse {
+  message: string;
+  noteId: number;
 }
 
 export interface PetWeightInfo {
