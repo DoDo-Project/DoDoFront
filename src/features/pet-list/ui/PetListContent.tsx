@@ -1,9 +1,9 @@
 import { usePetList } from '@/features/auth';
-import { PetListPanel } from '@/pages/my/ui/PetListPanel';
 import { Skeleton } from '@/shared/ui';
 
 import { PetListEmptyState } from './PetListEmptyState';
 import { PetListErrorState } from './PetListErrorState';
+import { PetListPanel } from './PetListPanel';
 
 function PetListLoadingState() {
   return (
