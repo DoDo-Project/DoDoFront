@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo, useState, type ChangeEventHandler, type FormEvent } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import { useCurrentUser } from '@/features/auth';
+import { useCreatePet, useCurrentUser } from '@/features/auth';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
+import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 
 const SPECIES_OPTIONS = [
   { value: 'CANINE', label: '강아지' },
@@ -15,6 +16,45 @@ const SEX_OPTIONS = [
   { value: 'FEMALE', label: '암컷' },
   { value: 'NEUTER', label: '중성화' },
 ] as const;
+
+const CREATE_PET_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  400: '입력한 반려동물 정보를 다시 확인해 주세요.',
+  401: '로그인이 필요한 기능입니다. 다시 로그인해 주세요.',
+  409: '이미 등록된 반려동물 정보이거나 디바이스가 사용 중일 수 있어요.',
+  500: '반려동물 등록 중 서버 오류가 발생했습니다.',
+};
+
+interface PetRegistrationFormState {
+  petName: string;
+  species: string;
+  sex: string;
+  breed: string;
+  birth: string;
+  registrationNumber: string;
+  referenceHeartRate: string;
+  deviceId: string;
+}
+
+interface PetRegistrationErrors {
+  petName?: string;
+  species?: string;
+  sex?: string;
+  breed?: string;
+  birth?: string;
+  referenceHeartRate?: string;
+  deviceId?: string;
+}
+
+const INITIAL_FORM_STATE: PetRegistrationFormState = {
+  petName: '',
+  species: '',
+  sex: '',
+  breed: '',
+  birth: '',
+  registrationNumber: '',
+  referenceHeartRate: '',
+  deviceId: '',
+};
 
 export function PetRegistrationPage() {
   const { user, profileUrl, displayName, isLoading } = useCurrentUser();
@@ -36,11 +76,69 @@ export function PetRegistrationPage() {
 }
 
 function PetRegistrationContent() {
-  const [birth, setBirth] = useState('');
-  const age = useMemo(() => calculateInternationalAge(birth), [birth]);
+  const navigate = useNavigate();
+  const { mutateAsync: createPet, isPending } = useCreatePet();
+  const [form, setForm] = useState<PetRegistrationFormState>(INITIAL_FORM_STATE);
+  const [errors, setErrors] = useState<PetRegistrationErrors>({});
+  const [submitError, setSubmitError] = useState('');
+  const age = useMemo(() => calculateInternationalAge(form.birth), [form.birth]);
+
+  const handleFieldChange =
+    (field: keyof PetRegistrationFormState): ChangeEventHandler<HTMLInputElement | HTMLSelectElement> =>
+    (event) => {
+      const { value } = event.target;
+
+      setForm((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+
+      setErrors((prev) => ({
+        ...prev,
+        [field]: undefined,
+      }));
+
+      setSubmitError('');
+    };
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const nextErrors = validatePetRegistrationForm(form, age);
+    setErrors(nextErrors);
+    setSubmitError('');
+
+    if (Object.keys(nextErrors).length > 0 || age === null) {
+      return;
+    }
+
+    try {
+      const result = await createPet({
+        petName: form.petName.trim(),
+        species: form.species,
+        sex: form.sex,
+        breed: form.breed.trim(),
+        birth: `${form.birth}T00:00:00`,
+        age,
+        registrationNumber: form.registrationNumber.trim() ? form.registrationNumber.trim() : null,
+        referenceHeartRate: Number(form.referenceHeartRate),
+        deviceId: form.deviceId.trim(),
+      });
+
+      void navigate(`/my/pets/${result.petId}`);
+    } catch (error) {
+      setSubmitError(
+        getApiErrorMessage(
+          error,
+          '반려동물 등록에 실패했어요. 잠시 후 다시 시도해 주세요.',
+          CREATE_PET_STATUS_MESSAGES,
+        ),
+      );
+    }
+  };
 
   return (
-    <div className="space-y-6">
+    <form className="space-y-6" onSubmit={handleSubmit}>
       <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
           <p className="text-xs font-semibold tracking-[0.24em] text-brand">PET REGISTER</p>
@@ -62,19 +160,53 @@ function PetRegistrationContent() {
         </div>
 
         <div className="grid gap-5 px-6 py-6 sm:px-8 lg:grid-cols-2">
-          <Field label="반려동물 이름" placeholder="예: 보리" required />
-          <Field label="품종" placeholder="예: 말티즈" required />
-          <SelectField label="종" options={SPECIES_OPTIONS} required />
-          <SelectField label="성별" options={SEX_OPTIONS} required />
+          <Field
+            label="반려동물 이름"
+            placeholder="예: 보리"
+            required
+            value={form.petName}
+            onChange={handleFieldChange('petName')}
+            error={errors.petName}
+          />
+          <Field
+            label="품종"
+            placeholder="예: 말티즈"
+            required
+            value={form.breed}
+            onChange={handleFieldChange('breed')}
+            error={errors.breed}
+          />
+          <SelectField
+            label="종"
+            options={SPECIES_OPTIONS}
+            required
+            value={form.species}
+            onChange={handleFieldChange('species')}
+            error={errors.species}
+          />
+          <SelectField
+            label="성별"
+            options={SEX_OPTIONS}
+            required
+            value={form.sex}
+            onChange={handleFieldChange('sex')}
+            error={errors.sex}
+          />
           <Field
             label="생년월일"
             type="date"
             required
-            value={birth}
-            onChange={(event) => setBirth(event.target.value)}
+            value={form.birth}
+            onChange={handleFieldChange('birth')}
+            error={errors.birth}
           />
           <ReadonlyField label="만 나이" value={age === null ? '생년월일을 입력하면 자동 계산돼요' : `만 ${age}세`} />
-          <Field label="등록번호" placeholder="없다면 비워둘 수 있어요" />
+          <Field
+            label="등록번호"
+            placeholder="없다면 비워둘 수 있어요"
+            value={form.registrationNumber}
+            onChange={handleFieldChange('registrationNumber')}
+          />
         </div>
       </section>
 
@@ -85,14 +217,32 @@ function PetRegistrationContent() {
         </div>
 
         <div className="grid gap-5 px-6 py-6 sm:px-8 lg:grid-cols-2">
-          <Field label="디바이스 ID" placeholder="예: ABC123XYZ" required />
-          <Field label="기준 심박수" type="number" placeholder="예: 85" required />
+          <Field
+            label="디바이스 ID"
+            placeholder="예: ABC123XYZ"
+            required
+            value={form.deviceId}
+            onChange={handleFieldChange('deviceId')}
+            error={errors.deviceId}
+          />
+          <Field
+            label="기준 심박수"
+            type="number"
+            placeholder="예: 85"
+            required
+            value={form.referenceHeartRate}
+            onChange={handleFieldChange('referenceHeartRate')}
+            error={errors.referenceHeartRate}
+          />
         </div>
       </section>
 
-      <p className="text-sm text-neutral-500">
-        <span className="font-semibold text-brand">*</span> 표시는 필수 입력 항목입니다.
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-sm text-neutral-500">
+          <span className="font-semibold text-brand">*</span> 표시는 필수 입력 항목입니다.
+        </p>
+        {submitError ? <p className="max-w-md text-right text-sm text-red-500">{submitError}</p> : null}
+      </div>
 
       <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
         <Link
@@ -102,14 +252,14 @@ function PetRegistrationContent() {
           목록으로
         </Link>
         <button
-          type="button"
-          disabled
-          className="inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground disabled:cursor-not-allowed disabled:opacity-70"
+          type="submit"
+          disabled={isPending}
+          className="inline-flex min-w-40 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          등록하기
+          {isPending ? '등록 중...' : '등록하기'}
         </button>
       </div>
-    </div>
+    </form>
   );
 }
 
@@ -122,10 +272,11 @@ interface FieldProps extends BaseFieldProps {
   placeholder?: string;
   type?: 'text' | 'number' | 'date';
   value?: string;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onChange?: ChangeEventHandler<HTMLInputElement>;
+  error?: string;
 }
 
-function Field({ label, placeholder, type = 'text', value, onChange, required = false }: FieldProps) {
+function Field({ label, placeholder, type = 'text', value, onChange, required = false, error }: FieldProps) {
   return (
     <label className="block">
       <LabelText label={label} required={required} />
@@ -134,8 +285,12 @@ function Field({ label, placeholder, type = 'text', value, onChange, required = 
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        className="mt-2 h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400 focus:border-brand"
+        className={[
+          'mt-2 h-12 w-full rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400',
+          error ? 'border-red-300 focus:border-red-400' : 'border-neutral-200 focus:border-brand',
+        ].join(' ')}
       />
+      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
     </label>
   );
 }
@@ -157,13 +312,23 @@ function ReadonlyField({ label, value, required = false }: ReadonlyFieldProps) {
 
 interface SelectFieldProps extends BaseFieldProps {
   options: readonly { value: string; label: string }[];
+  value: string;
+  onChange: ChangeEventHandler<HTMLSelectElement>;
+  error?: string;
 }
 
-function SelectField({ label, options, required = false }: SelectFieldProps) {
+function SelectField({ label, options, required = false, value, onChange, error }: SelectFieldProps) {
   return (
     <label className="block">
       <LabelText label={label} required={required} />
-      <select className="mt-2 h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand">
+      <select
+        value={value}
+        onChange={onChange}
+        className={[
+          'mt-2 h-12 w-full rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition-colors',
+          error ? 'border-red-300 focus:border-red-400' : 'border-neutral-200 focus:border-brand',
+        ].join(' ')}
+      >
         <option value="">선택해 주세요</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
@@ -171,6 +336,7 @@ function SelectField({ label, options, required = false }: SelectFieldProps) {
           </option>
         ))}
       </select>
+      {error ? <p className="mt-2 text-sm text-red-500">{error}</p> : null}
     </label>
   );
 }
@@ -202,4 +368,42 @@ function calculateInternationalAge(birth: string): number | null {
   }
 
   return Math.max(age, 0);
+}
+
+function validatePetRegistrationForm(form: PetRegistrationFormState, age: number | null): PetRegistrationErrors {
+  const nextErrors: PetRegistrationErrors = {};
+
+  if (!form.petName.trim()) {
+    nextErrors.petName = '반려동물 이름을 입력해 주세요.';
+  }
+
+  if (!form.breed.trim()) {
+    nextErrors.breed = '품종을 입력해 주세요.';
+  }
+
+  if (!form.species) {
+    nextErrors.species = '종을 선택해 주세요.';
+  }
+
+  if (!form.sex) {
+    nextErrors.sex = '성별을 선택해 주세요.';
+  }
+
+  if (!form.birth) {
+    nextErrors.birth = '생년월일을 입력해 주세요.';
+  } else if (age === null) {
+    nextErrors.birth = '올바른 생년월일을 입력해 주세요.';
+  }
+
+  if (!form.referenceHeartRate.trim()) {
+    nextErrors.referenceHeartRate = '기준 심박수를 입력해 주세요.';
+  } else if (Number(form.referenceHeartRate) <= 0) {
+    nextErrors.referenceHeartRate = '기준 심박수는 1 이상이어야 합니다.';
+  }
+
+  if (!form.deviceId.trim()) {
+    nextErrors.deviceId = '디바이스 ID를 입력해 주세요.';
+  }
+
+  return nextErrors;
 }

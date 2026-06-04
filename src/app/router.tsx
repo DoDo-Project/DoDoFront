@@ -9,6 +9,7 @@ import { SignupPage } from '@/pages/auth/SignupPage';
 import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
+import { PetDetailPage } from '@/pages/my/PetDetailPage';
 import { MyDodoPage } from '@/pages/my/MyDodoPage';
 import { NotificationSettingsPage } from '@/pages/my/NotificationSettingsPage';
 import { PetRegistrationPage } from '@/pages/my/PetRegistrationPage';
@@ -43,6 +44,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <PetRegistrationPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/my/pets/:petId',
+        element: (
+          <RequireAuth>
+            <PetDetailPage />
           </RequireAuth>
         ),
       },
