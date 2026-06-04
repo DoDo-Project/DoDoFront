@@ -27,6 +27,7 @@ function PetImage({ src, alt }: { src: string; alt: string }) {
         alt={alt}
         className="h-full w-full object-cover"
         onError={(event) => {
+          event.currentTarget.onerror = null;
           event.currentTarget.src = profileDefaultIllustration;
         }}
       />
