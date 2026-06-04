@@ -44,11 +44,9 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
   const visibleNotes = useMemo(() => {
     const filtered = filterType === 'ALL' ? notes : notes.filter((note) => note.noteType === filterType);
 
-    return [...filtered].sort((a, b) => {
-      const aTime = new Date(a.createdAt).getTime();
-      const bTime = new Date(b.createdAt).getTime();
-      return sortOrder === 'latest' ? bTime - aTime : aTime - bTime;
-    });
+    return [...filtered].sort((a, b) =>
+      sortOrder === 'latest' ? b.createdAt.localeCompare(a.createdAt) : a.createdAt.localeCompare(b.createdAt),
+    );
   }, [filterType, notes, sortOrder]);
 
   const editingNote = useMemo(
