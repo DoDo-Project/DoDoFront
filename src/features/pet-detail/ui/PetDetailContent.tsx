@@ -120,7 +120,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
             </Link>
             <Link
               to={`/my/pets/${pet.petId}/edit`}
-              className="inline-flex h-10 w-full items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 sm:w-28"
+              className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand sm:w-28"
             >
               정보 수정
             </Link>
