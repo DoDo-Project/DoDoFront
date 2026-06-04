@@ -4,6 +4,7 @@ import type { PetListItem } from '@/features/auth/model/types';
 interface PetListPanelProps {
   pets: PetListItem[];
   totalElements: number;
+  isRefreshing?: boolean;
 }
 
 function formatSexLabel(sex: string) {
@@ -71,7 +72,7 @@ function PetListCard({ pet }: { pet: PetListItem }) {
   );
 }
 
-export function PetListPanel({ pets, totalElements }: PetListPanelProps) {
+export function PetListPanel({ pets, totalElements, isRefreshing = false }: PetListPanelProps) {
   return (
     <div className="space-y-6">
       <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white">
@@ -84,8 +85,11 @@ export function PetListPanel({ pets, totalElements }: PetListPanelProps) {
                 등록된 반려동물 정보를 이곳에서 한눈에 확인할 수 있어요.
               </p>
             </div>
-            <div className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700">
-              총 {totalElements}마리
+            <div className="flex items-center gap-2">
+              {isRefreshing ? <span className="text-xs font-medium text-neutral-400">새로 불러오는 중...</span> : null}
+              <div className="rounded-full bg-neutral-100 px-4 py-2 text-sm font-medium text-neutral-700">
+                총 {totalElements}마리
+              </div>
             </div>
           </div>
         </div>
