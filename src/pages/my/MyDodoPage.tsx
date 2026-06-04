@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser, usePetList } from '@/features/auth';
 import { MY_DODO_CONTENT_BY_KEY, getMyDodoMenuHref, getMyDodoMenuKeyFromSearch } from '@/pages/my/model/menu';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
+import { PetListPanel } from '@/pages/my/ui/PetListPanel';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
 import { Skeleton } from '@/shared/ui';
 
@@ -133,7 +134,7 @@ function PetListContent() {
     return <PetListEmptyState />;
   }
 
-  return <MyDodoContent activeKey="pet-list" />;
+  return <PetListPanel pets={data.pets} totalElements={data.totalElements} />;
 }
 
 export function MyDodoPage() {
