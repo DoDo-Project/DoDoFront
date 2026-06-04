@@ -4,9 +4,11 @@ import { getPetDetail } from '@/features/auth/api/pets';
 import { queryKeys } from '@/shared/lib/react-query/queryKey';
 
 export function usePetDetail(petId: number | null) {
+  const isValidId = petId !== null && !Number.isNaN(petId);
+
   return useQuery({
-    queryKey: petId ? queryKeys.pets.detail(petId) : ['pets', 'detail', 'idle'],
+    queryKey: isValidId ? queryKeys.pets.detail(petId) : ['pets', 'detail', 'idle'],
     queryFn: () => getPetDetail(petId as number),
-    enabled: petId !== null,
+    enabled: isValidId,
   });
 }
