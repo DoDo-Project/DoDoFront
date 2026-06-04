@@ -89,7 +89,7 @@ export interface PetFamilyJoinResponse {
 // ---- 알림 수신 여부 변경 (PATCH /users/me/setting/notification) ----
 
 export type PetSpecies = 'CANINE' | 'FELINE' | string;
-export type PetSex = 'MALE' | 'FEMALE' | string;
+export type PetSex = 'MALE' | 'FEMALE' | 'NEUTER' | string;
 
 export interface PetListItem {
   petId: number;
@@ -111,6 +111,71 @@ export interface PetListResponse {
   totalElements: number;
   currentPage: number;
   pageSize: number;
+}
+
+export interface CreatePetRequest {
+  imageUrl?: string | null;
+  imageFileUrl?: string | null;
+  registrationNumber: string | null;
+  sex: PetSex;
+  age: number;
+  birth: string;
+  petName: string;
+  species: PetSpecies;
+  breed: string;
+  referenceHeartRate: number;
+  deviceId: string;
+}
+
+export interface CreatePetResponse {
+  message: string;
+  petId: number;
+}
+
+export interface PetFamilyMember {
+  userId: string;
+  userName: string;
+  profileImageUrl: string;
+}
+
+export interface PetLastActivity {
+  activityId: number;
+  activityType: string;
+  startTime: string;
+  endTime: string;
+  distance: number;
+}
+
+export interface PetSpecialNote {
+  noteId: number;
+  noteContent: string;
+  noteType: string;
+  createdAt: string;
+}
+
+export interface PetWeightInfo {
+  currentWeight: number;
+  weightTrend: string;
+}
+
+export interface PetDetailResponse {
+  message: string;
+  petId: number;
+  petName: string;
+  imageFileUrl: string | null;
+  species: PetSpecies;
+  breed: string;
+  sex: PetSex;
+  age: number;
+  birth: string;
+  registrationNumber: number | string | null;
+  deviceId: string;
+  referenceHeartRate: number;
+  familyMembers: PetFamilyMember[];
+  lastActivity: PetLastActivity | null;
+  specialNotes: PetSpecialNote[];
+  specialNotesCount: number;
+  weightInfo: PetWeightInfo | null;
 }
 
 export interface NotificationUpdateRequest {
