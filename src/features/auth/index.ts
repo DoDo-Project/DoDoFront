@@ -14,6 +14,7 @@ export { AuthErrorScreen } from './ui/status/AuthErrorScreen';
 export { socialLogin, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
 export { getMyProfile } from './api/users';
 export { useCurrentUser } from './model/useCurrentUser';
+export { usePetList } from './model/usePetList';
 export type {
   SocialProvider,
   AuthTokens,
@@ -26,6 +27,8 @@ export type {
   NicknameCheckResponse,
   NotificationUpdateRequest,
   NotificationUpdateResponse,
+  PetListItem,
+  PetListResponse,
   TokenReissueRequest,
   TokenReissueResponse,
   UserProfile,
