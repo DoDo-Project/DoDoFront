@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { PetDetailResponse } from '@/features/auth';
+import { PetSpecialNotesSection } from '@/features/pet-special-notes';
 import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.svg';
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 
@@ -66,14 +67,6 @@ function formatWeightContent(pet: PetDetailResponse) {
   }
 
   return `현재 ${pet.weightInfo.currentWeight} · ${pet.weightInfo.weightTrend}`;
-}
-
-function formatSpecialNotesContent(pet: PetDetailResponse) {
-  if (!pet.specialNotesCount || pet.specialNotes.length === 0) {
-    return '등록된 특이사항이 없습니다.';
-  }
-
-  return pet.specialNotes.map((note) => note.noteContent).join(' / ');
 }
 
 export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
@@ -163,7 +156,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
         </InfoCard>
 
         <InfoCard title={`특이사항 (${pet.specialNotesCount})`} fullWidth>
-          <p className="text-sm leading-7 text-neutral-600">{formatSpecialNotesContent(pet)}</p>
+          <PetSpecialNotesSection petId={pet.petId} fallbackCount={pet.specialNotesCount} />
         </InfoCard>
       </div>
     </div>
