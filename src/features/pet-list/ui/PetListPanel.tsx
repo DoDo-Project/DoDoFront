@@ -33,7 +33,7 @@ function formatBirthLabel(birth: string) {
   return [year, month, day].filter(Boolean).join('. ');
 }
 
-function PetImage({ src, alt, species }: { src: string; alt: string; species: string }) {
+function PetImage({ src, alt, species }: { src: string | null; alt: string; species: string }) {
   const fallbackImage = species === 'FELINE' ? petDefaultCatIllustration : petDefaultIllustration;
 
   return (
