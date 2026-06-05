@@ -1,13 +1,15 @@
 import { usePetWeightHistory } from '@/features/auth';
 
+import { formatWeight } from '../lib/formatters';
+
 interface PetWeightPreviewProps {
   petId: number;
 }
 
-function formatMeasuredDate(date: string) {
-  const [year, month, day] = date.split('-');
+function formatPreviewDate(date: string) {
+  const [year = '', month = '', day = ''] = date.slice(0, 10).split('-');
 
-  return [year, month, day].filter(Boolean).join('. ');
+  return [year, month, day].filter(Boolean).join('.');
 }
 
 export function PetWeightPreview({ petId }: PetWeightPreviewProps) {
@@ -33,18 +35,18 @@ export function PetWeightPreview({ petId }: PetWeightPreviewProps) {
 
   return (
     <div className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-4 sm:px-5">
-      <div className="flex min-h-[68px] items-stretch justify-between gap-4">
-        <div className="flex items-center gap-1">
-          <p className="text-[48px] font-semibold leading-none tracking-[0.02em] text-neutral-950">
-            {latestWeight.weight}
+      <div className="flex min-h-[108px] items-center justify-between gap-4 sm:gap-5">
+        <div className="flex min-w-0 items-end gap-1.5 whitespace-nowrap">
+          <p className="text-[36px] font-semibold leading-none tracking-[-0.03em] text-neutral-950 sm:text-[48px]">
+            {formatWeight(latestWeight.weight)}
           </p>
-          <span className="text-[18px] font-medium text-neutral-400">kg</span>
+          <span className="pb-1 text-[16px] font-medium text-neutral-400">kg</span>
         </div>
 
-        <div className="flex h-full flex-col justify-end items-end border-l border-neutral-200/80 pl-4 text-right">
-          <p className="text-[11px] font-semibold tracking-[0.08em] text-neutral-400">최근 측정일</p>
-          <p className="mt-1.5 text-[14px] font-semibold leading-none text-neutral-700">
-            {formatMeasuredDate(latestWeight.petWeightsMeasuredAt)}
+        <div className="flex shrink-0 flex-col items-end justify-center border-l border-neutral-200/80 pl-4 text-right sm:pl-5">
+          <p className="whitespace-nowrap text-[12px] font-Regular tracking-[0.08em] text-neutral-400">최근 측정일</p>
+          <p className="mt-1 whitespace-nowrap text-[14px] font-semibold leading-none text-neutral-700">
+            {formatPreviewDate(latestWeight.petWeightsMeasuredAt)}
           </p>
         </div>
       </div>
