@@ -46,11 +46,19 @@ function MyDodoContent({
         <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">{content.title}</h1>
       </div>
 
-      <div className="w-full overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
-        <div className="flex min-h-[220px] flex-col gap-5 px-6 py-6 sm:px-8 sm:py-7 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <h2 className="text-[18px] font-medium text-neutral-950">기능 준비 중</h2>
-            <p className="mt-3 text-sm leading-7 text-neutral-600">{content.description}</p>
+      <div className="w-full overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_10px_26px_rgba(15,23,42,0.04)]">
+        <div className="border-b border-neutral-100 bg-linear-to-r from-brand/[0.04] via-white to-white px-6 py-5 sm:px-8">
+          <h2 className="text-[18px] font-medium text-neutral-950">기능 준비 중</h2>
+          <p className="mt-2 text-sm leading-7 text-neutral-600">{content.description}</p>
+        </div>
+
+        <div className="flex min-h-[180px] flex-col gap-5 px-6 py-6 sm:px-8 sm:py-7 lg:flex-row lg:items-center lg:justify-between">
+          <div className="max-w-2xl rounded-[20px] border border-neutral-200 bg-neutral-50/80 px-5 py-5">
+            <p className="text-sm font-medium text-neutral-500">업데이트 예정</p>
+            <p className="mt-2 text-sm leading-7 text-neutral-700">
+              이 메뉴는 마이도도 전체 톤에 맞춰 순차적으로 연결하고 있어요. 기능이 준비되면 이 영역에서 바로 사용할 수
+              있게 열릴 예정입니다.
+            </p>
           </div>
 
           {actionHref ? (

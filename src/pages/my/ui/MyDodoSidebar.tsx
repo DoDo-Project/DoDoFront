@@ -16,8 +16,8 @@ function menuItemClass(active: boolean) {
   return [
     'block w-full rounded-xl border px-4 py-3 text-center text-sm font-semibold transition-all',
     active
-      ? 'border-brand bg-white text-brand ring-1 ring-brand'
-      : 'border-neutral-200 bg-white text-neutral-700 hover:border-brand/60 hover:text-brand',
+      ? 'border-brand bg-white text-brand ring-1 ring-brand shadow-[0_8px_18px_rgba(217,123,58,0.12)]'
+      : 'border-transparent bg-neutral-100/90 text-neutral-700 hover:border-brand/30 hover:bg-white hover:text-brand',
   ].join(' ');
 }
 
@@ -40,7 +40,7 @@ function SidebarSection({ section, activeKey }: { section: MyDodoMenuSection; ac
 
 export function MyDodoSidebar({ activeKey }: MyDodoSidebarProps) {
   return (
-    <div className="mt-6 border-t border-neutral-200 pt-6">
+    <div className="mt-6 border-t border-neutral-200/80 pt-6">
       <div className="flex flex-col gap-8">
         <SidebarSection section="pet" activeKey={activeKey} />
         <SidebarSection section="account" activeKey={activeKey} />

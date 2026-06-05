@@ -19,7 +19,7 @@ export function MyDodoSidebarPanel({
   activeKey,
 }: MyDodoSidebarPanelProps) {
   return (
-    <div className="h-full rounded-[24px] border border-neutral-200 bg-white px-5 py-6 shadow-sm">
+    <div className="h-full rounded-[26px] border border-white/80 bg-linear-to-b from-white to-neutral-50 px-5 py-6 shadow-[0_12px_28px_rgba(15,23,42,0.05)]">
       <MyDodoProfileCard user={user} profileUrl={profileUrl} displayName={displayName} isLoading={isLoading} />
       <MyDodoSidebar activeKey={activeKey} />
     </div>

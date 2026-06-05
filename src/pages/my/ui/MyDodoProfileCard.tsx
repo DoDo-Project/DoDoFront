@@ -54,7 +54,7 @@ export function MyDodoProfileCard({ user, profileUrl, displayName, isLoading = f
   }
 
   return (
-    <section className="px-1">
+    <section className="rounded-[22px] border border-white/80 bg-white/80 px-4 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
       <div className="flex flex-col items-center text-center">
         <ProfileAvatar profileUrl={profileUrl} />
 
