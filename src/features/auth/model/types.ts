@@ -223,6 +223,44 @@ export interface DeletePetSpecialNoteResponse {
   noteId: number;
 }
 
+export interface PetWeightRecord {
+  weightId: number;
+  weight: number;
+  petWeightsMeasuredAt: string;
+}
+
+export interface PetWeightHistoryResponse {
+  message: string;
+  weights: PetWeightRecord[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface CreatePetWeightRequest {
+  weight: number;
+  petWeightsMeasuredAt: string;
+}
+
+export interface CreatePetWeightResponse {
+  message: string;
+  weightId: number;
+}
+
+export interface UpdatePetWeightRequest {
+  weight?: number;
+  petWeightsMeasuredAt?: string;
+}
+
+export interface UpdatePetWeightResponse {
+  message: string;
+}
+
+export interface DeletePetWeightResponse {
+  message: string;
+}
+
 export interface PetWeightInfo {
   currentWeight: number;
   weightTrend: string;

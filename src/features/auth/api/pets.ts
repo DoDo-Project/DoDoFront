@@ -5,15 +5,21 @@ import type {
   CreatePetResponse,
   CreatePetSpecialNoteRequest,
   CreatePetSpecialNoteResponse,
+  CreatePetWeightRequest,
+  CreatePetWeightResponse,
+  DeletePetWeightResponse,
   DeletePetSpecialNoteResponse,
   PetDetailResponse,
   PetFamilyJoinResponse,
   PetListResponse,
   PetSpecialNoteListResponse,
+  PetWeightHistoryResponse,
   UpdatePetRequest,
   UpdatePetResponse,
   UpdatePetSpecialNoteRequest,
   UpdatePetSpecialNoteResponse,
+  UpdatePetWeightRequest,
+  UpdatePetWeightResponse,
 } from '../model/types';
 
 interface RequestFamilyJoinOptions {
@@ -28,6 +34,12 @@ export interface GetPetListParams {
 }
 
 export interface GetPetSpecialNoteListParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface GetPetWeightHistoryParams {
   page?: number;
   size?: number;
   sort?: string;
@@ -145,6 +157,58 @@ export async function updatePetSpecialNote(
  */
 export async function deletePetSpecialNote(noteId: number): Promise<DeletePetSpecialNoteResponse> {
   const response = await apiClient.delete<DeletePetSpecialNoteResponse>(`/pets/significant/${noteId}`);
+
+  return response.data;
+}
+
+/**
+ * 반려동물 몸무게 기록 조회 (GET /pet/{petId}/weight/history)
+ */
+export async function getPetWeightHistory(
+  petId: number,
+  params?: GetPetWeightHistoryParams,
+): Promise<PetWeightHistoryResponse> {
+  const response = await apiClient.get<PetWeightHistoryResponse>(`/pet/${petId}/weight/history`, {
+    params: {
+      page: params?.page ?? 0,
+      size: params?.size ?? 10,
+      sort: params?.sort ?? 'petWeightsMeasuredAt,desc',
+    },
+  });
+
+  return response.data;
+}
+
+/**
+ * 반려동물 몸무게 기록 추가 (POST /pet/{petId}/weight)
+ */
+export async function createPetWeight(
+  petId: number,
+  payload: CreatePetWeightRequest,
+): Promise<CreatePetWeightResponse> {
+  const response = await apiClient.post<CreatePetWeightResponse>(`/pet/${petId}/weight`, payload);
+
+  return response.data;
+}
+
+/**
+ * 반려동물 몸무게 기록 수정 (PATCH /pet/{petId}/weight/{weightId})
+ */
+export async function updatePetWeight(
+  petId: number,
+  weightId: number,
+  payload: UpdatePetWeightRequest,
+): Promise<UpdatePetWeightResponse> {
+  const response = await apiClient.patch<UpdatePetWeightResponse>(`/pet/${petId}/weight/${weightId}`, payload);
+
+  return response.data;
+}
+
+/**
+ * 반려동물 몸무게 기록 삭제 (DELETE /pet/{petId}/weight/{weightId})
+ */
+export async function deletePetWeight(petId: number, weightId: number): Promise<DeletePetWeightResponse> {
+  const response = await apiClient.delete<DeletePetWeightResponse>(`/pet/${petId}/weight/${weightId}`);
 
   return response.data;
 }
