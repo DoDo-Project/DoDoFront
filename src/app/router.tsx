@@ -15,6 +15,7 @@ import { MyDodoPage } from '@/pages/my/MyDodoPage';
 import { NotificationSettingsPage } from '@/pages/my/NotificationSettingsPage';
 import { PetRegistrationPage } from '@/pages/my/PetRegistrationPage';
 import { PetSpecialNotesPage } from '@/pages/my/PetSpecialNotesPage';
+import { PetWeightPage } from '@/pages/my/PetWeightPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { WalkPage } from '@/pages/walk/WalkPage';
 
@@ -70,6 +71,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <PetSpecialNotesPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/my/pets/:petId/weight',
+        element: (
+          <RequireAuth>
+            <PetWeightPage />
           </RequireAuth>
         ),
       },

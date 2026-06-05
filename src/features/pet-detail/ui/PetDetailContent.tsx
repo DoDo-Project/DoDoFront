@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import type { PetDetailResponse } from '@/features/auth';
 import { PetSpecialNotesPreview } from '@/features/pet-special-notes';
+import { PetWeightPreview } from '@/features/pet-weight';
 import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.svg';
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 
@@ -76,14 +77,6 @@ function DetailRows({ rows }: { rows: Array<{ label: string; value: string }> })
   );
 }
 
-function formatWeightContent(pet: PetDetailResponse) {
-  if (!pet.weightInfo || pet.weightInfo.currentWeight == null) {
-    return '현재 등록된 체중 정보가 없습니다.';
-  }
-
-  return `현재 ${pet.weightInfo.currentWeight} · ${pet.weightInfo.weightTrend}`;
-}
-
 export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
   return (
     <div className="space-y-6">
@@ -150,8 +143,18 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
           />
         </InfoCard>
 
-        <InfoCard title="체중 정보">
-          <p className="text-sm leading-7 text-neutral-600">{formatWeightContent(pet)}</p>
+        <InfoCard
+          title="체중 정보"
+          action={
+            <Link
+              to={`/my/pets/${pet.petId}/weight`}
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
+            >
+              전체 보기
+            </Link>
+          }
+        >
+          <PetWeightPreview petId={pet.petId} />
         </InfoCard>
 
         <InfoCard title="가족 구성원">
