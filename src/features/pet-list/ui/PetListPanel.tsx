@@ -62,19 +62,6 @@ function ActionButtonLink({ label, to }: { label: string; to: string }) {
   );
 }
 
-function ActionButtonDisabled({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      disabled
-      className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-70 sm:w-28"
-      title="반려동물 몸무게 기록 추가 API와 연결 예정입니다."
-    >
-      {label}
-    </button>
-  );
-}
-
 function PetCard({ pet }: { pet: PetListItem }) {
   return (
     <article className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
@@ -107,7 +94,7 @@ function PetCard({ pet }: { pet: PetListItem }) {
 
         <div className="flex flex-col gap-2 sm:items-end">
           <ActionButtonLink label="상세 정보" to={`/my/pets/${pet.petId}`} />
-          <ActionButtonDisabled label="체중 관리" />
+          <ActionButtonLink label="체중 관리" to={`/my/pets/${pet.petId}/weight`} />
         </div>
       </div>
     </article>
