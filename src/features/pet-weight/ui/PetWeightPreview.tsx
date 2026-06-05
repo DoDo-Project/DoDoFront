@@ -25,14 +25,14 @@ export function PetWeightPreview({ petId }: PetWeightPreviewProps) {
 
   if (!latestWeight) {
     return (
-      <div className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-4">
+      <div className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-4">
         <p className="text-sm leading-6 text-neutral-600">현재 등록된 체중 정보가 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-4 sm:px-5">
+    <div className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-4 sm:px-5">
       <div className="flex min-h-[68px] items-stretch justify-between gap-4">
         <div className="flex items-center gap-1">
           <p className="text-[48px] font-semibold leading-none tracking-[0.02em] text-neutral-950">

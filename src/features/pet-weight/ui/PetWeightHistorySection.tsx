@@ -157,7 +157,7 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
           event.preventDefault();
           void handleCreate();
         }}
-        className="rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-4 py-4"
+        className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-4"
       >
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           <label className="flex-1">
@@ -201,7 +201,7 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
       {isLoading ? (
         <p className="text-sm text-neutral-500">체중 기록을 불러오는 중이에요...</p>
       ) : isError ? (
-        <div className="rounded-[20px] border border-red-200 bg-red-50 px-4 py-4">
+        <div className="rounded-[18px] border border-red-200 bg-red-50 px-4 py-4">
           <p className="text-sm text-red-600">{getApiErrorMessage(error, '체중 기록을 불러오지 못했어요.')}</p>
           <button
             type="button"
@@ -212,7 +212,7 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
           </button>
         </div>
       ) : weights.length === 0 ? (
-        <article className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-3">
+        <article className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-3">
           <p className="text-sm leading-6 text-neutral-600">등록된 체중 기록이 없습니다.</p>
         </article>
       ) : (
@@ -221,7 +221,7 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
             const isEditing = editingWeightId === weight.weightId;
 
             return (
-              <article key={weight.weightId} className="rounded-[18px] border border-neutral-200 bg-white px-4 py-3.5">
+              <article key={weight.weightId} className="rounded-[16px] border border-neutral-200 bg-white px-4 py-3.5">
                 {isEditing ? (
                   <form
                     onSubmit={(event) => {

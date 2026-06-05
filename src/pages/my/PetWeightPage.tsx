@@ -55,7 +55,7 @@ export function PetWeightPage() {
           </Link>
         </div>
 
-        <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-sm">
           <div className="px-5 py-5 sm:px-6 sm:py-6">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-[18px] font-medium text-neutral-950 sm:text-[20px]">{data.petName}</h2>

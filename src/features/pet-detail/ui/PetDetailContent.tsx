@@ -32,7 +32,7 @@ function InfoCard({
   return (
     <section
       className={[
-        'rounded-[24px] border px-6 py-5 shadow-sm',
+        'rounded-[20px] border px-6 py-5 shadow-sm',
         tone === 'accent'
           ? 'border-neutral-200 bg-linear-to-br from-white via-white to-brand/[0.035] shadow-[0_12px_28px_rgba(15,23,42,0.05)]'
           : tone === 'muted'
@@ -57,7 +57,7 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
   const fallbackImage = species === 'FELINE' ? petDefaultCatIllustration : petDefaultIllustration;
 
   return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-neutral-100 sm:h-28 sm:w-28">
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[18px] bg-neutral-100 sm:h-28 sm:w-28">
       <img
         src={src || fallbackImage}
         alt={alt}
@@ -73,7 +73,7 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
 
 function DetailRows({ rows }: { rows: Array<{ label: string; value: string }> }) {
   return (
-    <div className="rounded-[18px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+    <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
       <div className="space-y-3">
         {rows.map((row) => (
           <div
@@ -97,7 +97,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
         <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">반려동물 상세정보</h1>
       </div>
 
-      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-sm">
         <div className="flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <PetImage src={pet.imageFileUrl} alt={pet.petName} species={pet.species} />
@@ -171,7 +171,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
         </InfoCard>
 
         <InfoCard title="가족 구성원" tone="muted">
-          <div className="rounded-[18px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+          <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
             <p className="text-sm leading-7 text-neutral-600">
               {pet.familyMembers.length > 0
                 ? pet.familyMembers.map((member) => member.userName).join(', ')
@@ -181,7 +181,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
         </InfoCard>
 
         <InfoCard title="최근 활동" tone="muted">
-          <div className="rounded-[18px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+          <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
             <p className="text-sm leading-7 text-neutral-600">
               {pet.lastActivity
                 ? `${pet.lastActivity.activityType} · ${pet.lastActivity.distance}km`

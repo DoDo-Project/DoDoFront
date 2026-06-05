@@ -125,7 +125,7 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
           event.preventDefault();
           void handleCreate();
         }}
-        className="rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-4 py-4"
+        className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-4"
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
           <select
@@ -183,7 +183,7 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
       {isLoading ? (
         <p className="text-sm text-neutral-500">특이사항을 불러오는 중이에요...</p>
       ) : isError ? (
-        <div className="rounded-[20px] border border-red-200 bg-red-50 px-4 py-4">
+        <div className="rounded-[18px] border border-red-200 bg-red-50 px-4 py-4">
           <p className="text-sm text-red-600">{getApiErrorMessage(error, '특이사항을 불러오지 못했어요.')}</p>
           <button
             type="button"
@@ -194,7 +194,7 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
           </button>
         </div>
       ) : visibleNotes.length === 0 ? (
-        <article className="rounded-[18px] border border-neutral-200 bg-neutral-50/70 px-4 py-3">
+        <article className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-3">
           <p className="text-sm leading-6 text-neutral-600">
             {filterType === 'ALL' ? '등록된 특이사항이 없습니다.' : '선택한 타입의 특이사항이 없습니다.'}
           </p>
@@ -205,7 +205,7 @@ export function PetSpecialNotesManager({ petId, pageSize = 10 }: PetSpecialNotes
             const isEditing = editingNoteId === note.noteId && editingNote !== null;
 
             return (
-              <article key={note.noteId} className="rounded-[18px] border border-neutral-200 bg-white px-4 py-3.5">
+              <article key={note.noteId} className="rounded-[16px] border border-neutral-200 bg-white px-4 py-3.5">
                 {isEditing ? (
                   <form
                     onSubmit={(event) => {
