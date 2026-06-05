@@ -20,22 +20,32 @@ function InfoCard({
   fullWidth = false,
   action,
   contentClassName = 'mt-3',
+  tone = 'default',
 }: {
   title: string;
   children: ReactNode;
   fullWidth?: boolean;
   action?: ReactNode;
   contentClassName?: string;
+  tone?: 'default' | 'accent' | 'muted';
 }) {
   return (
     <section
       className={[
-        'rounded-[24px] border border-neutral-200 bg-white px-6 py-5 shadow-sm',
+        'rounded-[24px] border px-6 py-5 shadow-sm',
+        tone === 'accent'
+          ? 'border-neutral-200 bg-linear-to-br from-white via-white to-brand/[0.035] shadow-[0_12px_28px_rgba(15,23,42,0.05)]'
+          : tone === 'muted'
+            ? 'border-neutral-200/90 bg-neutral-50/70 shadow-[0_8px_22px_rgba(15,23,42,0.03)]'
+            : 'border-neutral-200 bg-white',
         fullWidth ? 'lg:col-span-2' : '',
       ].join(' ')}
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[17px] font-medium text-neutral-950">{title}</h2>
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400">INFO</p>
+          <h2 className="mt-1 text-[17px] font-medium text-neutral-950">{title}</h2>
+        </div>
         {action}
       </div>
       <div className={contentClassName}>{children}</div>
@@ -63,16 +73,18 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
 
 function DetailRows({ rows }: { rows: Array<{ label: string; value: string }> }) {
   return (
-    <div className="space-y-3">
-      {rows.map((row) => (
-        <div
-          key={row.label}
-          className="flex flex-col gap-1 border-b border-neutral-100 pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <span className="text-sm font-medium text-neutral-500">{row.label}</span>
-          <span className="text-sm font-medium text-neutral-900">{row.value}</span>
-        </div>
-      ))}
+    <div className="rounded-[18px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+      <div className="space-y-3">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="flex flex-col gap-1 border-b border-neutral-100 pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="text-sm font-medium text-neutral-500">{row.label}</span>
+            <span className="text-sm font-medium text-neutral-900">{row.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -133,7 +145,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <InfoCard title="기본 정보">
+        <InfoCard title="기본 정보" tone="accent">
           <DetailRows
             rows={[
               { label: '등록번호', value: String(pet.registrationNumber ?? '미등록') },
@@ -145,6 +157,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
 
         <InfoCard
           title="체중 정보"
+          tone="accent"
           action={
             <Link
               to={`/my/pets/${pet.petId}/weight`}
@@ -157,25 +170,30 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
           <PetWeightPreview petId={pet.petId} />
         </InfoCard>
 
-        <InfoCard title="가족 구성원">
-          <p className="text-sm leading-7 text-neutral-600">
-            {pet.familyMembers.length > 0
-              ? pet.familyMembers.map((member) => member.userName).join(', ')
-              : '등록된 가족 구성원이 없습니다.'}
-          </p>
+        <InfoCard title="가족 구성원" tone="muted">
+          <div className="rounded-[18px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+            <p className="text-sm leading-7 text-neutral-600">
+              {pet.familyMembers.length > 0
+                ? pet.familyMembers.map((member) => member.userName).join(', ')
+                : '등록된 가족 구성원이 없습니다.'}
+            </p>
+          </div>
         </InfoCard>
 
-        <InfoCard title="최근 활동">
-          <p className="text-sm leading-7 text-neutral-600">
-            {pet.lastActivity
-              ? `${pet.lastActivity.activityType} · ${pet.lastActivity.distance}km`
-              : '최근 활동 정보가 없습니다.'}
-          </p>
+        <InfoCard title="최근 활동" tone="muted">
+          <div className="rounded-[18px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+            <p className="text-sm leading-7 text-neutral-600">
+              {pet.lastActivity
+                ? `${pet.lastActivity.activityType} · ${pet.lastActivity.distance}km`
+                : '최근 활동 정보가 없습니다.'}
+            </p>
+          </div>
         </InfoCard>
 
         <InfoCard
           title="특이사항"
           fullWidth
+          tone="muted"
           contentClassName="mt-2"
           action={
             <Link
