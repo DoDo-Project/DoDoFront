@@ -23,12 +23,13 @@ export function PetWeightPage() {
   const {
     data: weightHistory,
     isLoading: isWeightLoading,
+    isFetching: isWeightFetching,
     isError: isWeightError,
     error: weightError,
     refetch: refetchWeightHistory,
   } = usePetWeightHistory(numericPetId, {
     page: 0,
-    size: 30,
+    size: 15,
     sort: 'petWeightsMeasuredAt,desc',
   });
 
@@ -77,6 +78,7 @@ export function PetWeightPage() {
         <PetWeightTrendChart
           weights={graphWeights}
           isLoading={isWeightLoading}
+          isRefreshing={isWeightFetching && !isWeightLoading}
           isError={isWeightError}
           error={weightError}
           onRetry={() => void refetchWeightHistory()}

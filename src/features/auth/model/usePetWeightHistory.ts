@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 
 import { getPetWeightHistory, type GetPetWeightHistoryParams } from '@/features/auth/api/pets';
 import { queryKeys } from '@/shared/lib/react-query/queryKey';
@@ -10,5 +10,6 @@ export function usePetWeightHistory(petId: number | null, params?: GetPetWeightH
     queryKey: isValidId ? queryKeys.pets.weightHistory(petId, params) : ['pets', 'weight', 'history', 'idle'],
     queryFn: () => getPetWeightHistory(petId as number, params),
     enabled: isValidId,
+    placeholderData: keepPreviousData,
   });
 }

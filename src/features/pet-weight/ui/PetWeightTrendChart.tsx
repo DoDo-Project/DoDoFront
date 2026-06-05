@@ -5,6 +5,7 @@ import { formatMeasuredDate, formatWeight } from '../lib/formatters';
 interface PetWeightTrendChartProps {
   weights: PetWeightRecord[];
   isLoading?: boolean;
+  isRefreshing?: boolean;
   isError?: boolean;
   error?: unknown;
   onRetry?: () => void;
@@ -85,6 +86,7 @@ function buildChartPoints(weights: PetWeightRecord[]): ChartPoint[] {
 export function PetWeightTrendChart({
   weights,
   isLoading = false,
+  isRefreshing = false,
   isError = false,
   error,
   onRetry,
@@ -149,87 +151,111 @@ export function PetWeightTrendChart({
   const chartPoints = buildChartPoints(orderedWeights);
   const gridLines = buildGridLines(minWeight, maxWeight);
   const polylinePoints = chartPoints.map((point) => `${point.x},${point.y}`).join(' ');
+  const chartAnimationKey = orderedWeights
+    .map((weight) => `${weight.weightId}:${weight.weight}:${weight.petWeightsMeasuredAt}`)
+    .join('|');
 
   return (
-    <section className="rounded-[20px] border border-neutral-200 bg-white px-5 py-5 shadow-sm sm:px-6 sm:py-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-xs font-semibold tracking-[0.2em] text-brand">WEIGHT TREND</p>
-          <h2 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">체중 추이 그래프</h2>
-          <p className="mt-2 text-sm leading-6 text-neutral-500">
-            최근 {orderedWeights.length}개의 기록을 날짜 순으로 보여줘요.
-          </p>
+    <section className="relative rounded-[20px] border border-neutral-200 bg-white px-5 py-5 shadow-sm sm:px-6 sm:py-6">
+      {isRefreshing ? (
+        <div className="pointer-events-none absolute top-4 right-4 z-10">
+          <div className="animate-chart-fade rounded-full border border-neutral-200 bg-white/90 px-3 py-1 text-[11px] font-semibold tracking-[0.08em] text-neutral-500 shadow-sm backdrop-blur-sm">
+            업데이트 중
+          </div>
         </div>
+      ) : null}
 
-        <div className="grid grid-cols-3 gap-2 sm:gap-3">
-          <div className="rounded-[16px] bg-neutral-50 px-3 py-3">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-neutral-400">최신 체중</p>
-            <p className="mt-1 text-[17px] font-semibold text-neutral-950">{formatWeight(latestWeight.weight)}kg</p>
-          </div>
-          <div className="rounded-[16px] bg-neutral-50 px-3 py-3">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-neutral-400">최저 체중</p>
-            <p className="mt-1 text-[17px] font-semibold text-neutral-950">{formatWeight(minWeight)}kg</p>
-          </div>
-          <div className="rounded-[16px] bg-neutral-50 px-3 py-3">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-neutral-400">변화량</p>
-            <p
-              className={`mt-1 text-[17px] font-semibold ${
-                change > 0 ? 'text-amber-600' : change < 0 ? 'text-sky-600' : 'text-neutral-950'
-              }`}
-            >
-              {change > 0 ? '+' : ''}
-              {formatWeight(change)}kg
+      <div key={chartAnimationKey} className="animate-enter-soft">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.2em] text-brand">WEIGHT TREND</p>
+            <h2 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">체중 추이 그래프</h2>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              최근 {orderedWeights.length}개의 기록을 날짜 순으로 보여줘요.
             </p>
           </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:gap-3">
+            <div
+              className="animate-chart-fade rounded-[16px] bg-neutral-50 px-3 py-3"
+              style={{ animationDelay: '0.08s' }}
+            >
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-neutral-400">최신 체중</p>
+              <p className="mt-1 text-[17px] font-medium text-neutral-950">{formatWeight(latestWeight.weight)}kg</p>
+            </div>
+            <div
+              className="animate-chart-fade rounded-[16px] bg-neutral-50 px-3 py-3"
+              style={{ animationDelay: '0.14s' }}
+            >
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-neutral-400">최저 체중</p>
+              <p className="mt-1 text-[17px] font-medium text-neutral-950">{formatWeight(minWeight)}kg</p>
+            </div>
+            <div
+              className="animate-chart-fade rounded-[16px] bg-neutral-50 px-3 py-3"
+              style={{ animationDelay: '0.2s' }}
+            >
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-neutral-400">변화량</p>
+              <p
+                className={`mt-1 text-[17px] font-medium ${
+                  change > 0 ? 'text-amber-600' : change < 0 ? 'text-sky-600' : 'text-neutral-950'
+                }`}
+              >
+                {change > 0 ? '+' : ''}
+                {formatWeight(change)}kg
+              </p>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-5 rounded-[18px] border border-neutral-200/80 bg-linear-to-b from-white to-neutral-50/70 px-3 py-4 sm:px-4">
-        <svg
-          viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-          className="h-[260px] w-full"
-          role="img"
-          aria-label="날짜별 체중 추이 그래프"
-        >
-          {gridLines.map((line) => (
-            <g key={line.y}>
-              <line
-                x1={CHART_PADDING_X}
-                y1={line.y}
-                x2={CHART_WIDTH - CHART_PADDING_X}
-                y2={line.y}
-                stroke="#e5e7eb"
-                strokeDasharray="4 6"
-              />
-              <text x={0} y={line.y + 4} fontSize="11" fill="#94a3b8">
-                {line.label}
-              </text>
-            </g>
-          ))}
+        <div className="animate-enter-soft-delay mt-5 rounded-[18px] border border-neutral-200/80 bg-linear-to-b from-white to-neutral-50/70 px-3 py-4 sm:px-4">
+          <svg
+            viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+            className="h-[260px] w-full"
+            role="img"
+            aria-label="날짜별 체중 추이 그래프"
+          >
+            {gridLines.map((line) => (
+              <g key={line.y}>
+                <line
+                  x1={CHART_PADDING_X}
+                  y1={line.y}
+                  x2={CHART_WIDTH - CHART_PADDING_X}
+                  y2={line.y}
+                  stroke="#e5e7eb"
+                  strokeDasharray="4 6"
+                />
+                <text x={0} y={line.y + 4} fontSize="11" fill="#94a3b8">
+                  {line.label}
+                </text>
+              </g>
+            ))}
 
-          <polyline
-            fill="none"
-            stroke="#f97316"
-            strokeWidth="3"
-            strokeLinejoin="round"
-            strokeLinecap="round"
-            points={polylinePoints}
-          />
+            <polyline
+              fill="none"
+              stroke="#f97316"
+              strokeWidth="3"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+              pathLength={1}
+              className="animate-chart-line"
+              points={polylinePoints}
+            />
 
-          {chartPoints.map((point) => (
-            <g key={point.id}>
-              <circle cx={point.x} cy={point.y} r="5" fill="#ffffff" stroke="#f97316" strokeWidth="3">
-                <title>{`${point.fullDate} ${point.weightLabel}kg`}</title>
-              </circle>
-              <text x={point.x} y={point.y - 12} textAnchor="middle" fontSize="11" fill="#475569">
-                {point.weightLabel}
-              </text>
-              <text x={point.x} y={CHART_HEIGHT - 4} textAnchor="middle" fontSize="11" fill="#94a3b8">
-                {point.shortDate}
-              </text>
-            </g>
-          ))}
-        </svg>
+            {chartPoints.map((point, index) => (
+              <g key={point.id} className="animate-chart-point" style={{ animationDelay: `${0.22 + index * 0.06}s` }}>
+                <circle cx={point.x} cy={point.y} r="5" fill="#ffffff" stroke="#f97316" strokeWidth="3">
+                  <title>{`${point.fullDate} ${point.weightLabel}kg`}</title>
+                </circle>
+                <text x={point.x} y={point.y - 12} textAnchor="middle" fontSize="11" fill="#475569">
+                  {point.weightLabel}
+                </text>
+                <text x={point.x} y={CHART_HEIGHT - 4} textAnchor="middle" fontSize="11" fill="#94a3b8">
+                  {point.shortDate}
+                </text>
+              </g>
+            ))}
+          </svg>
+        </div>
       </div>
     </section>
   );
