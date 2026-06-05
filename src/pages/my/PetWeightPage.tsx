@@ -3,16 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 
 import { useCurrentUser, usePetDetail, usePetWeightHistory } from '@/features/auth';
 import { PetDetailError, PetDetailSkeleton } from '@/features/pet-detail';
-import { PetWeightHistorySection } from '@/features/pet-weight';
+import { PetWeightHistorySection, PetWeightTrendChart } from '@/features/pet-weight';
+import { formatMeasuredDate, formatWeight } from '@/features/pet-weight/lib/formatters';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
-
-function formatMeasuredDate(date: string) {
-  const [year, month, day] = date.split('-');
-
-  return [year, month, day].filter(Boolean).join('. ');
-}
 
 export function PetWeightPage() {
   const { petId } = useParams();
@@ -25,9 +20,15 @@ export function PetWeightPage() {
 
   const { user, profileUrl, displayName, isLoading } = useCurrentUser();
   const { data, isLoading: isDetailLoading, isError, error } = usePetDetail(numericPetId);
-  const { data: weightHistory } = usePetWeightHistory(numericPetId, {
+  const {
+    data: weightHistory,
+    isLoading: isWeightLoading,
+    isError: isWeightError,
+    error: weightError,
+    refetch: refetchWeightHistory,
+  } = usePetWeightHistory(numericPetId, {
     page: 0,
-    size: 1,
+    size: 30,
     sort: 'petWeightsMeasuredAt,desc',
   });
 
@@ -39,6 +40,7 @@ export function PetWeightPage() {
   } else {
     const latestWeight = weightHistory?.weights[0] ?? null;
     const totalElements = weightHistory?.totalElements ?? 0;
+    const graphWeights = weightHistory?.weights ?? [];
 
     content = (
       <div className="space-y-6">
@@ -64,13 +66,21 @@ export function PetWeightPage() {
               </span>
             </div>
             <p className="mt-2 text-sm leading-6 text-neutral-500">
-              최근 체중은 {latestWeight ? `${latestWeight.weight}` : '미등록'}이며,
+              최근 체중은 {latestWeight ? `${formatWeight(latestWeight.weight)}kg` : '미등록'}이며,
               {latestWeight
                 ? ` 최근 측정일은 ${formatMeasuredDate(latestWeight.petWeightsMeasuredAt)}입니다.`
                 : ' 아직 측정 기록이 없습니다.'}
             </p>
           </div>
         </section>
+
+        <PetWeightTrendChart
+          weights={graphWeights}
+          isLoading={isWeightLoading}
+          isError={isWeightError}
+          error={weightError}
+          onRetry={() => void refetchWeightHistory()}
+        />
 
         <PetWeightHistorySection petId={data.petId} />
       </div>

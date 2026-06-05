@@ -9,6 +9,8 @@ import {
   type PetWeightRecord,
 } from '@/features/auth';
 
+import { formatMeasuredDate, formatWeight } from '../lib/formatters';
+
 interface PetWeightHistorySectionProps {
   petId: number;
 }
@@ -16,12 +18,6 @@ interface PetWeightHistorySectionProps {
 interface WeightFormState {
   weight: string;
   measuredAt: string;
-}
-
-function formatMeasuredDate(date: string) {
-  const [year, month, day] = date.split('-');
-
-  return [year, month, day].filter(Boolean).join('. ');
 }
 
 function createEmptyFormState(): WeightFormState {
@@ -51,6 +47,114 @@ function isValidWeightForm(form: WeightFormState) {
   return parseWeightValue(form.weight) !== null && Boolean(form.measuredAt);
 }
 
+function WeightRecordItem({
+  weight,
+  isEditing,
+  editingForm,
+  isMutating,
+  onEditMeasuredAtChange,
+  onEditWeightChange,
+  onCancelEdit,
+  onSaveEdit,
+  onStartEdit,
+  onDelete,
+}: {
+  weight: PetWeightRecord;
+  isEditing: boolean;
+  editingForm: WeightFormState;
+  isMutating: boolean;
+  onEditMeasuredAtChange: (value: string) => void;
+  onEditWeightChange: (value: string) => void;
+  onCancelEdit: () => void;
+  onSaveEdit: () => void;
+  onStartEdit: () => void;
+  onDelete: () => void;
+}) {
+  if (isEditing) {
+    return (
+      <article className="rounded-[16px] border border-neutral-200 bg-white px-4 py-3.5">
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onSaveEdit();
+          }}
+          className="space-y-3"
+        >
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label>
+              <span className="mb-1.5 block text-xs font-medium text-neutral-500">측정 날짜</span>
+              <input
+                type="date"
+                value={editingForm.measuredAt}
+                onChange={(event) => onEditMeasuredAtChange(event.target.value)}
+                className="h-10 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand"
+              />
+            </label>
+            <label>
+              <span className="mb-1.5 block text-xs font-medium text-neutral-500">체중</span>
+              <input
+                type="number"
+                min="0"
+                step="0.1"
+                inputMode="decimal"
+                value={editingForm.weight}
+                onChange={(event) => onEditWeightChange(event.target.value)}
+                className="h-10 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand"
+              />
+            </label>
+          </div>
+          <div className="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={onCancelEdit}
+              disabled={isMutating}
+              className="inline-flex h-9 min-w-20 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              취소
+            </button>
+            <button
+              type="submit"
+              disabled={isMutating || !isValidWeightForm(editingForm)}
+              className="inline-flex h-9 min-w-20 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              저장
+            </button>
+          </div>
+        </form>
+      </article>
+    );
+  }
+
+  return (
+    <article className="rounded-[16px] border border-neutral-200 bg-white px-4 py-3.5">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-col gap-1">
+          <p className="text-[15px] font-medium text-neutral-900">{formatWeight(weight.weight)}kg</p>
+          <p className="text-sm text-neutral-500">측정일 {formatMeasuredDate(weight.petWeightsMeasuredAt)}</p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={onStartEdit}
+            disabled={isMutating}
+            className="inline-flex h-9 min-w-18 items-center justify-center rounded-xl border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            수정
+          </button>
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={isMutating}
+            className="inline-flex h-9 min-w-18 items-center justify-center rounded-xl border border-red-200 bg-white px-3 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            삭제
+          </button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps) {
   const { data, isLoading, isError, error, refetch } = usePetWeightHistory(petId, {
     page: 0,
@@ -67,7 +171,6 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
   const [submitError, setSubmitError] = useState('');
 
   const weights = data?.weights ?? [];
-  // const totalElements = data?.totalElements ?? 0;
   const isMutating = isCreating || isUpdating || isDeleting;
 
   const resetEditing = () => {
@@ -151,7 +254,15 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
   };
 
   return (
-    <div className="space-y-4">
+    <section className="space-y-4">
+      <div>
+        <p className="text-xs font-semibold tracking-[0.2em] text-brand">WEIGHT RECORDS</p>
+        <h2 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">체중 기록 관리</h2>
+        <p className="mt-2 text-sm leading-6 text-neutral-500">
+          기록을 추가하고, 잘못 입력한 값은 바로 수정하거나 삭제할 수 있어요.
+        </p>
+      </div>
+
       <form
         onSubmit={(event) => {
           event.preventDefault();
@@ -192,10 +303,6 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
         </div>
       </form>
 
-      {/* <div className="rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-4 py-4">
-        <p className="text-sm text-neutral-500">총 {totalElements}개의 체중 기록이 등록되어 있어요.</p>
-      </div> */}
-
       {submitError ? <p className="text-sm text-red-500">{submitError}</p> : null}
 
       {isLoading ? (
@@ -221,93 +328,23 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
             const isEditing = editingWeightId === weight.weightId;
 
             return (
-              <article key={weight.weightId} className="rounded-[16px] border border-neutral-200 bg-white px-4 py-3.5">
-                {isEditing ? (
-                  <form
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      void handleSaveEdit();
-                    }}
-                    className="space-y-3"
-                  >
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <label>
-                        <span className="mb-1.5 block text-xs font-medium text-neutral-500">측정 날짜</span>
-                        <input
-                          type="date"
-                          value={editingForm.measuredAt}
-                          onChange={(event) =>
-                            setEditingForm((current) => ({ ...current, measuredAt: event.target.value }))
-                          }
-                          className="h-10 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand"
-                        />
-                      </label>
-                      <label>
-                        <span className="mb-1.5 block text-xs font-medium text-neutral-500">체중</span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.1"
-                          inputMode="decimal"
-                          value={editingForm.weight}
-                          onChange={(event) =>
-                            setEditingForm((current) => ({ ...current, weight: event.target.value }))
-                          }
-                          className="h-10 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand"
-                        />
-                      </label>
-                    </div>
-                    <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={resetEditing}
-                        disabled={isMutating}
-                        className="inline-flex h-9 min-w-20 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        취소
-                      </button>
-                      <button
-                        type="submit"
-                        disabled={isMutating || !isValidWeightForm(editingForm)}
-                        className="inline-flex h-9 min-w-20 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        저장
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                    <div className="flex flex-col gap-1">
-                      <p className="text-[15px] font-medium text-neutral-900">{weight.weight}</p>
-                      <p className="text-sm text-neutral-500">
-                        측정일 {formatMeasuredDate(weight.petWeightsMeasuredAt)}
-                      </p>
-                    </div>
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleStartEdit(weight)}
-                        disabled={isMutating}
-                        className="inline-flex h-9 min-w-18 items-center justify-center rounded-xl border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        수정
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => void handleDelete(weight.weightId)}
-                        disabled={isMutating}
-                        className="inline-flex h-9 min-w-18 items-center justify-center rounded-xl border border-red-200 bg-white px-3 text-sm font-medium text-red-500 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </article>
+              <WeightRecordItem
+                key={weight.weightId}
+                weight={weight}
+                isEditing={isEditing}
+                editingForm={editingForm}
+                isMutating={isMutating}
+                onEditMeasuredAtChange={(value) => setEditingForm((current) => ({ ...current, measuredAt: value }))}
+                onEditWeightChange={(value) => setEditingForm((current) => ({ ...current, weight: value }))}
+                onCancelEdit={resetEditing}
+                onSaveEdit={handleSaveEdit}
+                onStartEdit={() => handleStartEdit(weight)}
+                onDelete={() => void handleDelete(weight.weightId)}
+              />
             );
           })}
         </div>
       )}
-    </div>
+    </section>
   );
 }
