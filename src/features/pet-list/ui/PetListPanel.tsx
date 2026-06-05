@@ -37,7 +37,7 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
   const fallbackImage = species === 'FELINE' ? petDefaultCatIllustration : petDefaultIllustration;
 
   return (
-    <div className="flex h-22 w-22 shrink-0 items-center justify-center overflow-hidden rounded-[20px] bg-neutral-100 sm:h-24 sm:w-24">
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-neutral-100 sm:h-28 sm:w-28">
       <img
         src={src || fallbackImage}
         alt={alt}
@@ -68,7 +68,7 @@ function ActionButtonDisabled({ label }: { label: string }) {
       type="button"
       disabled
       className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-70 sm:w-28"
-      title="반려동물 몸무게 기록 추가 API와 함께 다음 단계에서 연결 예정"
+      title="반려동물 몸무게 기록 추가 API와 연결 예정입니다."
     >
       {label}
     </button>
@@ -77,14 +77,14 @@ function ActionButtonDisabled({ label }: { label: string }) {
 
 function PetCard({ pet }: { pet: PetListItem }) {
   return (
-    <article className="overflow-hidden rounded-[22px] border border-neutral-200 bg-white shadow-sm">
-      <div className="flex flex-col gap-4 px-5 py-5 sm:px-6 sm:py-5 lg:flex-row lg:items-center lg:justify-between">
+    <article className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+      <div className="flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <PetImage src={pet.imageFileUrl} alt={pet.petName} species={pet.species} />
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-[18px] font-medium text-neutral-950">
+              <h2 className="text-[20px] font-medium text-neutral-950">
                 {pet.petName}
                 <span className={`ml-1 ${getSexColorClass(pet.sex)}`}>{getSexLabel(pet.sex)}</span>
               </h2>
@@ -97,7 +97,10 @@ function PetCard({ pet }: { pet: PetListItem }) {
               <p>
                 {formatSpeciesLabel(pet.species)} <span className="text-neutral-500">{pet.breed}</span>
               </p>
-              <p>{pet.weight}</p>
+              <p className="text-neutral-800">
+                <span className="text-neutral-500">성별 </span>
+                {getSexLabel(pet.sex)}
+              </p>
             </div>
           </div>
         </div>
@@ -114,10 +117,10 @@ function PetCard({ pet }: { pet: PetListItem }) {
 export function PetListPanel({ pets, totalElements, isRefreshing = false }: PetListPanelProps) {
   return (
     <div className="space-y-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-[18px] font-medium text-neutral-950">반려동물 리스트</h1>
-          <p className="mt-1 text-sm text-neutral-500">등록된 반려동물 정보를 한눈에 확인할 수 있어요.</p>
+          <p className="text-xs font-semibold tracking-[0.24em] text-brand">PET LIST</p>
+          <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">반려동물 리스트</h1>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto">

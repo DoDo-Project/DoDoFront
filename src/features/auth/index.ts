@@ -14,9 +14,14 @@ export { AuthErrorScreen } from './ui/status/AuthErrorScreen';
 export { socialLogin, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
 export { getMyProfile } from './api/users';
 export { useCreatePet } from './model/useCreatePet';
+export { useCreatePetSpecialNote } from './model/useCreatePetSpecialNote';
 export { useCurrentUser } from './model/useCurrentUser';
+export { useDeletePetSpecialNote } from './model/useDeletePetSpecialNote';
 export { usePetDetail } from './model/usePetDetail';
 export { usePetList } from './model/usePetList';
+export { usePetSpecialNoteList } from './model/usePetSpecialNoteList';
+export { useUpdatePet } from './model/useUpdatePet';
+export { useUpdatePetSpecialNote } from './model/useUpdatePetSpecialNote';
 export type {
   SocialProvider,
   AuthTokens,
@@ -26,6 +31,13 @@ export type {
   SocialLoginResult,
   CreatePetRequest,
   CreatePetResponse,
+  CreatePetSpecialNoteRequest,
+  CreatePetSpecialNoteResponse,
+  UpdatePetRequest,
+  UpdatePetResponse,
+  UpdatePetSpecialNoteRequest,
+  UpdatePetSpecialNoteResponse,
+  DeletePetSpecialNoteResponse,
   RegisterProfileRequest,
   RegisterProfileResponse,
   NicknameCheckResponse,
@@ -37,6 +49,8 @@ export type {
   PetListItem,
   PetListResponse,
   PetSpecialNote,
+  PetSpecialNoteListResponse,
+  PetSpecialNoteType,
   PetWeightInfo,
   TokenReissueRequest,
   TokenReissueResponse,

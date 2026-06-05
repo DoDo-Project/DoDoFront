@@ -31,6 +31,7 @@ export function PetRegistrationPage() {
           onFieldChange={registrationForm.handleFieldChange}
           onSelectPetImage={registrationForm.handleSelectPetImage}
           onSubmit={registrationForm.handleSubmit}
+          mode="create"
         />
       }
     />

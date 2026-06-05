@@ -3,9 +3,17 @@ import { apiClient } from '@/shared/api/axios';
 import type {
   CreatePetRequest,
   CreatePetResponse,
+  CreatePetSpecialNoteRequest,
+  CreatePetSpecialNoteResponse,
+  DeletePetSpecialNoteResponse,
   PetDetailResponse,
   PetFamilyJoinResponse,
   PetListResponse,
+  PetSpecialNoteListResponse,
+  UpdatePetRequest,
+  UpdatePetResponse,
+  UpdatePetSpecialNoteRequest,
+  UpdatePetSpecialNoteResponse,
 } from '../model/types';
 
 interface RequestFamilyJoinOptions {
@@ -14,6 +22,12 @@ interface RequestFamilyJoinOptions {
 }
 
 export interface GetPetListParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface GetPetSpecialNoteListParams {
   page?: number;
   size?: number;
   sort?: string;
@@ -72,6 +86,65 @@ export async function getPetList(params?: GetPetListParams): Promise<PetListResp
  */
 export async function getPetDetail(petId: number): Promise<PetDetailResponse> {
   const response = await apiClient.get<PetDetailResponse>(`/pets/${petId}`);
+
+  return response.data;
+}
+
+/**
+ * 반려동물 정보 수정 (PATCH /pets/{petId})
+ */
+export async function updatePet(petId: number, payload: UpdatePetRequest): Promise<UpdatePetResponse> {
+  const response = await apiClient.patch<UpdatePetResponse>(`/pets/${petId}`, payload);
+
+  return response.data;
+}
+
+/**
+ * 펫 특이사항 목록 조회 (GET /pets/{petId}/significant)
+ */
+export async function getPetSpecialNoteList(
+  petId: number,
+  params?: GetPetSpecialNoteListParams,
+): Promise<PetSpecialNoteListResponse> {
+  const response = await apiClient.get<PetSpecialNoteListResponse>(`/pets/${petId}/significant`, {
+    params: {
+      page: params?.page ?? 0,
+      size: params?.size ?? 10,
+      sort: params?.sort,
+    },
+  });
+
+  return response.data;
+}
+
+/**
+ * 펫 특이사항 생성 (POST /pets/significant)
+ */
+export async function createPetSpecialNote(
+  payload: CreatePetSpecialNoteRequest,
+): Promise<CreatePetSpecialNoteResponse> {
+  const response = await apiClient.post<CreatePetSpecialNoteResponse>('/pets/significant', payload);
+
+  return response.data;
+}
+
+/**
+ * 펫 특이사항 수정 (PATCH /pets/significant/{noteId})
+ */
+export async function updatePetSpecialNote(
+  noteId: number,
+  payload: UpdatePetSpecialNoteRequest,
+): Promise<UpdatePetSpecialNoteResponse> {
+  const response = await apiClient.patch<UpdatePetSpecialNoteResponse>(`/pets/significant/${noteId}`, payload);
+
+  return response.data;
+}
+
+/**
+ * 펫 특이사항 삭제 (DELETE /pets/significant/{noteId})
+ */
+export async function deletePetSpecialNote(noteId: number): Promise<DeletePetSpecialNoteResponse> {
+  const response = await apiClient.delete<DeletePetSpecialNoteResponse>(`/pets/significant/${noteId}`);
 
   return response.data;
 }

@@ -10,9 +10,11 @@ import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
 import { PetDetailPage } from '@/pages/my/PetDetailPage';
+import { PetEditPage } from '@/pages/my/PetEditPage';
 import { MyDodoPage } from '@/pages/my/MyDodoPage';
 import { NotificationSettingsPage } from '@/pages/my/NotificationSettingsPage';
 import { PetRegistrationPage } from '@/pages/my/PetRegistrationPage';
+import { PetSpecialNotesPage } from '@/pages/my/PetSpecialNotesPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { WalkPage } from '@/pages/walk/WalkPage';
 
@@ -52,6 +54,22 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <PetDetailPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/my/pets/:petId/edit',
+        element: (
+          <RequireAuth>
+            <PetEditPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/my/pets/:petId/notes',
+        element: (
+          <RequireAuth>
+            <PetSpecialNotesPage />
           </RequireAuth>
         ),
       },

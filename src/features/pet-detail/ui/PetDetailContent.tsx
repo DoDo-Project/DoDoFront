@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { PetDetailResponse } from '@/features/auth';
+import { PetSpecialNotesPreview } from '@/features/pet-special-notes';
 import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.svg';
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 
@@ -12,7 +13,19 @@ import {
   formatPetSpeciesLabel,
 } from '../lib/formatters';
 
-function InfoCard({ title, children, fullWidth = false }: { title: string; children: ReactNode; fullWidth?: boolean }) {
+function InfoCard({
+  title,
+  children,
+  fullWidth = false,
+  action,
+  contentClassName = 'mt-3',
+}: {
+  title: string;
+  children: ReactNode;
+  fullWidth?: boolean;
+  action?: ReactNode;
+  contentClassName?: string;
+}) {
   return (
     <section
       className={[
@@ -20,8 +33,11 @@ function InfoCard({ title, children, fullWidth = false }: { title: string; child
         fullWidth ? 'lg:col-span-2' : '',
       ].join(' ')}
     >
-      <h2 className="text-[17px] font-medium text-neutral-950">{title}</h2>
-      <div className="mt-3">{children}</div>
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="text-[17px] font-medium text-neutral-950">{title}</h2>
+        {action}
+      </div>
+      <div className={contentClassName}>{children}</div>
     </section>
   );
 }
@@ -68,14 +84,6 @@ function formatWeightContent(pet: PetDetailResponse) {
   return `현재 ${pet.weightInfo.currentWeight} · ${pet.weightInfo.weightTrend}`;
 }
 
-function formatSpecialNotesContent(pet: PetDetailResponse) {
-  if (!pet.specialNotesCount || pet.specialNotes.length === 0) {
-    return '등록된 특이사항이 없습니다.';
-  }
-
-  return pet.specialNotes.map((note) => note.noteContent).join(' / ');
-}
-
 export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
   return (
     <div className="space-y-6">
@@ -106,7 +114,10 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
                 <p>
                   {formatPetSpeciesLabel(pet.species)} <span className="text-neutral-500">{pet.breed}</span>
                 </p>
-                <p>{formatPetSexLabel(pet.sex)}</p>
+                <p>
+                  <span className="text-neutral-500">성별 </span>
+                  {formatPetSexLabel(pet.sex)}
+                </p>
               </div>
             </div>
           </div>
@@ -118,14 +129,12 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
             >
               목록으로
             </Link>
-            <button
-              type="button"
-              disabled
-              title="몸무게 기록 추가/조회 API 연결은 다음 이슈에서 진행 예정"
-              className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-70 sm:w-28"
+            <Link
+              to={`/my/pets/${pet.petId}/edit`}
+              className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand sm:w-28"
             >
-              수정 준비
-            </button>
+              정보 수정
+            </Link>
           </div>
         </div>
       </section>
@@ -161,8 +170,21 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
           </p>
         </InfoCard>
 
-        <InfoCard title={`특이사항 (${pet.specialNotesCount})`} fullWidth>
-          <p className="text-sm leading-7 text-neutral-600">{formatSpecialNotesContent(pet)}</p>
+        <InfoCard
+          title="특이사항"
+          fullWidth
+          contentClassName="mt-2"
+          action={
+            <Link
+              to={`/my/pets/${pet.petId}/notes`}
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
+            >
+              전체 보기
+              {/* <span aria-hidden>{'>'}</span> */}
+            </Link>
+          }
+        >
+          <PetSpecialNotesPreview petId={pet.petId} fallbackCount={pet.specialNotesCount} />
         </InfoCard>
       </div>
     </div>
