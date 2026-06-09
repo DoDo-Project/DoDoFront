@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { refreshAccessToken } from '@/shared/lib/auth/refreshSession';
+import { redirectToLogin, refreshAccessToken } from '@/shared/lib/auth/refreshSession';
 import { getAccessToken, getRefreshToken, isAccessTokenExpired } from '@/shared/lib/auth/token';
 import { Header } from '@/widgets/header';
 
@@ -10,7 +10,15 @@ export function AppLayout() {
     if (!getAccessToken() || !getRefreshToken() || !isAccessTokenExpired()) {
       return;
     }
-    void refreshAccessToken();
+
+    const refreshSession = async () => {
+      const refreshedToken = await refreshAccessToken();
+      if (!refreshedToken) {
+        redirectToLogin();
+      }
+    };
+
+    void refreshSession();
   }, []);
 
   return (

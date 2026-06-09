@@ -13,7 +13,6 @@ interface ReissueResponse {
 let refreshPromise: Promise<string | null> | null = null;
 let isRedirecting = false;
 
-/** refreshToken으로 accessToken 재발급 (동시 요청은 한 번만 호출) */
 export async function refreshAccessToken(): Promise<string | null> {
   if (refreshPromise) {
     return refreshPromise;
@@ -52,8 +51,10 @@ export async function refreshAccessToken(): Promise<string | null> {
 export function redirectToLogin(): void {
   if (typeof window === 'undefined') return;
   if (isRedirecting) return;
-  const path = window.location.pathname;
-  if (path.startsWith('/auth')) return;
+
+  const path = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+  if (window.location.pathname.startsWith('/auth')) return;
+
   isRedirecting = true;
   window.location.assign(`/auth?reason=session-expired&from=${encodeURIComponent(path)}`);
 }

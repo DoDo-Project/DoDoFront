@@ -1,7 +1,15 @@
 export { LoginModal } from './ui/LoginModal';
 export { SocialLoginButton } from './ui/SocialLoginButton';
 export { SignupFlow } from './ui/signup';
-export { redirectToSocialLogin, getStoredState, clearStoredState, parseProvider } from './lib/oauth';
+export {
+  redirectToSocialLogin,
+  getStoredState,
+  clearStoredState,
+  parseProvider,
+  getStoredReturnTo,
+  setStoredReturnTo,
+  clearStoredReturnTo,
+} from './lib/oauth';
 export {
   resolveApiAuthError,
   resolveAuthErrorFromMessage,

@@ -14,87 +14,87 @@ export interface AuthErrorPresentation {
 
 const HTTP_PRESENTATION: Record<number, Omit<AuthErrorPresentation, 'message' | 'statusCode'>> = {
   400: {
-    badge: '400',
-    title: '요청을 처리할 수 없어요',
-    hint: '입력·로그인 과정을 처음부터 다시 시도해주세요.',
+    badge: '요청 확인',
+    title: '요청을 다시 확인해주세요',
+    hint: '입력값이나 로그인 흐름이 중간에 바뀌었을 수 있어요. 처음부터 다시 시도해주세요.',
   },
   401: {
-    badge: '401',
-    title: '로그인에 실패했어요',
-    hint: '소셜 계정으로 다시 로그인해주세요.',
+    badge: '인증 필요',
+    title: '로그인이 필요해요',
+    hint: '세션이 만료되었거나 인증 정보가 유효하지 않을 수 있어요.',
   },
   403: {
-    badge: '403',
-    title: '이용이 제한된 계정이에요',
-    hint: '정지·휴면 계정은 고객센터로 문의해주세요.',
+    badge: '접근 제한',
+    title: '현재 계정으로는 이용할 수 없어요',
+    hint: '권한이 맞지 않거나 추가 확인이 필요한 상태일 수 있어요.',
   },
   404: {
-    badge: '404',
-    title: '계정을 찾을 수 없어요',
-    hint: '다른 소셜 계정으로 가입했을 수 있어요.',
+    badge: '계정 확인',
+    title: '계정 정보를 찾지 못했어요',
+    hint: '다른 소셜 계정으로 가입했는지 확인해보세요.',
   },
   409: {
-    badge: '409',
-    title: '요청을 완료할 수 없어요',
-    hint: '이미 처리된 요청일 수 있어요.',
+    badge: '중복 요청',
+    title: '이미 처리된 요청일 수 있어요',
+    hint: '같은 작업이 먼저 처리되었는지 확인한 뒤 다시 시도해주세요.',
   },
   429: {
-    badge: '429',
-    title: '잠시만 기다려주세요',
-    hint: '요청이 너무 많아요. 1~2분 뒤 다시 시도해주세요.',
+    badge: '잠시 후',
+    title: '요청이 잠시 많아졌어요',
+    hint: '1~2분 뒤 다시 시도하면 더 안정적으로 연결될 가능성이 높아요.',
   },
   500: {
-    badge: '500',
-    title: '서버에 문제가 있어요',
-    hint: '잠시 후 다시 시도해주세요.',
+    badge: '서버 점검',
+    title: '서버에서 문제가 발생했어요',
+    hint: '잠시 뒤 다시 시도해주세요. 문제가 계속되면 운영팀 확인이 필요할 수 있어요.',
   },
 };
 
 const CLIENT_ERRORS: Record<AuthClientErrorCode, AuthErrorPresentation> = {
   invalid_provider: {
-    badge: '안내',
-    title: '지원하지 않는 로그인이에요',
-    message: '네이버 또는 구글 로그인만 이용할 수 있어요.',
-    hint: '홈에서 다시 시작해주세요.',
+    badge: '로그인 안내',
+    title: '지원하지 않는 로그인 방식이에요',
+    message: '현재는 네이버와 구글 로그인만 지원하고 있어요.',
+    hint: '이전 화면으로 돌아가서 다시 선택해주세요.',
     statusCode: null,
   },
   missing_code: {
-    badge: '안내',
-    title: '로그인이 중단됐어요',
-    message: '인가 코드를 받지 못했어요.',
-    hint: '소셜 로그인을 처음부터 다시 시도해주세요.',
+    badge: '인증 중단',
+    title: '로그인이 중간에 멈췄어요',
+    message: '소셜 인증 코드를 받지 못했어요.',
+    hint: '브라우저 뒤로가기를 누르지 말고, 처음부터 다시 시도해주세요.',
     statusCode: null,
   },
   invalid_state: {
-    badge: '안내',
-    title: '잘못된 접근이에요',
-    message: '보안 검증에 실패했어요.',
-    hint: '브라우저 뒤로가기 없이 홈에서 다시 로그인해주세요.',
+    badge: '보안 확인',
+    title: '로그인 검증에 실패했어요',
+    message: '보안 검증을 완료하지 못해 로그인을 이어갈 수 없어요.',
+    hint: '탭을 오래 열어두었거나 인증 흐름이 중간에 바뀌었을 수 있어요.',
     statusCode: null,
   },
 };
 
 const SESSION_EXPIRED: AuthErrorPresentation = {
-  badge: '세션',
-  title: '로그인이 만료됐어요',
-  message: '안전을 위해 다시 로그인해주세요.',
-  hint: '오래된 탭이거나 토큰이 만료됐을 수 있어요.',
+  badge: '다시 인증',
+  title: '로그인이 만료되었어요',
+  message: '안전한 이용을 위해 한 번 더 로그인해주세요.',
+  hint: '오래된 탭을 다시 열었거나, 토큰 유효 시간이 지나 세션이 종료되었을 수 있어요.',
   statusCode: 401,
 };
 
 const NETWORK_PRESENTATION: AuthErrorPresentation = {
-  badge: '연결',
-  title: '네트워크를 확인해주세요',
+  badge: '연결 확인',
+  title: '네트워크 연결을 확인해주세요',
   message: '서버와 연결하지 못했어요.',
-  hint: '인터넷 연결 후 다시 시도해주세요.',
+  hint: '인터넷 연결 상태를 확인한 뒤 다시 시도해주세요.',
   statusCode: null,
 };
 
 const TIMEOUT_PRESENTATION: AuthErrorPresentation = {
-  badge: '시간',
-  title: '응답이 지연되고 있어요',
-  message: '요청 시간이 초과됐어요.',
-  hint: '잠시 후 다시 시도해주세요.',
+  badge: '응답 지연',
+  title: '응답이 조금 늦어지고 있어요',
+  message: '요청 시간이 초과되었어요.',
+  hint: '네트워크 상태가 안정된 뒤 다시 시도해주세요.',
   statusCode: null,
 };
 
@@ -113,7 +113,7 @@ function presentationFromStatus(
   }
 
   return {
-    badge: String(status),
+    badge: `오류 ${status}`,
     title: '문제가 발생했어요',
     message,
     statusCode: status,
@@ -155,7 +155,7 @@ export function resolveApiAuthError(
   }
 
   return {
-    badge: '오류',
+    badge: '알 수 없음',
     title: '문제가 발생했어요',
     message,
     statusCode: null,
@@ -168,7 +168,7 @@ export function resolveAuthErrorFromMessage(message: string, statusCode?: number
   }
 
   return {
-    badge: '오류',
+    badge: '일시 오류',
     title: '문제가 발생했어요',
     message,
     statusCode: null,

@@ -1,9 +1,11 @@
-import { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSyncExternalStore } from 'react';
 
-import { getAccessToken } from '@/shared/lib/auth/token';
+import { getAccessToken, subscribeAuthState } from '@/shared/lib/auth/token';
+
+function getLoggedInSnapshot(): boolean {
+  return typeof window !== 'undefined' && Boolean(getAccessToken());
+}
 
 export function useIsLoggedIn() {
-  const location = useLocation();
-  return useMemo(() => typeof window !== 'undefined' && Boolean(getAccessToken()), [location.pathname]);
+  return useSyncExternalStore(subscribeAuthState, getLoggedInSnapshot, () => false);
 }
