@@ -20,10 +20,22 @@ interface ChartPoint {
   weightLabel: string;
 }
 
-const CHART_WIDTH = 640;
-const CHART_HEIGHT = 260;
-const CHART_PADDING_X = 28;
-const CHART_PADDING_Y = 24;
+interface ChartScale {
+  minDomain: number;
+  maxDomain: number;
+  chartStartX: number;
+  chartEndX: number;
+  chartTopY: number;
+  chartBottomY: number;
+}
+
+const CHART_WIDTH = 720;
+const CHART_HEIGHT = 280;
+const LABEL_GUTTER = 54;
+const CHART_PADDING_LEFT = 20;
+const CHART_PADDING_RIGHT = 14;
+const CHART_PADDING_TOP = 28;
+const CHART_PADDING_BOTTOM = 34;
 
 function formatShortDate(date: string) {
   const [, month = '', day = ''] = date.slice(0, 10).split('-');
@@ -31,14 +43,31 @@ function formatShortDate(date: string) {
   return [month, day].filter(Boolean).join('.');
 }
 
-function buildGridLines(minWeight: number, maxWeight: number) {
+function buildChartScale(weights: PetWeightRecord[]): ChartScale {
+  const values = weights.map((item) => item.weight);
+  const minWeight = Math.min(...values);
+  const maxWeight = Math.max(...values);
+  const rawRange = maxWeight - minWeight;
+  const yPadding = rawRange === 0 ? Math.max(minWeight * 0.08, 0.2) : Math.max(rawRange * 0.2, 0.08);
+
+  return {
+    minDomain: Math.max(0, minWeight - yPadding),
+    maxDomain: maxWeight + yPadding,
+    chartStartX: LABEL_GUTTER + CHART_PADDING_LEFT,
+    chartEndX: CHART_WIDTH - CHART_PADDING_RIGHT,
+    chartTopY: CHART_PADDING_TOP,
+    chartBottomY: CHART_HEIGHT - CHART_PADDING_BOTTOM,
+  };
+}
+
+function buildGridLines(scale: ChartScale) {
   const steps = 4;
-  const range = maxWeight - minWeight || 1;
+  const range = scale.maxDomain - scale.minDomain || 1;
 
   return Array.from({ length: steps + 1 }, (_, index) => {
     const ratio = index / steps;
-    const y = CHART_PADDING_Y + (CHART_HEIGHT - CHART_PADDING_Y * 2) * ratio;
-    const value = maxWeight - range * ratio;
+    const y = scale.chartTopY + (scale.chartBottomY - scale.chartTopY) * ratio;
+    const value = scale.maxDomain - range * ratio;
 
     return {
       y,
@@ -47,15 +76,15 @@ function buildGridLines(minWeight: number, maxWeight: number) {
   });
 }
 
-function buildChartPoints(weights: PetWeightRecord[]): ChartPoint[] {
+function buildChartPoints(weights: PetWeightRecord[], scale: ChartScale): ChartPoint[] {
   if (weights.length === 1) {
     const only = weights[0];
 
     return [
       {
         id: only.weightId,
-        x: CHART_WIDTH / 2,
-        y: CHART_HEIGHT / 2,
+        x: (scale.chartStartX + scale.chartEndX) / 2,
+        y: (scale.chartTopY + scale.chartBottomY) / 2,
         shortDate: formatShortDate(only.petWeightsMeasuredAt),
         fullDate: formatMeasuredDate(only.petWeightsMeasuredAt),
         weightLabel: formatWeight(only.weight),
@@ -63,19 +92,16 @@ function buildChartPoints(weights: PetWeightRecord[]): ChartPoint[] {
     ];
   }
 
-  const values = weights.map((item) => item.weight);
-  const minWeight = Math.min(...values);
-  const maxWeight = Math.max(...values);
-  const range = maxWeight - minWeight || 1;
-  const xStep = (CHART_WIDTH - CHART_PADDING_X * 2) / Math.max(weights.length - 1, 1);
+  const range = scale.maxDomain - scale.minDomain || 1;
+  const xStep = (scale.chartEndX - scale.chartStartX) / Math.max(weights.length - 1, 1);
 
   return weights.map((weight, index) => {
-    const ratio = (weight.weight - minWeight) / range;
+    const ratio = (weight.weight - scale.minDomain) / range;
 
     return {
       id: weight.weightId,
-      x: CHART_PADDING_X + xStep * index,
-      y: CHART_HEIGHT - CHART_PADDING_Y - ratio * (CHART_HEIGHT - CHART_PADDING_Y * 2),
+      x: scale.chartStartX + xStep * index,
+      y: scale.chartBottomY - ratio * (scale.chartBottomY - scale.chartTopY),
       shortDate: formatShortDate(weight.petWeightsMeasuredAt),
       fullDate: formatMeasuredDate(weight.petWeightsMeasuredAt),
       weightLabel: formatWeight(weight.weight),
@@ -97,7 +123,7 @@ export function PetWeightTrendChart({
         <div className="animate-pulse space-y-4">
           <div className="h-4 w-32 rounded-full bg-neutral-200" />
           <div className="h-7 w-44 rounded-full bg-neutral-200" />
-          <div className="h-[260px] rounded-[18px] bg-neutral-100" />
+          <div className="h-[280px] rounded-[18px] bg-neutral-100" />
         </div>
       </section>
     );
@@ -144,12 +170,12 @@ export function PetWeightTrendChart({
   );
   const values = orderedWeights.map((item) => item.weight);
   const minWeight = Math.min(...values);
-  const maxWeight = Math.max(...values);
   const latestWeight = orderedWeights[orderedWeights.length - 1];
   const firstWeight = orderedWeights[0];
   const change = latestWeight.weight - firstWeight.weight;
-  const chartPoints = buildChartPoints(orderedWeights);
-  const gridLines = buildGridLines(minWeight, maxWeight);
+  const scale = buildChartScale(orderedWeights);
+  const chartPoints = buildChartPoints(orderedWeights, scale);
+  const gridLines = buildGridLines(scale);
   const polylinePoints = chartPoints.map((point) => `${point.x},${point.y}`).join(' ');
   const chartAnimationKey = orderedWeights
     .map((weight) => `${weight.weightId}:${weight.weight}:${weight.petWeightsMeasuredAt}`)
@@ -207,24 +233,24 @@ export function PetWeightTrendChart({
           </div>
         </div>
 
-        <div className="animate-enter-soft-delay mt-5 rounded-[18px] border border-neutral-200/80 bg-linear-to-b from-white to-neutral-50/70 px-3 py-4 sm:px-4">
+        <div className="animate-enter-soft-delay mt-5 rounded-[18px] border border-neutral-200/80 bg-linear-to-b from-white to-neutral-50/70 px-2 py-4 sm:px-3">
           <svg
             viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
-            className="h-[260px] w-full"
+            className="h-[280px] w-full"
             role="img"
             aria-label="날짜별 체중 추이 그래프"
           >
             {gridLines.map((line) => (
               <g key={line.y}>
                 <line
-                  x1={CHART_PADDING_X}
+                  x1={scale.chartStartX}
                   y1={line.y}
-                  x2={CHART_WIDTH - CHART_PADDING_X}
+                  x2={scale.chartEndX}
                   y2={line.y}
                   stroke="#e5e7eb"
                   strokeDasharray="4 6"
                 />
-                <text x={0} y={line.y + 4} fontSize="11" fill="#94a3b8">
+                <text x={8} y={line.y + 4} fontSize="11" fill="#94a3b8">
                   {line.label}
                 </text>
               </g>
@@ -249,7 +275,7 @@ export function PetWeightTrendChart({
                 <text x={point.x} y={point.y - 12} textAnchor="middle" fontSize="11" fill="#475569">
                   {point.weightLabel}
                 </text>
-                <text x={point.x} y={CHART_HEIGHT - 4} textAnchor="middle" fontSize="11" fill="#94a3b8">
+                <text x={point.x} y={CHART_HEIGHT - 6} textAnchor="middle" fontSize="11" fill="#94a3b8">
                   {point.shortDate}
                 </text>
               </g>
