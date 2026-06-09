@@ -170,6 +170,7 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
             nickname: nickname.trim(),
             region: region.trim(),
             hasFamily: false,
+            profileUrl: lastProfileImageUrlRef.current ?? null,
           },
           registrationToken,
         );

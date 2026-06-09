@@ -75,7 +75,7 @@ export function SubButton({ children, onClick, disabled, loading }: SubButtonPro
       className={`h-12 shrink-0 rounded-xl px-4 text-sm font-medium transition-colors ${
         isDisabled
           ? 'cursor-not-allowed bg-neutral-200 text-neutral-400'
-          : 'cursor-pointer bg-secondary text-secondary-foreground hover:opacity-90'
+          : 'cursor-pointer bg-secondary text-brand-foreground hover:opacity-90'
       }`}
     >
       {loading ? (
