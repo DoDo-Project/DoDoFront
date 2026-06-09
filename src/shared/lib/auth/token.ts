@@ -1,12 +1,5 @@
-// 인증 토큰 저장소 — 키 문자열은 여기서만 관리
-//
-// 저장 전략 (XSS 완화, 백엔드 쿠키 전환 전):
-// - accessToken: localStorage (apiClient·RequireAuth가 읽음)
-// - refreshToken: sessionStorage (탭 종료 시 제거, localStorage보다 노출 범위 축소)
-// TODO(보안 강화): 백엔드 httpOnly 쿠키 지원 시 refreshToken은 쿠키로, accessToken도 쿠키 검토
-
 const ACCESS_TOKEN_KEY = 'accessToken';
-/** @deprecated 마이그레이션용 — 신규 저장은 sessionStorage만 사용 */
+/** @deprecated migration-only legacy key */
 const LEGACY_REFRESH_TOKEN_KEY = 'refreshToken';
 const REFRESH_TOKEN_KEY = 'dodo.refreshToken';
 const PROFILE_URL_KEY = 'profileUrl';
@@ -14,14 +7,14 @@ const NICKNAME_KEY = 'nickname';
 const NOTIFICATION_ENABLED_KEY = 'notificationEnabled';
 const ACCESS_TOKEN_EXPIRES_AT_KEY = 'accessTokenExpiresAt';
 const ACCESS_TOKEN_TTL_MS_KEY = 'accessTokenTtlMs';
+const AUTH_STATE_EVENT = 'dodo:auth-state-change';
 
-/** 만료 N ms 전에 선제 갱신 (TTL 대비 cap 적용) */
+/** Refresh before expiry with a bounded TTL-based buffer. */
 export const ACCESS_TOKEN_REFRESH_BUFFER_MS = 60_000;
 
 interface StoredAuth {
   accessToken: string;
   refreshToken: string;
-  /** 소셜 로그인·가입 응답 — 밀리초 (OpenAPI SocialLoginResponse) */
   accessTokenExpiresIn: number;
   profileUrl: string;
   nickname?: string;
@@ -30,7 +23,6 @@ interface StoredAuth {
 interface ReissueTokens {
   accessToken: string;
   refreshToken: string;
-  /** POST /auth/reissue 응답 — 초 단위 (OpenAPI TokenResponse) */
   accessTokenExpiresIn: number;
 }
 
@@ -38,7 +30,12 @@ function readRefreshFromSession(): string | null {
   return sessionStorage.getItem(REFRESH_TOKEN_KEY);
 }
 
-/** 예전 localStorage refreshToken → sessionStorage로 1회 이전 */
+function notifyAuthStateChanged(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(AUTH_STATE_EVENT));
+}
+
+/** Migrate legacy localStorage refresh token into sessionStorage once. */
 function migrateLegacyRefreshToken(): void {
   const legacy = localStorage.getItem(LEGACY_REFRESH_TOKEN_KEY);
   if (!legacy) return;
@@ -47,6 +44,7 @@ function migrateLegacyRefreshToken(): void {
     sessionStorage.setItem(REFRESH_TOKEN_KEY, legacy);
   }
   localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
+  notifyAuthStateChanged();
 }
 
 migrateLegacyRefreshToken();
@@ -67,12 +65,47 @@ function getRefreshBufferMs(): number {
   if (!Number.isFinite(ttlMs) || ttlMs <= 0) {
     return ACCESS_TOKEN_REFRESH_BUFFER_MS;
   }
+
   return Math.min(ACCESS_TOKEN_REFRESH_BUFFER_MS, Math.max(5_000, Math.floor(ttlMs * 0.1)));
+}
+
+export function subscribeAuthState(listener: () => void): () => void {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+
+  const handleStorage = (event: StorageEvent) => {
+    if (!event.key) {
+      listener();
+      return;
+    }
+
+    if (
+      event.key === ACCESS_TOKEN_KEY ||
+      event.key === LEGACY_REFRESH_TOKEN_KEY ||
+      event.key === PROFILE_URL_KEY ||
+      event.key === NICKNAME_KEY ||
+      event.key === NOTIFICATION_ENABLED_KEY ||
+      event.key === ACCESS_TOKEN_EXPIRES_AT_KEY ||
+      event.key === ACCESS_TOKEN_TTL_MS_KEY
+    ) {
+      listener();
+    }
+  };
+
+  window.addEventListener(AUTH_STATE_EVENT, listener);
+  window.addEventListener('storage', handleStorage);
+
+  return () => {
+    window.removeEventListener(AUTH_STATE_EVENT, listener);
+    window.removeEventListener('storage', handleStorage);
+  };
 }
 
 export function getAccessTokenExpiresAt(): number | null {
   const raw = localStorage.getItem(ACCESS_TOKEN_EXPIRES_AT_KEY);
   if (!raw) return null;
+
   const parsed = Number(raw);
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -80,12 +113,13 @@ export function getAccessTokenExpiresAt(): number | null {
 export function isAccessTokenExpired(bufferMs = getRefreshBufferMs()): boolean {
   const expiresAt = getAccessTokenExpiresAt();
   if (expiresAt === null) return false;
+
   const remaining = expiresAt - Date.now();
   if (remaining <= 0) return true;
+
   return remaining <= bufferMs;
 }
 
-// 로그인/가입 완료 응답 — accessTokenExpiresIn은 밀리초 (OpenAPI SocialLoginResponse)
 export function setTokens(auth: StoredAuth): void {
   localStorage.setItem(ACCESS_TOKEN_KEY, auth.accessToken);
   setRefreshToken(auth.refreshToken);
@@ -96,13 +130,14 @@ export function setTokens(auth: StoredAuth): void {
   }
 
   setAccessTokenExpiry(auth.accessTokenExpiresIn);
+  notifyAuthStateChanged();
 }
 
-/** POST /auth/reissue 응답 — accessTokenExpiresIn은 초 단위 (OpenAPI TokenResponse) */
 export function setReissueTokens(tokens: ReissueTokens): void {
   localStorage.setItem(ACCESS_TOKEN_KEY, tokens.accessToken);
   setRefreshToken(tokens.refreshToken);
   setAccessTokenExpiry(tokens.accessTokenExpiresIn * 1000);
+  notifyAuthStateChanged();
 }
 
 export function getAccessToken(): string | null {
@@ -123,6 +158,7 @@ export function getNickname(): string | null {
 
 export function setNotificationEnabled(enabled: boolean): void {
   localStorage.setItem(NOTIFICATION_ENABLED_KEY, enabled ? 'true' : 'false');
+  notifyAuthStateChanged();
 }
 
 export function getNotificationEnabled(): boolean | null {
@@ -132,7 +168,6 @@ export function getNotificationEnabled(): boolean | null {
   return null;
 }
 
-/** GET /users/me 응답으로 localStorage 프로필 캐시를 갱신 */
 export function syncUserProfile(profile: {
   profileUrl?: string;
   nickname?: string;
@@ -149,16 +184,16 @@ export function syncUserProfile(profile: {
   }
 
   if (profile.notificationEnabled !== undefined) {
-    setNotificationEnabled(profile.notificationEnabled);
+    localStorage.setItem(NOTIFICATION_ENABLED_KEY, profile.notificationEnabled ? 'true' : 'false');
   }
+
+  notifyAuthStateChanged();
 }
 
-/** access + refresh 모두 있을 때만 true (reissue 가능한 완전한 세션) */
 export function hasAuthSession(): boolean {
   return Boolean(getAccessToken()) && Boolean(getRefreshToken());
 }
 
-// 저장된 모든 인증 정보를 제거(로그아웃·갱신 실패 등)
 export function clearTokens(): void {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(LEGACY_REFRESH_TOKEN_KEY);
@@ -168,4 +203,5 @@ export function clearTokens(): void {
   localStorage.removeItem(NOTIFICATION_ENABLED_KEY);
   localStorage.removeItem(ACCESS_TOKEN_EXPIRES_AT_KEY);
   localStorage.removeItem(ACCESS_TOKEN_TTL_MS_KEY);
+  notifyAuthStateChanged();
 }
