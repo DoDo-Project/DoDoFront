@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams, type Location } from 'react-router-dom';
 
-import { LoginModal, redirectToSocialLogin, resolveSessionExpiredError } from '@/features/auth';
+import { LoginModal, clearStoredReturnTo, redirectToSocialLogin, resolveSessionExpiredError } from '@/features/auth';
 import { AuthErrorScreen } from '@/features/auth/ui/status/AuthErrorScreen';
 import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
 import { clearTokens } from '@/shared/lib/auth/token';
@@ -45,6 +45,7 @@ export function LoginPage() {
   const returnTo = resolveReturnTo(searchParams.get('from'), locationState?.from);
 
   const handleGoHomeAsGuest = () => {
+    clearStoredReturnTo();
     clearTokens();
     navigate('/', { replace: true });
   };
