@@ -1,19 +1,26 @@
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 
 import { LoginModal, redirectToSocialLogin, resolveSessionExpiredError } from '@/features/auth';
 import { AuthErrorScreen } from '@/features/auth/ui/status/AuthErrorScreen';
 import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
+import { clearTokens } from '@/shared/lib/auth/token';
 
 const sessionExpiredButtonClassName =
   'group relative h-14 w-full overflow-hidden rounded-2xl bg-linear-to-r from-brand via-[#f08b57] to-[#f6b93b] px-4 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(229,108,49,0.34)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_48px_rgba(229,108,49,0.42)]';
 
 export function LoginPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const sessionExpired = searchParams.get('reason') === 'session-expired';
   const errorPresentation = useMemo(() => (sessionExpired ? resolveSessionExpiredError() : null), [sessionExpired]);
+
+  const handleGoHomeAsGuest = () => {
+    clearTokens();
+    navigate('/', { replace: true });
+  };
 
   if (sessionExpired && errorPresentation) {
     return (
@@ -21,6 +28,7 @@ export function LoginPage() {
         <AuthErrorScreen
           presentation={errorPresentation}
           showHomeLink
+          onHomeClick={handleGoHomeAsGuest}
           primaryAction={
             <button type="button" onClick={() => setIsLoginOpen(true)} className={sessionExpiredButtonClassName}>
               <span className="absolute inset-0 bg-linear-to-r from-white/0 via-white/18 to-white/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />

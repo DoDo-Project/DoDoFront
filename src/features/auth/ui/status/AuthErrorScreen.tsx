@@ -6,12 +6,11 @@ import type { SocialProvider } from '../../model/types';
 
 interface AuthErrorScreenProps {
   presentation: AuthErrorPresentation;
-  /** 주 버튼 (다시 로그인 등) */
   primaryAction?: ReactNode;
-  /** provider가 있으면 소셜 재시도 버튼 노출 */
   onRetrySocial?: (provider: SocialProvider) => void;
   retryProvider?: SocialProvider | null;
   showHomeLink?: boolean;
+  onHomeClick?: () => void;
 }
 
 function badgeTone(statusCode: number | null): string {
@@ -27,6 +26,7 @@ export function AuthErrorScreen({
   onRetrySocial,
   retryProvider,
   showHomeLink = true,
+  onHomeClick,
 }: AuthErrorScreenProps) {
   const { badge, title, message, hint, statusCode } = presentation;
 
@@ -60,12 +60,22 @@ export function AuthErrorScreen({
           ) : null}
 
           {showHomeLink ? (
-            <Link
-              to="/"
-              className="inline-flex h-12 items-center justify-center rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
-            >
-              홈으로 돌아가기
-            </Link>
+            onHomeClick ? (
+              <button
+                type="button"
+                onClick={onHomeClick}
+                className="inline-flex h-12 items-center justify-center rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+              >
+                홈으로 돌아가기
+              </button>
+            ) : (
+              <Link
+                to="/"
+                className="inline-flex h-12 items-center justify-center rounded-xl border border-neutral-200 bg-white text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+              >
+                홈으로 돌아가기
+              </Link>
+            )
           ) : null}
         </div>
       </div>
