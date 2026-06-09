@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useSearchParams, type Location } from 'react-router-dom';
 
 import { LoginModal, redirectToSocialLogin, resolveSessionExpiredError } from '@/features/auth';
 import { AuthErrorScreen } from '@/features/auth/ui/status/AuthErrorScreen';
@@ -9,14 +9,40 @@ import { clearTokens } from '@/shared/lib/auth/token';
 const sessionExpiredButtonClassName =
   'group relative h-14 w-full overflow-hidden rounded-2xl bg-linear-to-r from-brand via-[#f08b57] to-[#f6b93b] px-4 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(229,108,49,0.34)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_48px_rgba(229,108,49,0.42)]';
 
+interface LoginLocationState {
+  from?: Pick<Location, 'pathname' | 'search' | 'hash'>;
+}
+
+function isSafeReturnPath(path: string | null | undefined): path is string {
+  return Boolean(path && path.startsWith('/') && !path.startsWith('//'));
+}
+
+function resolveReturnTo(
+  queryFrom: string | null,
+  stateFrom: Pick<Location, 'pathname' | 'search' | 'hash'> | undefined,
+): string | null {
+  if (isSafeReturnPath(queryFrom)) {
+    return queryFrom;
+  }
+
+  if (!stateFrom) {
+    return null;
+  }
+
+  const path = `${stateFrom.pathname}${stateFrom.search}${stateFrom.hash}`;
+  return isSafeReturnPath(path) ? path : null;
+}
+
 export function LoginPage() {
   const [searchParams] = useSearchParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   const sessionExpired = searchParams.get('reason') === 'session-expired';
   const errorPresentation = useMemo(() => (sessionExpired ? resolveSessionExpiredError() : null), [sessionExpired]);
-  const returnTo = searchParams.get('from');
+  const locationState = location.state as LoginLocationState | null;
+  const returnTo = resolveReturnTo(searchParams.get('from'), locationState?.from);
 
   const handleGoHomeAsGuest = () => {
     clearTokens();
@@ -24,7 +50,7 @@ export function LoginPage() {
   };
 
   const handleSelectProvider = (provider: 'NAVER' | 'GOOGLE') => {
-    redirectToSocialLogin(provider, { returnTo: sessionExpired ? returnTo : null });
+    redirectToSocialLogin(provider, { returnTo });
   };
 
   if (sessionExpired && errorPresentation) {
