@@ -1,6 +1,6 @@
 import { useId, useRef, useState, type ChangeEvent } from 'react';
 
-import { IMAGE_UPLOAD_ACCEPT } from '@/shared/lib/files/imageUploadPolicy';
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_POLICY_DESCRIPTION } from '@/shared/lib/files/imageUploadPolicy';
 
 import PencilIcon from '../../assets/pencil.svg?react';
 import profileDefaultIllustration from '../../assets/profile-default.svg';
@@ -64,7 +64,7 @@ export function ProfileImagePicker({ imageUrl, uploading, error, onSelectFile }:
 
       <FormFeedback
         className="mt-1 w-full text-center"
-        message={error || (uploading ? '이미지 업로드 중...' : 'PNG, JPG 형식 / 최대 10MB')}
+        message={error || (uploading ? '이미지 업로드 중...' : IMAGE_UPLOAD_POLICY_DESCRIPTION)}
         tone={error ? 'error' : 'neutral'}
       />
     </div>

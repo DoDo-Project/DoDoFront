@@ -95,11 +95,9 @@ export function PetRegistrationForm({
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-7 text-neutral-600">
-                  사진이나 우측 하단 버튼을 눌러 새 이미지로 변경할 수 있어요.
+                  사진이나 우측 하단 버튼을 눌러 이미지를 변경할 수 있어요.
                 </p>
-                <p className="mt-1 text-sm leading-7 text-neutral-500">
-                  업로드한 이미지는 저장 후 반려동물 상세 화면과 목록 카드에 바로 반영됩니다.
-                </p>
+                <p className="mt-1 text-sm leading-7 text-neutral-500">업로드한 이미지는 저장 후 바로 반영됩니다.</p>
               </div>
             </div>
           ) : (
