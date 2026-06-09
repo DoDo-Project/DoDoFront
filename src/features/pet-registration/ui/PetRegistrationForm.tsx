@@ -91,7 +91,7 @@ export function PetRegistrationForm({
                     JPG / PNG
                   </span>
                   <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
-                    최대 5MB
+                    최대 10MB
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-7 text-neutral-600">
