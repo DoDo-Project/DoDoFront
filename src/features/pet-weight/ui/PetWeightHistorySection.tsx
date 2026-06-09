@@ -207,7 +207,7 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
     setEditingWeightId(weight.weightId);
     setEditingForm({
       weight: String(weight.weight),
-      measuredAt: weight.petWeightsMeasuredAt,
+      measuredAt: weight.petWeightsMeasuredAt.slice(0, 10),
     });
   };
 
