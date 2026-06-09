@@ -1,6 +1,8 @@
 import type { ChangeEventHandler, FormEventHandler, ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 
+import { MAX_IMAGE_FILE_SIZE_MB } from '@/shared/lib/files/imageUploadPolicy';
+
 import { SEX_OPTIONS, SPECIES_OPTIONS } from '../lib/constants';
 import type { PetRegistrationErrors, PetRegistrationFormState } from '../lib/validation';
 import { PetImagePicker } from './PetImagePicker';
@@ -91,7 +93,7 @@ export function PetRegistrationForm({
                     JPG / PNG
                   </span>
                   <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
-                    최대 10MB
+                    최대 {MAX_IMAGE_FILE_SIZE_MB}MB
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-7 text-neutral-600">
