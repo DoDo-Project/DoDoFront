@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 import type { PetDetailResponse } from '@/features/auth';
 import { PetSpecialNotesPreview } from '@/features/pet-special-notes';
+import { PetWeightPreview } from '@/features/pet-weight';
 import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.svg';
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 
@@ -19,22 +20,32 @@ function InfoCard({
   fullWidth = false,
   action,
   contentClassName = 'mt-3',
+  tone = 'default',
 }: {
   title: string;
   children: ReactNode;
   fullWidth?: boolean;
   action?: ReactNode;
   contentClassName?: string;
+  tone?: 'default' | 'accent' | 'muted';
 }) {
   return (
     <section
       className={[
-        'rounded-[24px] border border-neutral-200 bg-white px-6 py-5 shadow-sm',
+        'rounded-[20px] border px-6 py-5 shadow-sm',
+        tone === 'accent'
+          ? 'border-neutral-200 bg-linear-to-br from-white via-white to-brand/[0.035] shadow-[0_12px_28px_rgba(15,23,42,0.05)]'
+          : tone === 'muted'
+            ? 'border-neutral-200/90 bg-neutral-50/70 shadow-[0_8px_22px_rgba(15,23,42,0.03)]'
+            : 'border-neutral-200 bg-white',
         fullWidth ? 'lg:col-span-2' : '',
       ].join(' ')}
     >
       <div className="flex items-center justify-between gap-3">
-        <h2 className="text-[17px] font-medium text-neutral-950">{title}</h2>
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400">INFO</p>
+          <h2 className="mt-1 text-[17px] font-medium text-neutral-950">{title}</h2>
+        </div>
         {action}
       </div>
       <div className={contentClassName}>{children}</div>
@@ -46,7 +57,7 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
   const fallbackImage = species === 'FELINE' ? petDefaultCatIllustration : petDefaultIllustration;
 
   return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-neutral-100 sm:h-28 sm:w-28">
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[18px] bg-neutral-100 sm:h-28 sm:w-28">
       <img
         src={src || fallbackImage}
         alt={alt}
@@ -62,26 +73,20 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
 
 function DetailRows({ rows }: { rows: Array<{ label: string; value: string }> }) {
   return (
-    <div className="space-y-3">
-      {rows.map((row) => (
-        <div
-          key={row.label}
-          className="flex flex-col gap-1 border-b border-neutral-100 pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-        >
-          <span className="text-sm font-medium text-neutral-500">{row.label}</span>
-          <span className="text-sm font-medium text-neutral-900">{row.value}</span>
-        </div>
-      ))}
+    <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+      <div className="space-y-3">
+        {rows.map((row) => (
+          <div
+            key={row.label}
+            className="flex flex-col gap-1 border-b border-neutral-100 pb-3 last:border-b-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+          >
+            <span className="text-sm font-medium text-neutral-500">{row.label}</span>
+            <span className="text-sm font-medium text-neutral-900">{row.value}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
-
-function formatWeightContent(pet: PetDetailResponse) {
-  if (!pet.weightInfo || pet.weightInfo.currentWeight == null) {
-    return '현재 등록된 체중 정보가 없습니다.';
-  }
-
-  return `현재 ${pet.weightInfo.currentWeight} · ${pet.weightInfo.weightTrend}`;
 }
 
 export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
@@ -92,7 +97,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
         <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">반려동물 상세정보</h1>
       </div>
 
-      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-sm">
         <div className="flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
             <PetImage src={pet.imageFileUrl} alt={pet.petName} species={pet.species} />
@@ -140,7 +145,7 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
       </section>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <InfoCard title="기본 정보">
+        <InfoCard title="기본 정보" tone="accent">
           <DetailRows
             rows={[
               { label: '등록번호', value: String(pet.registrationNumber ?? '미등록') },
@@ -150,29 +155,45 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
           />
         </InfoCard>
 
-        <InfoCard title="체중 정보">
-          <p className="text-sm leading-7 text-neutral-600">{formatWeightContent(pet)}</p>
+        <InfoCard
+          title="체중 정보"
+          tone="accent"
+          action={
+            <Link
+              to={`/my/pets/${pet.petId}/weight`}
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
+            >
+              전체 보기
+            </Link>
+          }
+        >
+          <PetWeightPreview petId={pet.petId} />
         </InfoCard>
 
-        <InfoCard title="가족 구성원">
-          <p className="text-sm leading-7 text-neutral-600">
-            {pet.familyMembers.length > 0
-              ? pet.familyMembers.map((member) => member.userName).join(', ')
-              : '등록된 가족 구성원이 없습니다.'}
-          </p>
+        <InfoCard title="가족 구성원" tone="muted">
+          <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+            <p className="text-sm leading-7 text-neutral-600">
+              {pet.familyMembers.length > 0
+                ? pet.familyMembers.map((member) => member.userName).join(', ')
+                : '등록된 가족 구성원이 없습니다.'}
+            </p>
+          </div>
         </InfoCard>
 
-        <InfoCard title="최근 활동">
-          <p className="text-sm leading-7 text-neutral-600">
-            {pet.lastActivity
-              ? `${pet.lastActivity.activityType} · ${pet.lastActivity.distance}km`
-              : '최근 활동 정보가 없습니다.'}
-          </p>
+        <InfoCard title="최근 활동" tone="muted">
+          <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+            <p className="text-sm leading-7 text-neutral-600">
+              {pet.lastActivity
+                ? `${pet.lastActivity.activityType} · ${pet.lastActivity.distance}km`
+                : '최근 활동 정보가 없습니다.'}
+            </p>
+          </div>
         </InfoCard>
 
         <InfoCard
           title="특이사항"
           fullWidth
+          tone="muted"
           contentClassName="mt-2"
           action={
             <Link

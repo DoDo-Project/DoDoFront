@@ -37,7 +37,7 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
   const fallbackImage = species === 'FELINE' ? petDefaultCatIllustration : petDefaultIllustration;
 
   return (
-    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[22px] bg-neutral-100 sm:h-28 sm:w-28">
+    <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-[18px] bg-neutral-100 sm:h-28 sm:w-28">
       <img
         src={src || fallbackImage}
         alt={alt}
@@ -62,22 +62,9 @@ function ActionButtonLink({ label, to }: { label: string; to: string }) {
   );
 }
 
-function ActionButtonDisabled({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      disabled
-      className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 disabled:cursor-not-allowed disabled:opacity-70 sm:w-28"
-      title="반려동물 몸무게 기록 추가 API와 연결 예정입니다."
-    >
-      {label}
-    </button>
-  );
-}
-
 function PetCard({ pet }: { pet: PetListItem }) {
   return (
-    <article className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+    <article className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-sm">
       <div className="flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
           <PetImage src={pet.imageFileUrl} alt={pet.petName} species={pet.species} />
@@ -107,7 +94,7 @@ function PetCard({ pet }: { pet: PetListItem }) {
 
         <div className="flex flex-col gap-2 sm:items-end">
           <ActionButtonLink label="상세 정보" to={`/my/pets/${pet.petId}`} />
-          <ActionButtonDisabled label="체중 관리" />
+          <ActionButtonLink label="체중 관리" to={`/my/pets/${pet.petId}/weight`} />
         </div>
       </div>
     </article>

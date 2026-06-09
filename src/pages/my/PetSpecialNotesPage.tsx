@@ -41,7 +41,7 @@ export function PetSpecialNotesPage() {
           </Link>
         </div>
 
-        <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+        <section className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-sm">
           <div className="px-5 py-5 sm:px-6 sm:py-6">
             <div>
               <div className="flex flex-wrap items-center gap-2">

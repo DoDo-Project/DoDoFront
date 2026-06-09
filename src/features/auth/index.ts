@@ -15,13 +15,17 @@ export { socialLogin, registerProfile, checkNicknameAvailability, updateNotifica
 export { getMyProfile } from './api/users';
 export { useCreatePet } from './model/useCreatePet';
 export { useCreatePetSpecialNote } from './model/useCreatePetSpecialNote';
+export { useCreatePetWeight } from './model/useCreatePetWeight';
 export { useCurrentUser } from './model/useCurrentUser';
+export { useDeletePetWeight } from './model/useDeletePetWeight';
 export { useDeletePetSpecialNote } from './model/useDeletePetSpecialNote';
 export { usePetDetail } from './model/usePetDetail';
 export { usePetList } from './model/usePetList';
 export { usePetSpecialNoteList } from './model/usePetSpecialNoteList';
+export { usePetWeightHistory } from './model/usePetWeightHistory';
 export { useUpdatePet } from './model/useUpdatePet';
 export { useUpdatePetSpecialNote } from './model/useUpdatePetSpecialNote';
+export { useUpdatePetWeight } from './model/useUpdatePetWeight';
 export type {
   SocialProvider,
   AuthTokens,
@@ -33,10 +37,15 @@ export type {
   CreatePetResponse,
   CreatePetSpecialNoteRequest,
   CreatePetSpecialNoteResponse,
+  CreatePetWeightRequest,
+  CreatePetWeightResponse,
   UpdatePetRequest,
   UpdatePetResponse,
   UpdatePetSpecialNoteRequest,
   UpdatePetSpecialNoteResponse,
+  UpdatePetWeightRequest,
+  UpdatePetWeightResponse,
+  DeletePetWeightResponse,
   DeletePetSpecialNoteResponse,
   RegisterProfileRequest,
   RegisterProfileResponse,
@@ -51,6 +60,8 @@ export type {
   PetSpecialNote,
   PetSpecialNoteListResponse,
   PetSpecialNoteType,
+  PetWeightRecord,
+  PetWeightHistoryResponse,
   PetWeightInfo,
   TokenReissueRequest,
   TokenReissueResponse,
