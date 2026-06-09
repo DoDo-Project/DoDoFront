@@ -59,6 +59,7 @@ export interface RegisterProfileRequest {
   nickname: string;
   // TODO(STEP 6): 지역 값이 enum이면 백엔드 명세에 맞춰 union 타입으로 교체
   region: string;
+  profileUrl?: string | null;
 }
 
 // 200: 계정 ACTIVE 전환 + 새 토큰 발급

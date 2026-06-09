@@ -26,7 +26,7 @@ export function ProfileImagePicker({ imageUrl, uploading, error, onSelectFile }:
   };
 
   return (
-    <div className="flex flex-col items-center mt-4">
+    <div className="mt-10 flex flex-col items-center">
       <div className="relative">
         {showImage ? (
           <img
