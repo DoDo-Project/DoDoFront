@@ -170,7 +170,8 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
             nickname: nickname.trim(),
             region: region.trim(),
             hasFamily: false,
-            profileUrl: lastProfileImageUrlRef.current ?? null,
+            // 최종적으로 업로드된 이미지 URL을 사용. 업로드 실패 시 기존 URL 유지
+            profileUrl: lastProfileImageUrlRef.current,
           },
           registrationToken,
         );
