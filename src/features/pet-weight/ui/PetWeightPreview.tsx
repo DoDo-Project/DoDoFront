@@ -13,7 +13,7 @@ function formatPreviewDate(date: string) {
 }
 
 export function PetWeightPreview({ petId }: PetWeightPreviewProps) {
-  const { data, isLoading } = usePetWeightHistory(petId, {
+  const { data, isLoading, isError } = usePetWeightHistory(petId, {
     page: 0,
     size: 1,
     sort: 'petWeightsMeasuredAt,desc',
@@ -23,6 +23,14 @@ export function PetWeightPreview({ petId }: PetWeightPreviewProps) {
 
   if (isLoading) {
     return <p className="text-sm text-neutral-500">체중 기록을 불러오는 중이에요...</p>;
+  }
+
+  if (isError) {
+    return (
+      <div className="rounded-[16px] border border-red-100 bg-red-50/50 px-4 py-4">
+        <p className="text-sm leading-6 text-red-600">체중 정보를 불러오지 못했습니다.</p>
+      </div>
+    );
   }
 
   if (!latestWeight) {
