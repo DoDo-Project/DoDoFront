@@ -16,10 +16,15 @@ export function LoginPage() {
 
   const sessionExpired = searchParams.get('reason') === 'session-expired';
   const errorPresentation = useMemo(() => (sessionExpired ? resolveSessionExpiredError() : null), [sessionExpired]);
+  const returnTo = searchParams.get('from');
 
   const handleGoHomeAsGuest = () => {
     clearTokens();
     navigate('/', { replace: true });
+  };
+
+  const handleSelectProvider = (provider: 'NAVER' | 'GOOGLE') => {
+    redirectToSocialLogin(provider, { returnTo: sessionExpired ? returnTo : null });
   };
 
   if (sessionExpired && errorPresentation) {
@@ -34,8 +39,11 @@ export function LoginPage() {
               <span className="absolute inset-0 bg-linear-to-r from-white/0 via-white/18 to-white/0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
               <span className="absolute -right-8 top-0 h-full w-20 rotate-12 bg-white/12 blur-2xl transition-transform duration-500 group-hover:-translate-x-4" />
               <span className="relative flex items-center justify-center gap-2">
-                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/18 text-base">
-                  *
+                <span
+                  className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/18 text-base"
+                  aria-hidden
+                >
+                  ✦
                 </span>
                 <span>다시 로그인하기</span>
               </span>
@@ -43,7 +51,7 @@ export function LoginPage() {
           }
         />
 
-        <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={redirectToSocialLogin} />
+        <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={handleSelectProvider} />
       </>
     );
   }
@@ -68,7 +76,7 @@ export function LoginPage() {
         </Link>
       </div>
 
-      <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={redirectToSocialLogin} />
+      <LoginModal open={isLoginOpen} onClose={() => setIsLoginOpen(false)} onSelectProvider={handleSelectProvider} />
     </>
   );
 }

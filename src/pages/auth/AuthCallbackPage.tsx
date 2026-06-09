@@ -4,7 +4,9 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   AuthErrorScreen,
   AuthLoadingScreen,
+  clearStoredReturnTo,
   clearStoredState,
+  getStoredReturnTo,
   getStoredState,
   parseProvider,
   redirectToSocialLogin,
@@ -44,6 +46,7 @@ export function AuthCallbackPage() {
       const code = searchParams.get('code');
       const state = searchParams.get('state');
       const storedState = getStoredState();
+      const returnTo = getStoredReturnTo();
       clearStoredState();
 
       if (provider) {
@@ -73,18 +76,21 @@ export function AuthCallbackPage() {
 
         if (result.kind === 'LOGIN') {
           setTokens(result.data);
-          navigate('/', { replace: true });
-        } else {
-          navigate('/auth/signup', {
-            replace: true,
-            state: {
-              registrationToken: result.data.registrationToken,
-              email: result.data.email,
-              name: result.data.name,
-              profileUrl: result.data.profileUrl,
-            },
-          });
+          const nextPath = returnTo ?? '/';
+          clearStoredReturnTo();
+          navigate(nextPath, { replace: true });
+          return;
         }
+
+        navigate('/auth/signup', {
+          replace: true,
+          state: {
+            registrationToken: result.data.registrationToken,
+            email: result.data.email,
+            name: result.data.name,
+            profileUrl: result.data.profileUrl,
+          },
+        });
       } catch (error) {
         console.error('[social-login] 실패', error);
         setStatus('error');
@@ -95,7 +101,7 @@ export function AuthCallbackPage() {
     };
 
     void processCallback();
-  }, [providerParam, searchParams, navigate]);
+  }, [navigate, providerParam, searchParams]);
 
   const provider = parseProvider(providerParam);
   const providerLabel = provider ? PROVIDER_LABEL[provider] : null;
@@ -112,8 +118,8 @@ export function AuthCallbackPage() {
 
   return (
     <AuthLoadingScreen
-      title="로그인 처리 중"
-      message="소셜 계정 정보를 확인하고 있어요."
+      title="로그인을 확인하고 있어요"
+      message="선택한 소셜 계정 정보를 안전하게 불러오는 중입니다."
       stepLabel={providerLabel ? `${providerLabel} 로그인 연동 중` : undefined}
     />
   );

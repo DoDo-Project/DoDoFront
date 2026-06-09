@@ -3,12 +3,16 @@ import { env } from '@/shared/config';
 import type { SocialProvider } from '../model/types';
 
 const OAUTH_STATE_KEY = 'oauth_state';
+const OAUTH_RETURN_TO_KEY = 'oauth_return_to';
 
 interface ProviderOAuthConfig {
   authorizeUrl: string;
   clientId: string;
-  /** 요청할 사용자 정보 범위 (구글 등에서 사용) */
   scope?: string;
+}
+
+interface RedirectToSocialLoginOptions {
+  returnTo?: string | null;
 }
 
 const PROVIDER_OAUTH: Record<SocialProvider, ProviderOAuthConfig> = {
@@ -23,35 +27,51 @@ const PROVIDER_OAUTH: Record<SocialProvider, ProviderOAuthConfig> = {
   },
 };
 
-// provider별 redirect_uri. OAuth 콘솔에 등록된 값과 정확히 일치해야 함
 function getRedirectUri(provider: SocialProvider): string {
   return `${env.OAUTH_REDIRECT_URI}/${provider.toLowerCase()}`;
 }
 
-// URL 경로 파라미터("google"/"naver")를 SocialProvider로 변환. 유효하지 않으면 null.
+function isSafeReturnPath(value: string | null | undefined): value is string {
+  return Boolean(value && value.startsWith('/') && !value.startsWith('//'));
+}
+
 export function parseProvider(value: string | undefined): SocialProvider | null {
   const upper = value?.toUpperCase();
   return upper === 'GOOGLE' || upper === 'NAVER' ? upper : null;
 }
 
-// CSRF 방지용 랜덤 state를 생성하고 sessionStorage에 저장
 function createState(): string {
   const state = crypto.randomUUID();
   sessionStorage.setItem(OAUTH_STATE_KEY, state);
   return state;
 }
 
-// 콜백에서 검증할 수 있도록 저장된 state를 반환
 export function getStoredState(): string | null {
   return sessionStorage.getItem(OAUTH_STATE_KEY);
 }
 
-// 사용 후 state를 제거
 export function clearStoredState(): void {
   sessionStorage.removeItem(OAUTH_STATE_KEY);
 }
 
-// provider 인증 페이지 URL을 조립
+export function setStoredReturnTo(path: string | null | undefined): void {
+  if (!isSafeReturnPath(path)) {
+    sessionStorage.removeItem(OAUTH_RETURN_TO_KEY);
+    return;
+  }
+
+  sessionStorage.setItem(OAUTH_RETURN_TO_KEY, path);
+}
+
+export function getStoredReturnTo(): string | null {
+  const value = sessionStorage.getItem(OAUTH_RETURN_TO_KEY);
+  return isSafeReturnPath(value) ? value : null;
+}
+
+export function clearStoredReturnTo(): void {
+  sessionStorage.removeItem(OAUTH_RETURN_TO_KEY);
+}
+
 export function buildSocialAuthUrl(provider: SocialProvider): string {
   const config = PROVIDER_OAUTH[provider];
 
@@ -69,7 +89,10 @@ export function buildSocialAuthUrl(provider: SocialProvider): string {
   return `${config.authorizeUrl}?${params.toString()}`;
 }
 
-// provider 로그인 페이지로 이동
-export function redirectToSocialLogin(provider: SocialProvider): void {
+export function redirectToSocialLogin(provider: SocialProvider, options?: RedirectToSocialLoginOptions): void {
+  if (options?.returnTo !== undefined) {
+    setStoredReturnTo(options.returnTo);
+  }
+
   window.location.href = buildSocialAuthUrl(provider);
 }
