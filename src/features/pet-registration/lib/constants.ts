@@ -15,5 +15,3 @@ export const CREATE_PET_STATUS_MESSAGES: Partial<Record<number, string>> = {
   409: '이미 등록된 반려동물 정보이거나 디바이스가 사용 중일 수 있어요.',
   500: '반려동물 등록 중 서버 오류가 발생했습니다.',
 };
-
-export const MAX_PET_IMAGE_SIZE = 5 * 1024 * 1024;

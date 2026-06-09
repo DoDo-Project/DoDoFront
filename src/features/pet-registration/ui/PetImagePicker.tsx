@@ -1,6 +1,7 @@
 import { useId, useRef, useState, type ChangeEvent } from 'react';
 
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_POLICY_DESCRIPTION } from '@/shared/lib/files/imageUploadPolicy';
 
 interface PetImagePickerProps {
   imageUrl: string | null;
@@ -87,14 +88,14 @@ export function PetImagePicker({
           ref={inputRef}
           id={inputId}
           type="file"
-          accept="image/*"
+          accept={IMAGE_UPLOAD_ACCEPT}
           className="sr-only"
           disabled={uploading}
           onChange={handleChange}
         />
       </div>
 
-      {!compact ? <p className="mt-3 text-sm leading-6 text-neutral-500">PNG, JPG 형식 / 최대 5MB</p> : null}
+      {!compact ? <p className="mt-3 text-sm leading-6 text-neutral-500">{IMAGE_UPLOAD_POLICY_DESCRIPTION}</p> : null}
       {compact ? (
         <button
           type="button"

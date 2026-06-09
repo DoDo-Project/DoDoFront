@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { uploadImage } from '@/shared/api/files';
 import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/api/errorMessage';
 import { setNotificationEnabled, setTokens } from '@/shared/lib/auth/token';
+import { validateImageFile } from '@/shared/lib/files/imageUploadPolicy';
 
 import { checkNicknameAvailability, registerProfile, updateNotificationSetting } from '../../api/auth';
 import {
@@ -30,8 +31,6 @@ const Step = {
   Complete: 3,
 } as const;
 type Step = (typeof Step)[keyof typeof Step];
-
-const MAX_PROFILE_IMAGE_SIZE = 5 * 1024 * 1024;
 
 function resolveProfileUrl(url?: string): string | null {
   const trimmed = url?.trim();
@@ -124,13 +123,10 @@ export function SignupFlow({ registrationToken, email, name, initialProfileUrl, 
   const handleSelectProfileImage = async (file: File) => {
     if (uploadingProfileImage) return;
 
-    if (!file.type.startsWith('image/')) {
-      setProfileImageError('이미지 파일만 업로드할 수 있어요.');
-      return;
-    }
-
-    if (file.size > MAX_PROFILE_IMAGE_SIZE) {
-      setProfileImageError('5MB 이하의 이미지를 선택해주세요.');
+    try {
+      validateImageFile(file);
+    } catch (error) {
+      setProfileImageError(error instanceof Error ? error.message : '이미지 파일을 다시 확인해주세요.');
       return;
     }
 

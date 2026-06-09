@@ -1,4 +1,5 @@
 import { apiClient } from '@/shared/api/axios';
+import { validateImageFiles } from '@/shared/lib/files/imageUploadPolicy';
 
 /** POST /files/upload 성공 응답 */
 export interface ImageUploadResponse {
@@ -18,6 +19,8 @@ export interface UploadImagesOptions {
  */
 export async function uploadImages(files: File | File[], options?: UploadImagesOptions): Promise<string[]> {
   const list = Array.isArray(files) ? files : [files];
+  validateImageFiles(list);
+
   const formData = new FormData();
   list.forEach((file) => formData.append('files', file));
 

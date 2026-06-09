@@ -1,5 +1,7 @@
 import { useId, useRef, useState, type ChangeEvent } from 'react';
 
+import { IMAGE_UPLOAD_ACCEPT, IMAGE_UPLOAD_POLICY_DESCRIPTION } from '@/shared/lib/files/imageUploadPolicy';
+
 import PencilIcon from '../../assets/pencil.svg?react';
 import profileDefaultIllustration from '../../assets/profile-default.svg';
 import { FormFeedback } from './SignupStepLayout';
@@ -43,7 +45,7 @@ export function ProfileImagePicker({ imageUrl, uploading, error, onSelectFile }:
           type="button"
           onClick={() => inputRef.current?.click()}
           disabled={uploading}
-          className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-secondary transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          className="absolute bottom-0 right-0 flex h-7 w-7 cursor-pointer items-center justify-center rounded-full bg-brand text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="프로필 이미지 변경"
         >
           <PencilIcon className="h-3.5 w-3.5" aria-hidden />
@@ -53,7 +55,7 @@ export function ProfileImagePicker({ imageUrl, uploading, error, onSelectFile }:
           ref={inputRef}
           id={inputId}
           type="file"
-          accept="image/*"
+          accept={IMAGE_UPLOAD_ACCEPT}
           className="sr-only"
           disabled={uploading}
           onChange={handleChange}
@@ -62,7 +64,7 @@ export function ProfileImagePicker({ imageUrl, uploading, error, onSelectFile }:
 
       <FormFeedback
         className="mt-1 w-full text-center"
-        message={error || (uploading ? '이미지 업로드 중...' : undefined)}
+        message={error || (uploading ? '이미지 업로드 중...' : IMAGE_UPLOAD_POLICY_DESCRIPTION)}
         tone={error ? 'error' : 'neutral'}
       />
     </div>

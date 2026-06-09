@@ -4,8 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { useCreatePet } from '@/features/auth';
 import { uploadImage } from '@/shared/api/files';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
+import { validateImageFile } from '@/shared/lib/files/imageUploadPolicy';
 
-import { CREATE_PET_STATUS_MESSAGES, MAX_PET_IMAGE_SIZE } from '../lib/constants';
+import { CREATE_PET_STATUS_MESSAGES } from '../lib/constants';
 import { calculateInternationalAge } from '../lib/helpers';
 import {
   INITIAL_PET_REGISTRATION_FORM_STATE,
@@ -48,13 +49,10 @@ export function usePetRegistrationForm() {
   const handleSelectPetImage = async (file: File) => {
     if (uploadingImage) return;
 
-    if (!file.type.startsWith('image/')) {
-      setImageError('이미지 파일만 업로드할 수 있어요.');
-      return;
-    }
-
-    if (file.size > MAX_PET_IMAGE_SIZE) {
-      setImageError('5MB 이하 이미지로 업로드해 주세요.');
+    try {
+      validateImageFile(file);
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : '이미지 파일을 다시 확인해 주세요.');
       return;
     }
 
