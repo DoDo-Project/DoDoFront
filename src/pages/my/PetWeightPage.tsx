@@ -84,7 +84,7 @@ export function PetWeightPage() {
           onRetry={() => void refetchWeightHistory()}
         />
 
-        <PetWeightHistorySection petId={data.petId} />
+        <PetWeightHistorySection petId={data.petId} birth={data.birth} />
       </div>
     );
   }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import {
   getApiErrorMessage,
@@ -13,6 +13,7 @@ import { formatMeasuredDate, formatWeight } from '../lib/formatters';
 
 interface PetWeightHistorySectionProps {
   petId: number;
+  birth: string;
 }
 
 interface WeightFormState {
@@ -47,11 +48,21 @@ function isValidWeightForm(form: WeightFormState) {
   return parseWeightValue(form.weight) !== null && Boolean(form.measuredAt);
 }
 
+function normalizeDateInputValue(date: string) {
+  return date.slice(0, 10);
+}
+
+function getTodayDateValue() {
+  return new Date().toLocaleDateString('en-CA');
+}
+
 function WeightRecordItem({
   weight,
   isEditing,
   editingForm,
   isMutating,
+  minDate,
+  maxDate,
   onEditMeasuredAtChange,
   onEditWeightChange,
   onCancelEdit,
@@ -63,6 +74,8 @@ function WeightRecordItem({
   isEditing: boolean;
   editingForm: WeightFormState;
   isMutating: boolean;
+  minDate: string;
+  maxDate: string;
   onEditMeasuredAtChange: (value: string) => void;
   onEditWeightChange: (value: string) => void;
   onCancelEdit: () => void;
@@ -86,6 +99,8 @@ function WeightRecordItem({
               <input
                 type="date"
                 value={editingForm.measuredAt}
+                min={minDate}
+                max={maxDate}
                 onChange={(event) => onEditMeasuredAtChange(event.target.value)}
                 className="h-10 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand"
               />
@@ -155,7 +170,7 @@ function WeightRecordItem({
   );
 }
 
-export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps) {
+export function PetWeightHistorySection({ petId, birth }: PetWeightHistorySectionProps) {
   const { data, isLoading, isError, error, refetch } = usePetWeightHistory(petId, {
     page: 0,
     size: 10,
@@ -172,6 +187,8 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
 
   const weights = data?.weights ?? [];
   const isMutating = isCreating || isUpdating || isDeleting;
+  const minMeasuredAt = useMemo(() => normalizeDateInputValue(birth), [birth]);
+  const maxMeasuredAt = useMemo(() => getTodayDateValue(), []);
 
   const resetEditing = () => {
     setEditingWeightId(null);
@@ -207,7 +224,7 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
     setEditingWeightId(weight.weightId);
     setEditingForm({
       weight: String(weight.weight),
-      measuredAt: weight.petWeightsMeasuredAt.slice(0, 10),
+      measuredAt: normalizeDateInputValue(weight.petWeightsMeasuredAt),
     });
   };
 
@@ -276,6 +293,8 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
             <input
               type="date"
               value={createForm.measuredAt}
+              min={minMeasuredAt}
+              max={maxMeasuredAt}
               onChange={(event) => setCreateForm((current) => ({ ...current, measuredAt: event.target.value }))}
               className="h-11 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-900 outline-none transition-colors focus:border-brand"
             />
@@ -334,6 +353,8 @@ export function PetWeightHistorySection({ petId }: PetWeightHistorySectionProps)
                 isEditing={isEditing}
                 editingForm={editingForm}
                 isMutating={isMutating}
+                minDate={minMeasuredAt}
+                maxDate={maxMeasuredAt}
                 onEditMeasuredAtChange={(value) => setEditingForm((current) => ({ ...current, measuredAt: value }))}
                 onEditWeightChange={(value) => setEditingForm((current) => ({ ...current, weight: value }))}
                 onCancelEdit={resetEditing}
