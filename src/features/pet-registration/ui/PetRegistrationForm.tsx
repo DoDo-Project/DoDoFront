@@ -51,11 +51,11 @@ export function PetRegistrationForm({
   const panelDescription =
     description ??
     (isEditMode
-      ? '이미지를 변경하려면 사진 우측 하단의 버튼을 눌러 업로드해 주세요.'
+      ? '이미지를 변경하려면 사진 하단의 버튼을 눌러 업로드해 주세요.'
       : '반려동물의 기본 정보와 디바이스 정보를 입력해 등록을 시작해보세요. 생년월일을 입력하면 만 나이는 자동으로 계산됩니다.');
   const imageActionLabel = isEditMode ? '이미지 변경' : '이미지 등록';
   const imageHelperText = isEditMode
-    ? '사진이나 우측 하단 버튼을 눌러 이미지를 변경할 수 있어요.'
+    ? '사진이나 하단 버튼을 눌러 이미지를 변경할 수 있어요.'
     : '사진이나 버튼을 눌러 반려동물 프로필 이미지를 등록할 수 있어요.';
   const imageHintText = isEditMode
     ? '업로드한 이미지는 저장 후 바로 반영됩니다.'
