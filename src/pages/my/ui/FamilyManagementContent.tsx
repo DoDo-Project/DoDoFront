@@ -29,7 +29,7 @@ import {
 } from '@/features/family-management';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 
-function FamilyRequestManagementView({
+function FamilyJoinManagementView({
   joinCode,
   isSubmitting,
   joinSuccessMessage,
@@ -39,22 +39,6 @@ function FamilyRequestManagementView({
   applications,
   applicationsLoading,
   applicationsErrorMessage,
-  pendingRequests,
-  pendingLoading,
-  pendingErrorMessage,
-  activeRequestKey,
-  feedbackMessage,
-  feedbackTone,
-  onApprove,
-  onReject,
-  onBlock,
-  blockedUsers,
-  blockedLoading,
-  blockedErrorMessage,
-  activeBlockedUserKey,
-  blockedFeedbackMessage,
-  blockedFeedbackTone,
-  onReleaseBlockedUser,
 }: {
   joinCode: string;
   isSubmitting: boolean;
@@ -65,22 +49,6 @@ function FamilyRequestManagementView({
   applications: Parameters<typeof FamilyApplicationsCard>[0]['applications'];
   applicationsLoading: boolean;
   applicationsErrorMessage: string | null;
-  pendingRequests: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'];
-  pendingLoading: boolean;
-  pendingErrorMessage: string | null;
-  activeRequestKey: string | null;
-  feedbackMessage: string;
-  feedbackTone: 'success' | 'error' | null;
-  onApprove: Parameters<typeof FamilyPendingRequestsCard>[0]['onApprove'];
-  onReject: Parameters<typeof FamilyPendingRequestsCard>[0]['onReject'];
-  onBlock: Parameters<typeof FamilyPendingRequestsCard>[0]['onBlock'];
-  blockedUsers: Parameters<typeof FamilyBlockedUsersCard>[0]['users'];
-  blockedLoading: boolean;
-  blockedErrorMessage: string | null;
-  activeBlockedUserKey: string | null;
-  blockedFeedbackMessage: string;
-  blockedFeedbackTone: 'success' | 'error' | null;
-  onReleaseBlockedUser: Parameters<typeof FamilyBlockedUsersCard>[0]['onRelease'];
 }) {
   return (
     <div className="space-y-6">
@@ -113,9 +81,61 @@ function FamilyRequestManagementView({
             errorMessage={applicationsErrorMessage}
           />
         </SectionCard>
+      </div>
+    </div>
+  );
+}
 
-        <SectionCard badge="INFO" title="받은 신청 목록">
+function FamilyReceivedManagementView({
+  pendingRequests,
+  pendingLoading,
+  pendingErrorMessage,
+  activeRequestKey,
+  feedbackMessage,
+  feedbackTone,
+  onApprove,
+  onReject,
+  onBlock,
+  blockedUsers,
+  blockedLoading,
+  blockedErrorMessage,
+  activeBlockedUserKey,
+  blockedFeedbackMessage,
+  blockedFeedbackTone,
+  onReleaseBlockedUser,
+}: {
+  pendingRequests: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'];
+  pendingLoading: boolean;
+  pendingErrorMessage: string | null;
+  activeRequestKey: string | null;
+  feedbackMessage: string;
+  feedbackTone: 'success' | 'error' | null;
+  onApprove: Parameters<typeof FamilyPendingRequestsCard>[0]['onApprove'];
+  onReject: Parameters<typeof FamilyPendingRequestsCard>[0]['onReject'];
+  onBlock: Parameters<typeof FamilyPendingRequestsCard>[0]['onBlock'];
+  blockedUsers: Parameters<typeof FamilyBlockedUsersCard>[0]['users'];
+  blockedLoading: boolean;
+  blockedErrorMessage: string | null;
+  activeBlockedUserKey: string | null;
+  blockedFeedbackMessage: string;
+  blockedFeedbackTone: 'success' | 'error' | null;
+  onReleaseBlockedUser: Parameters<typeof FamilyBlockedUsersCard>[0]['onRelease'];
+}) {
+  return (
+    <div className="space-y-6">
+      <div>
+        <p className="text-xs font-semibold tracking-[0.24em] text-brand">FAMILY</p>
+        <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">받은 신청 목록</h1>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard
+          badge="INFO"
+          title="받은 신청 목록"
+          action={<SectionActionButton href="/my?menu=family">메인 보기</SectionActionButton>}
+        >
           <FamilyPendingRequestsCard
+            mode="manage"
             requests={pendingRequests}
             isLoading={pendingLoading}
             errorMessage={pendingErrorMessage}
@@ -147,7 +167,8 @@ function FamilyRequestManagementView({
 export function FamilyManagementContent() {
   const [searchParams] = useSearchParams();
   const section = searchParams.get('section');
-  const isRequestsView = section === 'requests';
+  const isJoinView = section === 'join';
+  const isReceivedView = section === 'received';
 
   const { data, isLoading, isError, refetch } = usePetList({ page: 0, size: 10 });
   const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
@@ -199,9 +220,41 @@ export function FamilyManagementContent() {
     ? getApiErrorMessage(blockedUsersQuery.error, '차단 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
     : null;
 
-  if (isRequestsView) {
+  const handleApprove = (request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number]) => {
+    if (!window.confirm(`${request.nickname}님을 승인하시겠습니까?`)) {
+      return;
+    }
+
+    void familyApprovalAction.handleApproveAction(request, 'APPROVED');
+  };
+
+  const handleReject = (request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number]) => {
+    if (!window.confirm(`${request.nickname}님을 거절하시겠습니까?`)) {
+      return;
+    }
+
+    void familyApprovalAction.handleApproveAction(request, 'REJECTED');
+  };
+
+  const handleBlock = (request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number]) => {
+    if (!window.confirm(`${request.nickname}님을 차단하시겠습니까?`)) {
+      return;
+    }
+
+    void familyApprovalAction.handleApproveAction(request, 'BLOCKED');
+  };
+
+  const handleReleaseBlockedUser = (user: Parameters<typeof FamilyBlockedUsersCard>[0]['users'][number]) => {
+    if (!window.confirm(`${user.nickname}님의 차단을 해제하시겠습니까?`)) {
+      return;
+    }
+
+    void familyBlockedAction.handleReleaseBlockedUser(user);
+  };
+
+  if (isJoinView) {
     return (
-      <FamilyRequestManagementView
+      <FamilyJoinManagementView
         joinCode={familyJoinForm.joinCode}
         isSubmitting={familyJoinForm.isSubmitting}
         joinSuccessMessage={familyJoinForm.joinSuccessMessage}
@@ -211,22 +264,29 @@ export function FamilyManagementContent() {
         applications={applicationsQuery.data?.applications ?? []}
         applicationsLoading={applicationsQuery.isLoading || applicationsQuery.isFetching}
         applicationsErrorMessage={applicationsErrorMessage}
+      />
+    );
+  }
+
+  if (isReceivedView) {
+    return (
+      <FamilyReceivedManagementView
         pendingRequests={filteredPendingUsers}
         pendingLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
         pendingErrorMessage={pendingErrorMessage}
         activeRequestKey={familyApprovalAction.activeRequestKey}
         feedbackMessage={familyApprovalAction.feedbackMessage}
         feedbackTone={familyApprovalAction.feedbackTone}
-        onApprove={(request) => void familyApprovalAction.handleApproveAction(request, 'APPROVED')}
-        onReject={(request) => void familyApprovalAction.handleApproveAction(request, 'REJECTED')}
-        onBlock={(request) => void familyApprovalAction.handleApproveAction(request, 'BLOCKED')}
+        onApprove={handleApprove}
+        onReject={handleReject}
+        onBlock={handleBlock}
         blockedUsers={filteredBlockedUsers}
         blockedLoading={blockedUsersQuery.isLoading || blockedUsersQuery.isFetching}
         blockedErrorMessage={blockedUsersErrorMessage}
         activeBlockedUserKey={familyBlockedAction.activeBlockedUserKey}
         blockedFeedbackMessage={familyBlockedAction.feedbackMessage}
         blockedFeedbackTone={familyBlockedAction.feedbackTone}
-        onReleaseBlockedUser={(user) => void familyBlockedAction.handleReleaseBlockedUser(user)}
+        onReleaseBlockedUser={handleReleaseBlockedUser}
       />
     );
   }
@@ -253,6 +313,29 @@ export function FamilyManagementContent() {
         />
       </SectionCard>
 
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard
+          badge="INFO"
+          title="가족 신청"
+          action={<SectionActionButton href="/my?menu=family&section=join">전체 보기</SectionActionButton>}
+        >
+          <FamilyJoinCard mode="summary" />
+        </SectionCard>
+
+        <SectionCard
+          badge="INFO"
+          title="받은 신청 목록"
+          action={<SectionActionButton href="/my?menu=family&section=received">전체 보기</SectionActionButton>}
+        >
+          <FamilyPendingRequestsCard
+            mode="summary"
+            requests={filteredPendingUsers}
+            isLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
+            errorMessage={pendingErrorMessage}
+          />
+        </SectionCard>
+      </div>
+
       <SectionCard badge="INFO" title="초대 코드 발급">
         <FamilyInvitationCodeCard
           activeCode={invitationCode.activeInvitationCode}
@@ -262,30 +345,6 @@ export function FamilyManagementContent() {
           onCreate={() => void invitationCode.handleCreateInvitationCode()}
         />
       </SectionCard>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard
-          badge="INFO"
-          title="가족 신청"
-          action={<SectionActionButton href="/my?menu=family&section=requests">전체 보기</SectionActionButton>}
-        >
-          <FamilyJoinCard mode="summary" />
-        </SectionCard>
-
-        <SectionCard badge="INFO" title="받은 신청 목록">
-          <FamilyPendingRequestsCard
-            requests={filteredPendingUsers}
-            isLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
-            errorMessage={pendingErrorMessage}
-            activeRequestKey={familyApprovalAction.activeRequestKey}
-            feedbackMessage={familyApprovalAction.feedbackMessage}
-            feedbackTone={familyApprovalAction.feedbackTone}
-            onApprove={(request) => void familyApprovalAction.handleApproveAction(request, 'APPROVED')}
-            onReject={(request) => void familyApprovalAction.handleApproveAction(request, 'REJECTED')}
-            onBlock={(request) => void familyApprovalAction.handleApproveAction(request, 'BLOCKED')}
-          />
-        </SectionCard>
-      </div>
     </div>
   );
 }
