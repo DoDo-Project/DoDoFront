@@ -11,5 +11,6 @@ export { FamilyMembersCard } from './ui/FamilyMembersCard';
 export { FamilyPendingRequestsCard } from './ui/FamilyPendingRequestsCard';
 export { FamilyApplicationsCard } from './ui/FamilyApplicationsCard';
 export { SectionCard } from './ui/FamilyVisuals';
+export { useFamilyApprovalAction } from './model/useFamilyApprovalAction';
 export { useFamilyInvitationCode } from './model/useFamilyInvitationCode';
 export { useFamilyJoinForm } from './model/useFamilyJoinForm';

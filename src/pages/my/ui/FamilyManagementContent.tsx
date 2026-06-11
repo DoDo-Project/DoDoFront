@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react';
 import { useFamilyApplications, useFamilyPendingUsers, usePetDetail, usePetList } from '@/features/auth';
 import {
   FamilyApplicationsCard,
+  useFamilyApprovalAction,
   FamilyInvitationCodeCard,
   FamilyJoinCard,
   FamilyManagementEmptyState,
@@ -30,6 +31,7 @@ export function FamilyManagementContent() {
   const applicationsQuery = useFamilyApplications({ page: 0, size: 20 });
   const invitationCode = useFamilyInvitationCode(selectedPet);
   const familyJoinForm = useFamilyJoinForm();
+  const familyApprovalAction = useFamilyApprovalAction();
 
   const filteredPendingUsers = useMemo(
     () => pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
@@ -108,6 +110,11 @@ export function FamilyManagementContent() {
             requests={filteredPendingUsers}
             isLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
             errorMessage={pendingErrorMessage}
+            activeRequestKey={familyApprovalAction.activeRequestKey}
+            feedbackMessage={familyApprovalAction.feedbackMessage}
+            feedbackTone={familyApprovalAction.feedbackTone}
+            onApprove={(request) => void familyApprovalAction.handleApproveAction(request, 'APPROVED')}
+            onReject={(request) => void familyApprovalAction.handleApproveAction(request, 'REJECTED')}
           />
         </SectionCard>
 
