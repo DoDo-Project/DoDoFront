@@ -52,36 +52,33 @@ function FamilyJoinManagementView({
 }) {
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs font-semibold tracking-[0.24em] text-brand">FAMILY</p>
-        <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">가족 신청 관리</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.24em] text-brand">FAMILY</p>
+          <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">가족 신청 관리</h1>
+        </div>
+        <SectionActionButton href="/my?menu=family">메인 보기</SectionActionButton>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard
-          badge="INFO"
-          title="가족 신청"
-          action={<SectionActionButton href="/my?menu=family">메인 보기</SectionActionButton>}
-        >
-          <FamilyJoinCard
-            mode="form"
-            code={joinCode}
-            isSubmitting={isSubmitting}
-            successMessage={joinSuccessMessage}
-            errorMessage={joinErrorMessage}
-            onChange={onChangeJoinCode}
-            onSubmit={onSubmitJoinCode}
-          />
-        </SectionCard>
+      <SectionCard badge="INFO" title="가족 신청">
+        <FamilyJoinCard
+          mode="form"
+          code={joinCode}
+          isSubmitting={isSubmitting}
+          successMessage={joinSuccessMessage}
+          errorMessage={joinErrorMessage}
+          onChange={onChangeJoinCode}
+          onSubmit={onSubmitJoinCode}
+        />
+      </SectionCard>
 
-        <SectionCard badge="INFO" title="내 신청 내역">
-          <FamilyApplicationsCard
-            applications={applications}
-            isLoading={applicationsLoading}
-            errorMessage={applicationsErrorMessage}
-          />
-        </SectionCard>
-      </div>
+      <SectionCard badge="INFO" title="내 신청 내역">
+        <FamilyApplicationsCard
+          applications={applications}
+          isLoading={applicationsLoading}
+          errorMessage={applicationsErrorMessage}
+        />
+      </SectionCard>
     </div>
   );
 }
@@ -123,43 +120,40 @@ function FamilyReceivedManagementView({
 }) {
   return (
     <div className="space-y-6">
-      <div>
-        <p className="text-xs font-semibold tracking-[0.24em] text-brand">FAMILY</p>
-        <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">받은 신청 목록</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.24em] text-brand">FAMILY</p>
+          <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">받은 신청 목록</h1>
+        </div>
+        <SectionActionButton href="/my?menu=family">메인 보기</SectionActionButton>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <SectionCard
-          badge="INFO"
-          title="받은 신청 목록"
-          action={<SectionActionButton href="/my?menu=family">메인 보기</SectionActionButton>}
-        >
-          <FamilyPendingRequestsCard
-            mode="manage"
-            requests={pendingRequests}
-            isLoading={pendingLoading}
-            errorMessage={pendingErrorMessage}
-            activeRequestKey={activeRequestKey}
-            feedbackMessage={feedbackMessage}
-            feedbackTone={feedbackTone}
-            onApprove={onApprove}
-            onReject={onReject}
-            onBlock={onBlock}
-          />
-        </SectionCard>
+      <SectionCard badge="INFO" title="받은 신청 목록">
+        <FamilyPendingRequestsCard
+          mode="manage"
+          requests={pendingRequests}
+          isLoading={pendingLoading}
+          errorMessage={pendingErrorMessage}
+          activeRequestKey={activeRequestKey}
+          feedbackMessage={feedbackMessage}
+          feedbackTone={feedbackTone}
+          onApprove={onApprove}
+          onReject={onReject}
+          onBlock={onBlock}
+        />
+      </SectionCard>
 
-        <SectionCard badge="INFO" title="차단 목록">
-          <FamilyBlockedUsersCard
-            users={blockedUsers}
-            isLoading={blockedLoading}
-            errorMessage={blockedErrorMessage}
-            activeBlockedUserKey={activeBlockedUserKey}
-            feedbackMessage={blockedFeedbackMessage}
-            feedbackTone={blockedFeedbackTone}
-            onRelease={onReleaseBlockedUser}
-          />
-        </SectionCard>
-      </div>
+      <SectionCard badge="INFO" title="차단 목록">
+        <FamilyBlockedUsersCard
+          users={blockedUsers}
+          isLoading={blockedLoading}
+          errorMessage={blockedErrorMessage}
+          activeBlockedUserKey={activeBlockedUserKey}
+          feedbackMessage={blockedFeedbackMessage}
+          feedbackTone={blockedFeedbackTone}
+          onRelease={onReleaseBlockedUser}
+        />
+      </SectionCard>
     </div>
   );
 }
