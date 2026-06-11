@@ -100,7 +100,9 @@ export interface FamilyPendingUser {
   targetPetId: number;
   targetPetName: string;
   targetPetImageUrl: string | null;
+  status: PetFamilyApplicationStatus;
   requestedAt: string;
+  rejectedAt?: string | null;
 }
 
 export interface FamilyPendingUsersResponse {
@@ -112,7 +114,7 @@ export interface FamilyPendingUsersResponse {
   pageSize: number;
 }
 
-export type PetFamilyApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | string;
+export type PetFamilyApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED' | string;
 
 export interface FamilyApplicationItem {
   petId: number;
@@ -131,7 +133,7 @@ export interface FamilyApplicationsResponse {
   pageSize: number;
 }
 
-export type PetFamilyApprovalAction = 'APPROVED' | 'REJECTED';
+export type PetFamilyApprovalAction = 'APPROVED' | 'REJECTED' | 'BLOCKED';
 
 export interface PetFamilyApprovalRequest {
   petId: number;
@@ -145,6 +147,35 @@ export interface PetFamilyApprovalResponse {
 }
 
 export interface LeavePetFamilyResponse {
+  message: string;
+}
+
+export interface FamilyBlockedUser {
+  userId: string;
+  nickname: string;
+  profileUrl: string;
+  targetPetId: number;
+  targetPetName: string;
+  targetPetImageUrl: string | null;
+  blockedAt: string;
+}
+
+export interface FamilyBlockedUsersResponse {
+  message: string;
+  users: FamilyBlockedUser[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface ReleaseFamilyBlockedUserRequest {
+  petId: number;
+  targetUserId: string;
+}
+
+export interface ReleaseFamilyBlockedUserResponse {
+  petId: number;
   message: string;
 }
 

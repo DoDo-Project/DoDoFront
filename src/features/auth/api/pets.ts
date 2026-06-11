@@ -11,6 +11,7 @@ import type {
   DeletePetWeightResponse,
   DeletePetSpecialNoteResponse,
   FamilyApplicationsResponse,
+  FamilyBlockedUsersResponse,
   FamilyPendingUsersResponse,
   LeavePetFamilyResponse,
   PetFamilyApprovalRequest,
@@ -20,6 +21,8 @@ import type {
   PetListResponse,
   PetSpecialNoteListResponse,
   PetWeightHistoryResponse,
+  ReleaseFamilyBlockedUserRequest,
+  ReleaseFamilyBlockedUserResponse,
   UpdatePetRequest,
   UpdatePetResponse,
   UpdatePetSpecialNoteRequest,
@@ -52,6 +55,13 @@ export interface GetPetWeightHistoryParams {
 }
 
 export interface GetFamilyPendingUsersParams {
+  status?: 'PENDING' | 'REJECTED';
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface GetFamilyBlockedUsersParams {
   page?: number;
   size?: number;
   sort?: string;
@@ -110,6 +120,7 @@ export async function createPetInvitationCode(petId: number): Promise<CreatePetI
 export async function getFamilyPendingUsers(params?: GetFamilyPendingUsersParams): Promise<FamilyPendingUsersResponse> {
   const response = await apiClient.get<FamilyPendingUsersResponse>('/pets/family/pending-users', {
     params: {
+      status: params?.status,
       page: params?.page ?? 0,
       size: params?.size ?? 10,
       sort: params?.sort,
@@ -135,6 +146,21 @@ export async function getFamilyApplications(params?: GetFamilyApplicationsParams
 }
 
 /**
+ * 가족 신청 차단 유저 조회 (GET /pets/family/blocked-users)
+ */
+export async function getFamilyBlockedUsers(params?: GetFamilyBlockedUsersParams): Promise<FamilyBlockedUsersResponse> {
+  const response = await apiClient.get<FamilyBlockedUsersResponse>('/pets/family/blocked-users', {
+    params: {
+      page: params?.page ?? 0,
+      size: params?.size ?? 10,
+      sort: params?.sort,
+    },
+  });
+
+  return response.data;
+}
+
+/**
  * 가족 신청 승인/거절 (POST /pets/family/approval)
  */
 export async function approvePetFamilyRequest(payload: PetFamilyApprovalRequest): Promise<PetFamilyApprovalResponse> {
@@ -148,6 +174,19 @@ export async function approvePetFamilyRequest(payload: PetFamilyApprovalRequest)
  */
 export async function leavePetFamily(petId: number): Promise<LeavePetFamilyResponse> {
   const response = await apiClient.delete<LeavePetFamilyResponse>(`/pets/${petId}`);
+
+  return response.data;
+}
+
+/**
+ * 가족 신청 차단 해제 (DELETE /pets/family/block)
+ */
+export async function releaseFamilyBlockedUser(
+  payload: ReleaseFamilyBlockedUserRequest,
+): Promise<ReleaseFamilyBlockedUserResponse> {
+  const response = await apiClient.delete<ReleaseFamilyBlockedUserResponse>('/pets/family/block', {
+    data: payload,
+  });
 
   return response.data;
 }
