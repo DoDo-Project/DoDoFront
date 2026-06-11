@@ -1,12 +1,15 @@
 import type { ReactNode } from 'react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
+  useCreatePetInvitationCode,
   useFamilyApplications,
   useFamilyPendingUsers,
   usePetDetail,
   usePetList,
+  useRequestFamilyJoin,
+  type CreatePetInvitationCodeResponse,
   type FamilyApplicationItem,
   type FamilyPendingUser,
   type PetFamilyMember,
@@ -17,6 +20,28 @@ import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.sv
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 import { Skeleton } from '@/shared/ui';
+
+const FAMILY_CODE_REGEX = /^[A-Z0-9]{6}$/;
+
+const INVITATION_CODE_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  401: '로그인이 필요해요. 다시 시도해 주세요.',
+  403: '가족 초대 권한이 없는 반려동물이에요.',
+  404: '대상 반려동물을 찾을 수 없어요.',
+  409: '이미 유효한 초대 코드가 있어요.',
+  500: '초대 코드 생성에 실패했어요. 잠시 후 다시 시도해 주세요.',
+};
+
+const FAMILY_JOIN_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  400: '가족 코드를 다시 확인해 주세요.',
+  401: '로그인이 필요해요. 다시 시도해 주세요.',
+  404: '만료되었거나 존재하지 않는 초대 코드예요.',
+  409: '이미 가족으로 등록된 반려동물이에요.',
+  500: '가족 신청에 실패했어요. 잠시 후 다시 시도해 주세요.',
+};
+
+interface InvitationCodeState extends CreatePetInvitationCodeResponse {
+  createdAt: number;
+}
 
 function formatSpeciesLabel(species: string) {
   if (species === 'CANINE') return '강아지';
@@ -51,6 +76,19 @@ function getApplicationStatusClass(status: string) {
   if (status === 'APPROVED') return 'bg-emerald-50 text-emerald-600';
   if (status === 'REJECTED') return 'bg-rose-50 text-rose-500';
   return 'bg-amber-50 text-amber-600';
+}
+
+function normalizeFamilyCode(value: string) {
+  return value
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, '')
+    .slice(0, 6);
+}
+
+function formatRemainingTime(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 function PetImage({ src, alt, species }: { src: string | null; alt: string; species: string }) {
@@ -125,6 +163,21 @@ function ErrorSectionMessage({ message }: { message: string }) {
   return (
     <div className="rounded-[16px] border border-red-100 bg-red-50/70 px-4 py-4">
       <p className="text-sm leading-7 text-red-500">{message}</p>
+    </div>
+  );
+}
+
+function InlineFeedback({ tone, message }: { tone: 'success' | 'error'; message: string }) {
+  return (
+    <div
+      className={[
+        'rounded-[14px] border px-4 py-3 text-sm leading-6',
+        tone === 'success'
+          ? 'border-emerald-100 bg-emerald-50/80 text-emerald-700'
+          : 'border-red-100 bg-red-50/80 text-red-500',
+      ].join(' ')}
+    >
+      {message}
     </div>
   );
 }
@@ -333,6 +386,126 @@ function SelectedPetOverview({
   );
 }
 
+function InvitationCodeSection({
+  activeCode,
+  isCreating,
+  createErrorMessage,
+  createSuccessMessage,
+  onCreate,
+}: {
+  activeCode: InvitationCodeState | null;
+  isCreating: boolean;
+  createErrorMessage: string;
+  createSuccessMessage: string;
+  onCreate: () => void;
+}) {
+  const remainingSeconds = useRemainingSeconds(activeCode);
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-[16px] border border-neutral-200 bg-neutral-50/80 px-4 py-4">
+        <p className="text-sm leading-7 text-neutral-600">
+          선택한 반려동물 기준으로 초대 코드를 발급할 수 있어요. 생성된 코드는 15분 동안 유효하고, 같은 코드로 가족
+          신청을 받을 수 있어요.
+        </p>
+      </div>
+
+      {activeCode ? (
+        <div className="rounded-[16px] border border-brand/20 bg-brand/[0.06] px-4 py-4">
+          <p className="text-xs font-semibold tracking-[0.16em] text-brand">ACTIVE CODE</p>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-[24px] font-semibold tracking-[0.24em] text-neutral-950">{activeCode.code}</p>
+              <p className="mt-2 text-sm text-neutral-600">
+                {remainingSeconds > 0
+                  ? `남은 시간 ${formatRemainingTime(remainingSeconds)}`
+                  : '유효 시간이 만료되었어요.'}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onCreate}
+              disabled={isCreating}
+              className="inline-flex h-10 min-w-28 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isCreating ? '재생성 중' : '다시 생성'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={onCreate}
+          disabled={isCreating}
+          className="inline-flex h-10 min-w-28 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isCreating ? '생성 중' : '초대 코드 만들기'}
+        </button>
+      )}
+
+      {createSuccessMessage ? <InlineFeedback tone="success" message={createSuccessMessage} /> : null}
+      {createErrorMessage ? <InlineFeedback tone="error" message={createErrorMessage} /> : null}
+    </div>
+  );
+}
+
+function FamilyJoinSection({
+  code,
+  isSubmitting,
+  successMessage,
+  errorMessage,
+  onChange,
+  onSubmit,
+}: {
+  code: string;
+  isSubmitting: boolean;
+  successMessage: string;
+  errorMessage: string;
+  onChange: (value: string) => void;
+  onSubmit: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="rounded-[16px] border border-neutral-200 bg-neutral-50/80 px-4 py-4">
+        <p className="text-sm leading-7 text-neutral-600">
+          가족 코드를 입력하면 다른 반려동물의 가족으로 신청할 수 있어요. 승인 전까지는 내 신청 내역에서 상태를 확인할
+          수 있어요.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <input
+          value={code}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="가족 코드 입력"
+          maxLength={6}
+          autoComplete="off"
+          spellCheck={false}
+          className="h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm uppercase tracking-[0.24em] text-neutral-900 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15"
+        />
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={isSubmitting || code.trim().length === 0}
+          className="inline-flex h-12 min-w-28 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {isSubmitting ? '신청 중' : '가족 신청'}
+        </button>
+      </div>
+
+      {successMessage ? <InlineFeedback tone="success" message={successMessage} /> : null}
+      {errorMessage ? <InlineFeedback tone="error" message={errorMessage} /> : null}
+
+      <Link
+        to="/auth/family/join"
+        className="inline-flex text-sm font-medium text-brand transition-opacity hover:opacity-80"
+      >
+        전체 화면으로 신청하기
+      </Link>
+    </div>
+  );
+}
+
 function FamilyMembersSection({
   members,
   isLoading,
@@ -468,15 +641,77 @@ function ApplicationsSection({
   );
 }
 
+function useRemainingSeconds(activeCode: InvitationCodeState | null) {
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    if (!activeCode) return;
+
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timer);
+    };
+  }, [activeCode]);
+
+  if (!activeCode) {
+    return 0;
+  }
+
+  const elapsedSeconds = Math.floor((now - activeCode.createdAt) / 1000);
+  return Math.max(0, activeCode.expiresIn - elapsedSeconds);
+}
+
 export function FamilyManagementContent() {
   const { data, isLoading, isError, refetch } = usePetList({ page: 0, size: 10 });
   const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
+  const [joinCode, setJoinCode] = useState('');
+  const [joinErrorMessage, setJoinErrorMessage] = useState('');
+  const [joinSuccessMessage, setJoinSuccessMessage] = useState('');
+  const [invitationCodeByPetId, setInvitationCodeByPetId] = useState<Record<number, InvitationCodeState>>({});
+
   const pets = data?.pets ?? [];
   const selectedPet = (selectedPetId ? pets.find((pet) => pet.petId === selectedPetId) : null) ?? pets[0] ?? null;
 
   const petDetailQuery = usePetDetail(selectedPet?.petId ?? null);
   const pendingUsersQuery = useFamilyPendingUsers({ page: 0, size: 20 });
   const applicationsQuery = useFamilyApplications({ page: 0, size: 20 });
+  const createInvitationCodeMutation = useCreatePetInvitationCode();
+  const requestFamilyJoinMutation = useRequestFamilyJoin();
+
+  const activeInvitationCode = selectedPet ? (invitationCodeByPetId[selectedPet.petId] ?? null) : null;
+
+  const filteredPendingUsers = useMemo(
+    () => pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
+    [pendingUsersQuery.data?.users, selectedPet?.petId],
+  );
+
+  const familyMembers = petDetailQuery.data?.familyMembers ?? [];
+  const familyMembersErrorMessage = petDetailQuery.isError
+    ? getApiErrorMessage(petDetailQuery.error, '가족 구성원 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
+    : null;
+  const pendingErrorMessage = pendingUsersQuery.isError
+    ? getApiErrorMessage(pendingUsersQuery.error, '받은 신청 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
+    : null;
+  const applicationsErrorMessage = applicationsQuery.isError
+    ? getApiErrorMessage(applicationsQuery.error, '내 신청 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
+    : null;
+
+  const invitationCodeErrorMessage =
+    createInvitationCodeMutation.isError && selectedPet
+      ? getApiErrorMessage(
+          createInvitationCodeMutation.error,
+          '초대 코드 생성에 실패했어요. 잠시 후 다시 시도해 주세요.',
+          INVITATION_CODE_STATUS_MESSAGES,
+        )
+      : '';
+
+  const invitationCodeSuccessMessage =
+    createInvitationCodeMutation.isSuccess && activeInvitationCode
+      ? `${selectedPet?.petName ?? '선택한 반려동물'}의 초대 코드가 준비되었어요.`
+      : '';
 
   if (isLoading) {
     return <FamilyManagementLoadingState />;
@@ -490,18 +725,53 @@ export function FamilyManagementContent() {
     return <FamilyManagementEmptyState />;
   }
 
-  const filteredPendingUsers =
-    pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet.petId) ?? [];
-  const familyMembers = petDetailQuery.data?.familyMembers ?? [];
-  const familyMembersErrorMessage = petDetailQuery.isError
-    ? getApiErrorMessage(petDetailQuery.error, '가족 구성원 정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
-    : null;
-  const pendingErrorMessage = pendingUsersQuery.isError
-    ? getApiErrorMessage(pendingUsersQuery.error, '받은 신청 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
-    : null;
-  const applicationsErrorMessage = applicationsQuery.isError
-    ? getApiErrorMessage(applicationsQuery.error, '내 신청 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
-    : null;
+  const handleCreateInvitationCode = async () => {
+    try {
+      const created = await createInvitationCodeMutation.mutateAsync(selectedPet.petId);
+      setInvitationCodeByPetId((current) => ({
+        ...current,
+        [selectedPet.petId]: {
+          ...created,
+          createdAt: Date.now(),
+        },
+      }));
+    } catch (error) {
+      console.error('[family-invitation-code] failed', error);
+    }
+  };
+
+  const handleChangeJoinCode = (value: string) => {
+    setJoinCode(normalizeFamilyCode(value));
+    if (joinErrorMessage) {
+      setJoinErrorMessage('');
+    }
+    if (joinSuccessMessage) {
+      setJoinSuccessMessage('');
+    }
+  };
+
+  const handleRequestFamilyJoin = async () => {
+    const trimmed = joinCode.trim();
+
+    if (!FAMILY_CODE_REGEX.test(trimmed)) {
+      setJoinErrorMessage('가족 코드는 영문 대문자와 숫자 6자리여야 해요.');
+      setJoinSuccessMessage('');
+      return;
+    }
+
+    try {
+      const result = await requestFamilyJoinMutation.mutateAsync(trimmed);
+      setJoinSuccessMessage(`가족 신청이 완료되었어요. 반려동물 ID ${result.petId}의 승인을 기다려 주세요.`);
+      setJoinErrorMessage('');
+      setJoinCode('');
+    } catch (error) {
+      console.error('[family-join-inline] failed', error);
+      setJoinSuccessMessage('');
+      setJoinErrorMessage(
+        getApiErrorMessage(error, '가족 신청에 실패했어요. 잠시 후 다시 시도해 주세요.', FAMILY_JOIN_STATUS_MESSAGES),
+      );
+    }
+  };
 
   return (
     <div className="space-y-5">
@@ -519,18 +789,24 @@ export function FamilyManagementContent() {
 
       <div className="grid gap-4 xl:grid-cols-2">
         <SectionCard badge="INVITE CODE" title="가족 초대 코드">
-          <div className="rounded-[16px] border border-neutral-200 bg-neutral-50/80 px-4 py-4">
-            <p className="text-sm leading-7 text-neutral-600">
-              선택한 반려동물 기준으로 초대 코드를 발급하고, 만료 시간과 재발급 상태를 이 영역에서 관리할 예정이에요.
-            </p>
-          </div>
-          <button
-            type="button"
-            disabled
-            className="mt-4 inline-flex h-10 min-w-28 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-700 disabled:cursor-not-allowed disabled:opacity-70"
-          >
-            코드 준비 중
-          </button>
+          <InvitationCodeSection
+            activeCode={activeInvitationCode}
+            isCreating={createInvitationCodeMutation.isPending}
+            createErrorMessage={invitationCodeErrorMessage}
+            createSuccessMessage={invitationCodeSuccessMessage}
+            onCreate={() => void handleCreateInvitationCode()}
+          />
+        </SectionCard>
+
+        <SectionCard badge="JOIN FAMILY" title="가족 신청">
+          <FamilyJoinSection
+            code={joinCode}
+            isSubmitting={requestFamilyJoinMutation.isPending}
+            successMessage={joinSuccessMessage}
+            errorMessage={joinErrorMessage}
+            onChange={handleChangeJoinCode}
+            onSubmit={() => void handleRequestFamilyJoin()}
+          />
         </SectionCard>
 
         <SectionCard badge="FAMILY MEMBERS" title="현재 가족 구성원">
