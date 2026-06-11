@@ -1,6 +1,7 @@
 import { apiClient } from '@/shared/api/axios';
 
 import type {
+  CreatePetInvitationCodeResponse,
   CreatePetRequest,
   CreatePetResponse,
   CreatePetSpecialNoteRequest,
@@ -9,6 +10,11 @@ import type {
   CreatePetWeightResponse,
   DeletePetWeightResponse,
   DeletePetSpecialNoteResponse,
+  FamilyApplicationsResponse,
+  FamilyPendingUsersResponse,
+  LeavePetFamilyResponse,
+  PetFamilyApprovalRequest,
+  PetFamilyApprovalResponse,
   PetDetailResponse,
   PetFamilyJoinResponse,
   PetListResponse,
@@ -45,6 +51,18 @@ export interface GetPetWeightHistoryParams {
   sort?: string;
 }
 
+export interface GetFamilyPendingUsersParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface GetFamilyApplicationsParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
 /**
  * 반려동물 등록 (POST /pets)
  */
@@ -73,6 +91,63 @@ export async function requestFamilyJoin(
         : undefined,
     },
   );
+
+  return response.data;
+}
+
+/**
+ * 가족 초대 코드 생성 (POST /pets/{petId}/invitation-code)
+ */
+export async function createPetInvitationCode(petId: number): Promise<CreatePetInvitationCodeResponse> {
+  const response = await apiClient.post<CreatePetInvitationCodeResponse>(`/pets/${petId}/invitation-code`);
+
+  return response.data;
+}
+
+/**
+ * 가족 신청 대기자 조회 (GET /pets/family/pending-users)
+ */
+export async function getFamilyPendingUsers(params?: GetFamilyPendingUsersParams): Promise<FamilyPendingUsersResponse> {
+  const response = await apiClient.get<FamilyPendingUsersResponse>('/pets/family/pending-users', {
+    params: {
+      page: params?.page ?? 0,
+      size: params?.size ?? 10,
+      sort: params?.sort,
+    },
+  });
+
+  return response.data;
+}
+
+/**
+ * 내 가족 신청 내역 조회 (GET /pets/family/applications)
+ */
+export async function getFamilyApplications(params?: GetFamilyApplicationsParams): Promise<FamilyApplicationsResponse> {
+  const response = await apiClient.get<FamilyApplicationsResponse>('/pets/family/applications', {
+    params: {
+      page: params?.page ?? 0,
+      size: params?.size ?? 10,
+      sort: params?.sort,
+    },
+  });
+
+  return response.data;
+}
+
+/**
+ * 가족 신청 승인/거절 (POST /pets/family/approval)
+ */
+export async function approvePetFamilyRequest(payload: PetFamilyApprovalRequest): Promise<PetFamilyApprovalResponse> {
+  const response = await apiClient.post<PetFamilyApprovalResponse>('/pets/family/approval', payload);
+
+  return response.data;
+}
+
+/**
+ * 펫 가족 나가기 (DELETE /pets/{petId})
+ */
+export async function leavePetFamily(petId: number): Promise<LeavePetFamilyResponse> {
+  const response = await apiClient.delete<LeavePetFamilyResponse>(`/pets/${petId}`);
 
   return response.data;
 }
