@@ -47,71 +47,54 @@ export function PetRegistrationForm({
   cancelTo = '/my?menu=pet-list',
 }: PetRegistrationFormProps) {
   const isEditMode = mode === 'edit';
+  const eyebrow = isEditMode ? 'PET DETAIL' : 'PET REGISTER';
   const panelDescription =
     description ??
     (isEditMode
-      ? '이미지를 변경하려면 사진 우측 하단의 버튼을 눌러 업로드해 주세요.'
+      ? '이미지를 변경하려면 사진 하단의 버튼을 눌러 업로드해 주세요.'
       : '반려동물의 기본 정보와 디바이스 정보를 입력해 등록을 시작해보세요. 생년월일을 입력하면 만 나이는 자동으로 계산됩니다.');
+  const imageActionLabel = isEditMode ? '이미지 변경' : '이미지 등록';
+  const imageHelperText = isEditMode
+    ? '사진이나 하단 버튼을 눌러 이미지를 변경할 수 있어요.'
+    : '사진이나 버튼을 눌러 반려동물 프로필 이미지를 등록할 수 있어요.';
+  const imageHintText = isEditMode
+    ? '업로드한 이미지는 저장 후 바로 반영됩니다.'
+    : '이미지는 나중에 다시 변경할 수 있으며, 등록 전에도 미리 확인할 수 있어요.';
 
   return (
     <form className="space-y-6" onSubmit={onSubmit}>
-      {isEditMode ? (
-        <div>
-          <p className="text-xs font-semibold tracking-[0.24em] text-brand">PET DETAIL</p>
-          <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">{heading}</h1>
-        </div>
-      ) : (
-        <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
-          <div className="border-b border-neutral-100 bg-gradient-to-r from-brand/8 via-white to-white px-6 py-5 sm:px-8">
-            <p className="text-xs font-semibold tracking-[0.24em] text-brand">PET REGISTER</p>
-            <h1 className="mt-3 text-[22px] font-medium text-neutral-950">{heading}</h1>
-          </div>
-
-          <div className="px-6 py-6 sm:px-8">
-            <p className="max-w-2xl text-sm leading-7 text-neutral-600">{panelDescription}</p>
-          </div>
-        </section>
-      )}
+      <div>
+        <p className="text-xs font-semibold tracking-[0.24em] text-brand">{eyebrow}</p>
+        <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">{heading}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-600">{panelDescription}</p>
+      </div>
 
       <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
         <div className="flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6">
-          {isEditMode ? (
-            <div className="grid gap-6 lg:grid-cols-[160px_minmax(0,1fr)] lg:items-stretch">
-              <PetImagePicker
-                imageUrl={petImageUrl}
-                uploading={uploadingImage}
-                error={imageError}
-                onSelectFile={onSelectPetImage}
-                compact
-                actionLabel="이미지 변경"
-              />
+          <div className="grid gap-6 lg:grid-cols-[160px_minmax(0,1fr)] lg:items-stretch">
+            <PetImagePicker
+              imageUrl={petImageUrl}
+              uploading={uploadingImage}
+              error={imageError}
+              onSelectFile={onSelectPetImage}
+              compact
+              actionLabel={imageActionLabel}
+            />
 
-              <div className="flex h-full flex-col justify-center rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-5 py-5">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-[17px] font-medium text-neutral-950">프로필 이미지</span>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
-                    JPG / PNG
-                  </span>
-                  <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
-                    최대 {MAX_IMAGE_FILE_SIZE_MB}MB
-                  </span>
-                </div>
-                <p className="mt-3 text-sm leading-7 text-neutral-600">
-                  사진이나 우측 하단 버튼을 눌러 이미지를 변경할 수 있어요.
-                </p>
-                <p className="mt-1 text-sm leading-7 text-neutral-500">업로드한 이미지는 저장 후 바로 반영됩니다.</p>
+            <div className="flex h-full flex-col justify-center rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-5 py-5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[17px] font-medium text-neutral-950">프로필 이미지</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
+                  JPG / PNG
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
+                  최대 {MAX_IMAGE_FILE_SIZE_MB}MB
+                </span>
               </div>
+              <p className="mt-3 text-sm leading-7 text-neutral-600">{imageHelperText}</p>
+              <p className="mt-1 text-sm leading-7 text-neutral-500">{imageHintText}</p>
             </div>
-          ) : (
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-              <PetImagePicker
-                imageUrl={petImageUrl}
-                uploading={uploadingImage}
-                error={imageError}
-                onSelectFile={onSelectPetImage}
-              />
-            </div>
-          )}
+          </div>
         </div>
       </section>
 
