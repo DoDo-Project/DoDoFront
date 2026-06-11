@@ -12,7 +12,7 @@ export function FamilyMembersCard({
   errorMessage: string | null;
 }) {
   if (isLoading) {
-    return <SectionContentSkeleton rows={2} />;
+    return <SectionContentSkeleton rows={1} />;
   }
 
   if (errorMessage) {
@@ -24,19 +24,18 @@ export function FamilyMembersCard({
   }
 
   return (
-    <div className="space-y-3">
-      {members.map((member) => (
-        <div
-          key={member.userId}
-          className="flex items-center gap-3 rounded-[22px] border border-neutral-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(245,245,245,0.88))] px-4 py-4"
-        >
-          <ProfileImage src={member.profileImageUrl || null} alt={member.userName} />
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-neutral-900">{member.userName}</p>
-            <p className="mt-1 text-xs font-medium text-neutral-500">현재 함께 관리 중인 가족 구성원</p>
+    <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+      <div className="flex flex-wrap gap-3">
+        {members.map((member) => (
+          <div
+            key={member.userId}
+            className="inline-flex items-center gap-3 rounded-full border border-neutral-200 bg-white px-3 py-2"
+          >
+            <ProfileImage src={member.profileImageUrl || null} alt={member.userName} />
+            <span className="text-sm font-medium text-neutral-900">{member.userName}</span>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }

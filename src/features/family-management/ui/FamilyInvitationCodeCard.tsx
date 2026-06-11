@@ -1,7 +1,30 @@
+import { useEffect, useState } from 'react';
+
 import { formatRemainingTime } from '../lib/formatters';
 import type { InvitationCodeState } from '../model/types';
 import { useRemainingSeconds } from '../model/useRemainingSeconds';
 import { InlineFeedback } from './FamilyVisuals';
+
+function CopyIcon() {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" aria-hidden className="h-4 w-4">
+      <path
+        d="M7.5 6.667V5a1.667 1.667 0 0 1 1.667-1.667h5A1.667 1.667 0 0 1 15.833 5v5a1.667 1.667 0 0 1-1.666 1.667H12.5"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M5.833 7.5h5A1.667 1.667 0 0 1 12.5 9.167v5a1.667 1.667 0 0 1-1.667 1.666h-5a1.667 1.667 0 0 1-1.666-1.666v-5A1.667 1.667 0 0 1 5.833 7.5Z"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
 export function FamilyInvitationCodeCard({
   activeCode,
@@ -17,10 +40,38 @@ export function FamilyInvitationCodeCard({
   onCreate: () => void;
 }) {
   const remainingSeconds = useRemainingSeconds(activeCode);
+  const [copiedMessage, setCopiedMessage] = useState('');
+
+  useEffect(() => {
+    if (!copiedMessage) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setCopiedMessage('');
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(timer);
+    };
+  }, [copiedMessage]);
+
+  const handleCopyCode = async () => {
+    if (!activeCode) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(activeCode.code);
+      setCopiedMessage('초대 코드를 복사했어요.');
+    } catch {
+      setCopiedMessage('복사에 실패했어요. 다시 시도해 주세요.');
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <div className="rounded-[22px] border border-neutral-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(245,245,245,0.88))] px-4 py-4">
+      <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
         <p className="text-sm leading-7 text-neutral-600">
           선택한 반려동물 기준으로 초대 코드를 발급할 수 있어요. 생성된 코드는 15분 동안 유효하고, 같은 코드로 가족
           신청을 받을 수 있어요.
@@ -28,11 +79,21 @@ export function FamilyInvitationCodeCard({
       </div>
 
       {activeCode ? (
-        <div className="rounded-[24px] border border-neutral-200 bg-white px-5 py-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)]">
-          <p className="text-xs font-semibold tracking-[0.28em] text-neutral-400">ACTIVE CODE</p>
-          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[24px] font-semibold tracking-[0.24em] text-neutral-950">{activeCode.code}</p>
+        <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+          <p className="text-xs font-semibold tracking-[0.16em] text-neutral-400">ACTIVE CODE</p>
+          <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <p className="text-[24px] font-semibold tracking-[0.24em] text-neutral-950">{activeCode.code}</p>
+                <button
+                  type="button"
+                  onClick={() => void handleCopyCode()}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition-colors hover:border-brand/50 hover:text-brand"
+                  aria-label="초대 코드 복사"
+                >
+                  <CopyIcon />
+                </button>
+              </div>
               <p className="mt-2 text-sm text-neutral-600">
                 {remainingSeconds > 0
                   ? `남은 시간 ${formatRemainingTime(remainingSeconds)}`
@@ -43,23 +104,28 @@ export function FamilyInvitationCodeCard({
               type="button"
               onClick={onCreate}
               disabled={isCreating}
-              className="inline-flex h-11 min-w-28 items-center justify-center rounded-full border border-neutral-200 bg-white px-5 text-sm font-medium text-neutral-800 transition-colors hover:border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 min-w-28 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isCreating ? '재생성 중' : '다시 생성'}
             </button>
           </div>
         </div>
       ) : (
-        <button
-          type="button"
-          onClick={onCreate}
-          disabled={isCreating}
-          className="inline-flex h-11 min-w-32 items-center justify-center rounded-full bg-neutral-900 px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          {isCreating ? '생성 중' : '초대 코드 만들기'}
-        </button>
+        <div className="flex items-center justify-start">
+          <button
+            type="button"
+            onClick={onCreate}
+            disabled={isCreating}
+            className="inline-flex h-10 min-w-28 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isCreating ? '생성 중' : '초대 코드 만들기'}
+          </button>
+        </div>
       )}
 
+      {copiedMessage ? (
+        <InlineFeedback tone={copiedMessage.includes('실패') ? 'error' : 'success'} message={copiedMessage} />
+      ) : null}
       {createSuccessMessage ? <InlineFeedback tone="success" message={createSuccessMessage} /> : null}
       {createErrorMessage ? <InlineFeedback tone="error" message={createErrorMessage} /> : null}
     </div>

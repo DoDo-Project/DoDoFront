@@ -39,16 +39,40 @@ export function ProfileImage({ src, alt }: { src: string | null; alt: string }) 
   );
 }
 
-export function SectionCard({ badge, title, children }: { badge: string; title: string; children: ReactNode }) {
+export function SectionCard({
+  badge,
+  title,
+  children,
+  action,
+}: {
+  badge: string;
+  title: string;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
   return (
     <section className="rounded-[20px] border border-neutral-200 bg-white px-6 py-5 shadow-sm">
-      <div>
-        <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400">{badge}</p>
-        <h2 className="mt-1 text-[17px] font-medium text-neutral-950">{title}</h2>
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400">{badge}</p>
+          <h2 className="mt-1 text-[17px] font-medium text-neutral-950">{title}</h2>
+        </div>
+        {action}
       </div>
 
       <div className="mt-3">{children}</div>
     </section>
+  );
+}
+
+export function SectionActionButton({ children, href }: { children: ReactNode; href: string }) {
+  return (
+    <a
+      href={href}
+      className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
+    >
+      {children}
+    </a>
   );
 }
 

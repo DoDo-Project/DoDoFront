@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { useCreatePetInvitationCode, type PetListItem } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
@@ -6,11 +6,61 @@ import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 import { INVITATION_CODE_STATUS_MESSAGES } from '../lib/constants';
 import type { InvitationCodeState } from './types';
 
+const INVITATION_CODE_STORAGE_KEY = 'family-invitation-code-by-pet-id';
+
+function pruneInvitationCodes(codes: Record<number, InvitationCodeState>) {
+  const now = Date.now();
+
+  return Object.fromEntries(
+    Object.entries(codes).filter(([, value]) => {
+      const elapsedSeconds = Math.floor((now - value.createdAt) / 1000);
+      return elapsedSeconds < value.expiresIn;
+    }),
+  ) as Record<number, InvitationCodeState>;
+}
+
+function readStoredInvitationCodes() {
+  if (typeof window === 'undefined') {
+    return {};
+  }
+
+  try {
+    const raw = window.localStorage.getItem(INVITATION_CODE_STORAGE_KEY);
+    if (!raw) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw) as Record<string, InvitationCodeState>;
+    return pruneInvitationCodes(parsed as Record<number, InvitationCodeState>);
+  } catch {
+    return {};
+  }
+}
+
 export function useFamilyInvitationCode(selectedPet: PetListItem | null) {
-  const [invitationCodeByPetId, setInvitationCodeByPetId] = useState<Record<number, InvitationCodeState>>({});
+  const [invitationCodeByPetId, setInvitationCodeByPetId] = useState<Record<number, InvitationCodeState>>(() =>
+    readStoredInvitationCodes(),
+  );
   const createInvitationCodeMutation = useCreatePetInvitationCode();
 
-  const activeInvitationCode = selectedPet ? (invitationCodeByPetId[selectedPet.petId] ?? null) : null;
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(
+      INVITATION_CODE_STORAGE_KEY,
+      JSON.stringify(pruneInvitationCodes(invitationCodeByPetId)),
+    );
+  }, [invitationCodeByPetId]);
+
+  const activeInvitationCode = useMemo(() => {
+    if (!selectedPet) {
+      return null;
+    }
+
+    return invitationCodeByPetId[selectedPet.petId] ?? null;
+  }, [invitationCodeByPetId, selectedPet]);
 
   const createErrorMessage =
     createInvitationCodeMutation.isError && selectedPet
