@@ -5,7 +5,21 @@ import type { InvitationCodeState } from '../model/types';
 import { useRemainingSeconds } from '../model/useRemainingSeconds';
 import { InlineFeedback } from './FamilyVisuals';
 
-function CopyIcon() {
+function CopyIcon({ checked = false }: { checked?: boolean }) {
+  if (checked) {
+    return (
+      <svg viewBox="0 0 20 20" fill="none" aria-hidden className="h-4 w-4">
+        <path
+          d="M4.167 10.417 7.5 13.75l8.333-8.333"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
+  }
+
   return (
     <svg viewBox="0 0 20 20" fill="none" aria-hidden className="h-4 w-4">
       <path
@@ -40,21 +54,21 @@ export function FamilyInvitationCodeCard({
   onCreate: () => void;
 }) {
   const remainingSeconds = useRemainingSeconds(activeCode);
-  const [copiedMessage, setCopiedMessage] = useState('');
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
-    if (!copiedMessage) {
+    if (!isCopied) {
       return;
     }
 
     const timer = window.setTimeout(() => {
-      setCopiedMessage('');
-    }, 2000);
+      setIsCopied(false);
+    }, 1800);
 
     return () => {
       window.clearTimeout(timer);
     };
-  }, [copiedMessage]);
+  }, [isCopied]);
 
   const handleCopyCode = async () => {
     if (!activeCode) {
@@ -63,9 +77,9 @@ export function FamilyInvitationCodeCard({
 
     try {
       await navigator.clipboard.writeText(activeCode.code);
-      setCopiedMessage('초대 코드를 복사했어요.');
+      setIsCopied(true);
     } catch {
-      setCopiedMessage('복사에 실패했어요. 다시 시도해 주세요.');
+      setIsCopied(false);
     }
   };
 
@@ -88,10 +102,15 @@ export function FamilyInvitationCodeCard({
                 <button
                   type="button"
                   onClick={() => void handleCopyCode()}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition-colors hover:border-brand/50 hover:text-brand"
-                  aria-label="초대 코드 복사"
+                  className={[
+                    'inline-flex h-9 w-9 items-center justify-center rounded-full border bg-white transition-colors',
+                    isCopied
+                      ? 'border-emerald-200 text-emerald-600'
+                      : 'border-neutral-200 text-neutral-700 hover:border-brand/50 hover:text-brand',
+                  ].join(' ')}
+                  aria-label={isCopied ? '초대 코드 복사 완료' : '초대 코드 복사'}
                 >
-                  <CopyIcon />
+                  <CopyIcon checked={isCopied} />
                 </button>
               </div>
               <p className="mt-2 text-sm text-neutral-600">
@@ -123,9 +142,6 @@ export function FamilyInvitationCodeCard({
         </div>
       )}
 
-      {copiedMessage ? (
-        <InlineFeedback tone={copiedMessage.includes('실패') ? 'error' : 'success'} message={copiedMessage} />
-      ) : null}
       {createSuccessMessage ? <InlineFeedback tone="success" message={createSuccessMessage} /> : null}
       {createErrorMessage ? <InlineFeedback tone="error" message={createErrorMessage} /> : null}
     </div>

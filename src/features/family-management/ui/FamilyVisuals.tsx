@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Link } from 'react-router-dom';
 
 import profileDefaultIllustration from '@/features/auth/assets/profile-default.svg';
 import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.svg';
@@ -67,12 +68,12 @@ export function SectionCard({
 
 export function SectionActionButton({ children, href }: { children: ReactNode; href: string }) {
   return (
-    <a
-      href={href}
+    <Link
+      to={href}
       className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
     >
       {children}
-    </a>
+    </Link>
   );
 }
 
