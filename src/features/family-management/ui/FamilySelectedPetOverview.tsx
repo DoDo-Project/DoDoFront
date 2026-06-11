@@ -22,7 +22,7 @@ export function FamilySelectedPetOverview({
 
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-[20px] font-medium text-neutral-950">{pet.petName}</h2>
+              <h2 className="text-[18px] font-medium text-neutral-950 sm:text-[20px]">{pet.petName}</h2>
               <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-600">
                 {familyCountLoading ? '가족 불러오는 중' : `가족 ${familyCount}명`}
               </span>
@@ -53,9 +53,9 @@ export function FamilySelectedPetOverview({
           <button
             type="button"
             disabled
-            className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-sm font-medium text-neutral-500 disabled:cursor-not-allowed sm:w-28"
+            className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-500 disabled:cursor-not-allowed sm:w-28"
           >
-            코드 준비
+            준비 중
           </button>
         </div>
       </div>

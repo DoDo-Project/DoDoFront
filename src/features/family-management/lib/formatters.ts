@@ -10,8 +10,8 @@ export function formatBirthLabel(birth: string) {
 }
 
 export function getSexLabel(sex: string) {
-  if (sex === 'MALE') return '남아';
-  if (sex === 'FEMALE') return '여아';
+  if (sex === 'MALE') return '수컷';
+  if (sex === 'FEMALE') return '암컷';
   return '중성화';
 }
 
@@ -24,12 +24,14 @@ export function formatApplicationStatus(status: string) {
   if (status === 'PENDING') return '승인 대기';
   if (status === 'APPROVED') return '승인 완료';
   if (status === 'REJECTED') return '거절됨';
+  if (status === 'BLOCKED') return '차단됨';
   return status;
 }
 
 export function getApplicationStatusClass(status: string) {
   if (status === 'APPROVED') return 'bg-emerald-50 text-emerald-600';
   if (status === 'REJECTED') return 'bg-rose-50 text-rose-500';
+  if (status === 'BLOCKED') return 'bg-neutral-200 text-neutral-700';
   return 'bg-amber-50 text-amber-600';
 }
 

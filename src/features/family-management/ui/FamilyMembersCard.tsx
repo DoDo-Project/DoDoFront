@@ -28,7 +28,7 @@ export function FamilyMembersCard({
       {members.map((member) => (
         <div
           key={member.userId}
-          className="flex items-center gap-3 rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-4"
+          className="flex items-center gap-3 rounded-[22px] border border-neutral-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(245,245,245,0.88))] px-4 py-4"
         >
           <ProfileImage src={member.profileImageUrl || null} alt={member.userName} />
           <div className="min-w-0">

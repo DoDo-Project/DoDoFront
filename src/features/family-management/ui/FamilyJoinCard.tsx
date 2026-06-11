@@ -19,7 +19,7 @@ export function FamilyJoinCard({
 }) {
   return (
     <div className="space-y-4">
-      <div className="rounded-[16px] border border-neutral-200 bg-neutral-50/80 px-4 py-4">
+      <div className="rounded-[22px] border border-neutral-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(245,245,245,0.88))] px-4 py-4">
         <p className="text-sm leading-7 text-neutral-600">
           가족 코드를 입력하면 다른 반려동물의 가족으로 신청할 수 있어요. 승인 전까지는 내 신청 내역에서 상태를 확인할
           수 있어요.
@@ -34,13 +34,13 @@ export function FamilyJoinCard({
           maxLength={6}
           autoComplete="off"
           spellCheck={false}
-          className="h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm uppercase tracking-[0.24em] text-neutral-900 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15"
+          className="h-12 w-full rounded-full border border-neutral-200 bg-white px-4 text-sm uppercase tracking-[0.24em] text-neutral-900 outline-none transition-colors focus:border-neutral-400 focus:ring-2 focus:ring-neutral-200"
         />
         <button
           type="button"
           onClick={onSubmit}
           disabled={isSubmitting || code.trim().length === 0}
-          className="inline-flex h-12 min-w-28 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex h-12 min-w-28 items-center justify-center rounded-full bg-neutral-900 px-5 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isSubmitting ? '신청 중' : '가족 신청'}
         </button>
@@ -51,7 +51,7 @@ export function FamilyJoinCard({
 
       <Link
         to="/auth/family/join"
-        className="inline-flex text-sm font-medium text-brand transition-opacity hover:opacity-80"
+        className="inline-flex text-sm font-medium text-neutral-700 transition-opacity hover:opacity-80"
       >
         전체 화면으로 신청하기
       </Link>

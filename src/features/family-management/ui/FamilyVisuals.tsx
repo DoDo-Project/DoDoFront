@@ -41,13 +41,13 @@ export function ProfileImage({ src, alt }: { src: string | null; alt: string }) 
 
 export function SectionCard({ badge, title, children }: { badge: string; title: string; children: ReactNode }) {
   return (
-    <section className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-sm">
-      <div className="border-b border-neutral-100 bg-linear-to-r from-brand/[0.05] via-white to-white px-5 py-5 sm:px-6">
-        <p className="text-[11px] font-semibold tracking-[0.2em] text-brand">{badge}</p>
-        <h2 className="mt-2 text-[17px] font-medium text-neutral-950">{title}</h2>
+    <section className="rounded-[20px] border border-neutral-200 bg-white px-6 py-5 shadow-sm">
+      <div>
+        <p className="text-[11px] font-semibold tracking-[0.16em] text-neutral-400">{badge}</p>
+        <h2 className="mt-1 text-[17px] font-medium text-neutral-950">{title}</h2>
       </div>
 
-      <div className="px-5 py-5 sm:px-6 sm:py-6">{children}</div>
+      <div className="mt-3">{children}</div>
     </section>
   );
 }
@@ -56,7 +56,7 @@ export function SectionContentSkeleton({ rows = 3 }: { rows?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: rows }).map((_, index) => (
-        <div key={index} className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-4">
+        <div key={index} className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
           <Skeleton className="h-4 w-32 rounded-md" />
           <Skeleton className="mt-3 h-4 w-full rounded-md" />
         </div>
@@ -67,8 +67,8 @@ export function SectionContentSkeleton({ rows = 3 }: { rows?: number }) {
 
 export function EmptySectionMessage({ message }: { message: string }) {
   return (
-    <div className="rounded-[16px] border border-dashed border-neutral-200 bg-neutral-50/60 px-4 py-8 text-center">
-      <p className="text-sm leading-7 text-neutral-500">{message}</p>
+    <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+      <p className="text-sm leading-7 text-neutral-600">{message}</p>
     </div>
   );
 }

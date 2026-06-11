@@ -29,7 +29,7 @@ export function FamilyApplicationsCard({
       {applications.map((application) => (
         <div
           key={`${application.petId}-${application.requestedAt}`}
-          className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-4"
+          className="rounded-[22px] border border-neutral-200 bg-[linear-gradient(180deg,rgba(250,250,250,0.96),rgba(245,245,245,0.88))] px-4 py-4"
         >
           <div className="flex items-start gap-3">
             <PetImage src={application.petImageUrl} alt={application.petName} species="CANINE" />

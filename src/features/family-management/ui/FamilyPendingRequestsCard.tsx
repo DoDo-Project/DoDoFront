@@ -18,6 +18,7 @@ export function FamilyPendingRequestsCard({
   feedbackTone,
   onApprove,
   onReject,
+  onBlock,
 }: {
   requests: FamilyPendingUser[];
   isLoading: boolean;
@@ -27,6 +28,7 @@ export function FamilyPendingRequestsCard({
   feedbackTone: 'success' | 'error' | null;
   onApprove: (request: FamilyPendingUser) => void;
   onReject: (request: FamilyPendingUser) => void;
+  onBlock: (request: FamilyPendingUser) => void;
 }) {
   if (isLoading) {
     return <SectionContentSkeleton rows={2} />;
@@ -49,7 +51,7 @@ export function FamilyPendingRequestsCard({
         const isProcessing = activeRequestKey === requestKey;
 
         return (
-          <div key={requestKey} className="rounded-[16px] border border-neutral-200 bg-neutral-50/70 px-4 py-4">
+          <div key={requestKey} className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
             <div className="flex items-start gap-3">
               <ProfileImage src={request.profileUrl || null} alt={request.nickname} />
               <div className="min-w-0 flex-1">
@@ -67,7 +69,7 @@ export function FamilyPendingRequestsCard({
                     type="button"
                     onClick={() => onApprove(request)}
                     disabled={isProcessing}
-                    className="inline-flex h-10 min-w-24 items-center justify-center rounded-xl bg-brand px-4 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex h-10 min-w-24 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isProcessing ? '처리 중' : '승인'}
                   </button>
@@ -75,9 +77,17 @@ export function FamilyPendingRequestsCard({
                     type="button"
                     onClick={() => onReject(request)}
                     disabled={isProcessing}
-                    className="inline-flex h-10 min-w-24 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-700 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="inline-flex h-10 min-w-24 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-rose-200 hover:text-rose-500 disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     거절
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onBlock(request)}
+                    disabled={isProcessing}
+                    className="inline-flex h-10 min-w-24 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-neutral-400 hover:text-neutral-950 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    차단
                   </button>
                 </div>
               </div>

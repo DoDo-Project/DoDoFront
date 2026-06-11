@@ -26,7 +26,9 @@ export function useFamilyApprovalAction() {
       setFeedbackMessage(
         action === 'APPROVED'
           ? `${request.nickname}님의 가족 신청을 승인했어요.`
-          : `${request.nickname}님의 가족 신청을 거절했어요.`,
+          : action === 'BLOCKED'
+            ? `${request.nickname}님을 차단 목록에 추가했어요.`
+            : `${request.nickname}님의 가족 신청을 거절했어요.`,
       );
     } catch (error) {
       setFeedbackTone('error');

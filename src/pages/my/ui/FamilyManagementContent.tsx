@@ -1,9 +1,15 @@
 import { useMemo, useState } from 'react';
 
-import { useFamilyApplications, useFamilyPendingUsers, usePetDetail, usePetList } from '@/features/auth';
+import {
+  useFamilyApplications,
+  useFamilyBlockedUsers,
+  useFamilyPendingUsers,
+  usePetDetail,
+  usePetList,
+} from '@/features/auth';
 import {
   FamilyApplicationsCard,
-  useFamilyApprovalAction,
+  FamilyBlockedUsersCard,
   FamilyInvitationCodeCard,
   FamilyJoinCard,
   FamilyManagementEmptyState,
@@ -14,6 +20,8 @@ import {
   FamilyPetSelector,
   FamilySelectedPetOverview,
   SectionCard,
+  useFamilyApprovalAction,
+  useFamilyBlockedAction,
   useFamilyInvitationCode,
   useFamilyJoinForm,
 } from '@/features/family-management';
@@ -29,13 +37,19 @@ export function FamilyManagementContent() {
   const petDetailQuery = usePetDetail(selectedPet?.petId ?? null);
   const pendingUsersQuery = useFamilyPendingUsers({ page: 0, size: 20 });
   const applicationsQuery = useFamilyApplications({ page: 0, size: 20 });
+  const blockedUsersQuery = useFamilyBlockedUsers({ page: 0, size: 20 });
   const invitationCode = useFamilyInvitationCode(selectedPet);
   const familyJoinForm = useFamilyJoinForm();
   const familyApprovalAction = useFamilyApprovalAction();
+  const familyBlockedAction = useFamilyBlockedAction();
 
   const filteredPendingUsers = useMemo(
     () => pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
     [pendingUsersQuery.data?.users, selectedPet?.petId],
+  );
+  const filteredBlockedUsers = useMemo(
+    () => blockedUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
+    [blockedUsersQuery.data?.users, selectedPet?.petId],
   );
 
   if (isLoading) {
@@ -60,9 +74,12 @@ export function FamilyManagementContent() {
   const applicationsErrorMessage = applicationsQuery.isError
     ? getApiErrorMessage(applicationsQuery.error, '내 신청 내역을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
     : null;
+  const blockedUsersErrorMessage = blockedUsersQuery.isError
+    ? getApiErrorMessage(blockedUsersQuery.error, '차단 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
+    : null;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <div>
         <p className="text-xs font-semibold tracking-[0.24em] text-brand">FAMILY</p>
         <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">반려동물 가족 관리</h1>
@@ -75,8 +92,8 @@ export function FamilyManagementContent() {
         familyCountLoading={petDetailQuery.isLoading || petDetailQuery.isFetching}
       />
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <SectionCard badge="INVITE CODE" title="가족 초대 코드">
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SectionCard badge="INFO" title="초대 코드 발급">
           <FamilyInvitationCodeCard
             activeCode={invitationCode.activeInvitationCode}
             isCreating={invitationCode.isCreating}
@@ -86,7 +103,7 @@ export function FamilyManagementContent() {
           />
         </SectionCard>
 
-        <SectionCard badge="JOIN FAMILY" title="가족 신청">
+        <SectionCard badge="INFO" title="가족 신청">
           <FamilyJoinCard
             code={familyJoinForm.joinCode}
             isSubmitting={familyJoinForm.isSubmitting}
@@ -97,7 +114,7 @@ export function FamilyManagementContent() {
           />
         </SectionCard>
 
-        <SectionCard badge="FAMILY MEMBERS" title="현재 가족 구성원">
+        <SectionCard badge="INFO" title="현재 가족 구성원">
           <FamilyMembersCard
             members={familyMembers}
             isLoading={petDetailQuery.isLoading || petDetailQuery.isFetching}
@@ -105,7 +122,7 @@ export function FamilyManagementContent() {
           />
         </SectionCard>
 
-        <SectionCard badge="PENDING REQUESTS" title="받은 신청 목록">
+        <SectionCard badge="INFO" title="받은 신청 목록">
           <FamilyPendingRequestsCard
             requests={filteredPendingUsers}
             isLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
@@ -115,14 +132,27 @@ export function FamilyManagementContent() {
             feedbackTone={familyApprovalAction.feedbackTone}
             onApprove={(request) => void familyApprovalAction.handleApproveAction(request, 'APPROVED')}
             onReject={(request) => void familyApprovalAction.handleApproveAction(request, 'REJECTED')}
+            onBlock={(request) => void familyApprovalAction.handleApproveAction(request, 'BLOCKED')}
           />
         </SectionCard>
 
-        <SectionCard badge="MY APPLICATIONS" title="내 신청 내역">
+        <SectionCard badge="INFO" title="내 신청 내역">
           <FamilyApplicationsCard
             applications={applicationsQuery.data?.applications ?? []}
             isLoading={applicationsQuery.isLoading || applicationsQuery.isFetching}
             errorMessage={applicationsErrorMessage}
+          />
+        </SectionCard>
+
+        <SectionCard badge="INFO" title="차단 목록">
+          <FamilyBlockedUsersCard
+            users={filteredBlockedUsers}
+            isLoading={blockedUsersQuery.isLoading || blockedUsersQuery.isFetching}
+            errorMessage={blockedUsersErrorMessage}
+            activeBlockedUserKey={familyBlockedAction.activeBlockedUserKey}
+            feedbackMessage={familyBlockedAction.feedbackMessage}
+            feedbackTone={familyBlockedAction.feedbackTone}
+            onRelease={(user) => void familyBlockedAction.handleReleaseBlockedUser(user)}
           />
         </SectionCard>
       </div>
