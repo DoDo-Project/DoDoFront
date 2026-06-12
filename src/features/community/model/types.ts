@@ -35,6 +35,7 @@ export interface TempSaveBoardRequest {
   boardTitle?: string;
   boardContent?: string;
   imageFileUrl?: string;
+  imageFileUrls?: string[];
 }
 
 export interface TempSaveBoardResponse {
@@ -47,6 +48,7 @@ export interface TempSavedBoardResponse {
   boardTitle: string;
   boardContent: string;
   imageFileUrl: string | null;
+  imageFileUrls?: string[] | null;
 }
 
 export interface BoardDetailResponse {

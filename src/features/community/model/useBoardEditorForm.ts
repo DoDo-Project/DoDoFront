@@ -44,10 +44,14 @@ function mapBoardDetailToFormState(board: BoardDetailResponse): BoardEditorFormS
 }
 
 function mapTempSavedBoardToFormState(board: TempSavedBoardResponse): BoardEditorFormState {
+  const imageFileUrls =
+    board.imageFileUrls?.filter((imageUrl): imageUrl is string => Boolean(imageUrl?.trim())) ??
+    (board.imageFileUrl ? [board.imageFileUrl] : []);
+
   return {
     boardTitle: board.boardTitle ?? '',
     boardContent: board.boardContent ?? '',
-    imageFileUrls: board.imageFileUrl ? [board.imageFileUrl] : [],
+    imageFileUrls,
   };
 }
 
@@ -206,6 +210,7 @@ export function useBoardEditorForm({ mode, boardId = null }: UseBoardEditorFormO
         boardTitle: form.boardTitle.trim() || undefined,
         boardContent: form.boardContent.trim() || undefined,
         imageFileUrl: form.imageFileUrls[0] ?? undefined,
+        imageFileUrls: form.imageFileUrls.length ? form.imageFileUrls : undefined,
       });
 
       setStoredBoardDraftSessionKey(result.sessionKey);
