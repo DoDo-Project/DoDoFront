@@ -49,10 +49,14 @@ export function useFamilyInvitationCode(selectedPet: PetListItem | null) {
       return;
     }
 
-    window.localStorage.setItem(
-      INVITATION_CODE_STORAGE_KEY,
-      JSON.stringify(pruneInvitationCodes(invitationCodeByPetId)),
-    );
+    try {
+      window.localStorage.setItem(
+        INVITATION_CODE_STORAGE_KEY,
+        JSON.stringify(pruneInvitationCodes(invitationCodeByPetId)),
+      );
+    } catch (error) {
+      console.error('[local-storage] failed to save invitation codes', error);
+    }
   }, [invitationCodeByPetId]);
 
   useEffect(() => {
