@@ -72,6 +72,57 @@ function PetImage({ src, alt, species }: { src: string | null; alt: string; spec
   );
 }
 
+function ProfileAvatar({ src, name }: { src: string | null; name: string }) {
+  return (
+    <div className="group relative">
+      <div className="h-12 w-12 overflow-hidden rounded-full border border-white bg-neutral-100 shadow-[0_8px_18px_rgba(15,23,42,0.08)]">
+        {src ? (
+          <img
+            src={src}
+            alt={name}
+            className="h-full w-full object-cover"
+            onError={(event) => {
+              event.currentTarget.onerror = null;
+              event.currentTarget.src = petDefaultIllustration;
+            }}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-neutral-500">
+            {name.slice(0, 1)}
+          </div>
+        )}
+      </div>
+
+      <div className="pointer-events-none absolute left-1/2 top-full z-10 mt-2 -translate-x-1/2 translate-y-1 opacity-0 transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100">
+        <div className="relative rounded-full bg-neutral-900 px-3 py-1 text-xs font-medium whitespace-nowrap text-white shadow-lg">
+          {name}
+          <span className="absolute left-1/2 top-0 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-neutral-900" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FamilyMembersPreview({ pet }: { pet: PetDetailResponse }) {
+  if (pet.familyMembers.length === 0) {
+    return (
+      <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+        <p className="text-sm leading-7 text-neutral-600">등록된 가족 구성원이 없습니다.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
+      <div className="flex flex-wrap items-center gap-3">
+        {pet.familyMembers.map((member) => (
+          <ProfileAvatar key={member.userId} src={member.profileImageUrl || null} name={member.userName} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function DetailRows({ rows }: { rows: Array<{ label: string; value: string }> }) {
   return (
     <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
@@ -259,14 +310,19 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
           <PetWeightPreview petId={pet.petId} />
         </InfoCard>
 
-        <InfoCard title="가족 구성원" tone="muted">
-          <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
-            <p className="text-sm leading-7 text-neutral-600">
-              {pet.familyMembers.length > 0
-                ? pet.familyMembers.map((member) => member.userName).join(', ')
-                : '등록된 가족 구성원이 없습니다.'}
-            </p>
-          </div>
+        <InfoCard
+          title="가족 구성원"
+          tone="muted"
+          action={
+            <Link
+              to={`/my?menu=family&petId=${pet.petId}`}
+              className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
+            >
+              전체 보기
+            </Link>
+          }
+        >
+          <FamilyMembersPreview pet={pet} />
         </InfoCard>
 
         <InfoCard title="최근 활동" tone="muted">

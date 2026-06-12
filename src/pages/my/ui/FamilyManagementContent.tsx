@@ -227,12 +227,15 @@ export function FamilyManagementContent() {
   const [searchParams] = useSearchParams();
   const section = searchParams.get('section');
   const statusFilter = parseStatusFilter(searchParams.get('status'));
+  const selectedPetIdParam = searchParams.get('petId');
+  const initialSelectedPetId =
+    selectedPetIdParam && !Number.isNaN(Number(selectedPetIdParam)) ? Number(selectedPetIdParam) : null;
   const isJoinView = section === 'join';
   const isReceivedView = section === 'received';
   const statusParam = statusFilter === 'ALL' ? undefined : statusFilter;
 
   const { data, isLoading, isError, refetch } = usePetList({ page: 0, size: 10 });
-  const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
+  const [selectedPetId, setSelectedPetId] = useState<number | null>(initialSelectedPetId);
 
   const pets = data?.pets ?? [];
   const selectedPet = (selectedPetId ? pets.find((pet) => pet.petId === selectedPetId) : null) ?? pets[0] ?? null;
