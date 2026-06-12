@@ -75,8 +75,8 @@ export function MyProfileEditContent({ user, isLoading = false }: MyProfileEditC
     if (!user) return false;
 
     return (
-      effectiveNickname !== user.nickname.trim() ||
-      trimmedRegion !== user.region.trim() ||
+      effectiveNickname !== (user.nickname ?? '').trim() ||
+      trimmedRegion !== (user.region ?? '').trim() ||
       submittedProfileUrl !== resolveProfileUrl(user.profileUrl)
     );
   }, [effectiveNickname, submittedProfileUrl, trimmedRegion, user]);
