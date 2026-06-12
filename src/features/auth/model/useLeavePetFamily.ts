@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { leavePetFamily } from '@/features/auth/api/pets';
 import type { LeavePetFamilyResponse } from '@/features/auth/model/types';
+import { queryKeys } from '@/shared/lib/react-query/queryKey';
 
 interface LeavePetFamilyVariables {
   petId: number;
@@ -17,7 +18,7 @@ export function useLeavePetFamily() {
         queryKey: ['pets', 'list'],
       });
       void queryClient.invalidateQueries({
-        queryKey: ['pets', variables.petId, 'detail'],
+        queryKey: queryKeys.pets.detail(variables.petId),
       });
       void queryClient.invalidateQueries({
         queryKey: ['pets', 'family', 'applications'],
