@@ -44,11 +44,13 @@ function parseStatusFilter(value: string | null): FamilyStatusFilter {
 function StatusFilterTabs({
   current,
   buildHref,
+  filters,
 }: {
   current: FamilyStatusFilter;
   buildHref: (next: FamilyStatusFilter) => string;
+  filters?: Array<{ value: FamilyStatusFilter; label: string }>;
 }) {
-  const filters: Array<{ value: FamilyStatusFilter; label: string }> = [
+  const defaultFilters: Array<{ value: FamilyStatusFilter; label: string }> = [
     { value: 'ALL', label: '전체' },
     { value: 'PENDING', label: '승인 대기' },
     { value: 'REJECTED', label: '거절됨' },
@@ -56,7 +58,7 @@ function StatusFilterTabs({
 
   return (
     <div className="flex flex-wrap gap-2">
-      {filters.map((filter) => {
+      {(filters ?? defaultFilters).map((filter) => {
         const isActive = current === filter.value;
 
         return (
@@ -247,7 +249,11 @@ function FamilyReceivedManagementView({
   statusFilter: FamilyStatusFilter;
 }) {
   const buildStatusHref = (next: FamilyStatusFilter) =>
-    next === 'ALL' ? '/my?menu=family&section=received' : `/my?menu=family&section=received&status=${next}`;
+    next === 'PENDING' ? '/my?menu=family&section=received' : `/my?menu=family&section=received&status=${next}`;
+  const receivedFilters: Array<{ value: FamilyStatusFilter; label: string }> = [
+    { value: 'PENDING', label: '승인 대기' },
+    { value: 'REJECTED', label: '거절됨' },
+  ];
 
   return (
     <div className="space-y-6">
@@ -262,7 +268,7 @@ function FamilyReceivedManagementView({
       <SectionCard
         badge="INFO"
         title="받은 신청 목록"
-        action={<StatusFilterTabs current={statusFilter} buildHref={buildStatusHref} />}
+        action={<StatusFilterTabs current={statusFilter} buildHref={buildStatusHref} filters={receivedFilters} />}
       >
         <FamilyPendingRequestsCard
           mode="manage"
@@ -302,7 +308,8 @@ export function FamilyManagementContent() {
     selectedPetIdParam && !Number.isNaN(Number(selectedPetIdParam)) ? Number(selectedPetIdParam) : null;
   const isJoinView = section === 'join';
   const isReceivedView = section === 'received';
-  const statusParam = statusFilter === 'ALL' ? undefined : statusFilter;
+  const receivedStatusFilter: FamilyStatusFilter = isReceivedView && statusFilter === 'ALL' ? 'PENDING' : statusFilter;
+  const statusParam = receivedStatusFilter === 'ALL' ? undefined : receivedStatusFilter;
 
   const { data, isLoading, isError, refetch } = usePetList({ page: 0, size: 10 });
   const [selectedPetId, setSelectedPetId] = useState<number | null>(initialSelectedPetId);
@@ -318,7 +325,7 @@ export function FamilyManagementContent() {
   const pendingUsersQuery = useFamilyPendingUsers({
     status: isReceivedView ? statusParam : undefined,
     page: 0,
-    size: 20,
+    size: isReceivedView && receivedStatusFilter === 'REJECTED' ? 15 : 20,
   });
   const applicationsQuery = useFamilyApplications({
     status: isJoinView ? statusParam : undefined,
@@ -332,8 +339,12 @@ export function FamilyManagementContent() {
   const familyBlockedAction = useFamilyBlockedAction();
 
   const filteredPendingUsers = useMemo(
-    () => pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
-    [pendingUsersQuery.data?.users, selectedPet?.petId],
+    () =>
+      (pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? []).slice(
+        0,
+        isReceivedView && receivedStatusFilter === 'REJECTED' ? 15 : undefined,
+      ),
+    [isReceivedView, pendingUsersQuery.data?.users, receivedStatusFilter, selectedPet?.petId],
   );
   const pendingPreviewUsers = useMemo(() => filteredPendingUsers.slice(0, 2), [filteredPendingUsers]);
   const filteredBlockedUsers = useMemo(
@@ -455,7 +466,7 @@ export function FamilyManagementContent() {
           blockedFeedbackMessage={familyBlockedAction.feedbackMessage}
           blockedFeedbackTone={familyBlockedAction.feedbackTone}
           onReleaseBlockedUser={handleReleaseBlockedUser}
-          statusFilter={statusFilter}
+          statusFilter={receivedStatusFilter}
         />
 
         <PendingRequestActionConfirmModal

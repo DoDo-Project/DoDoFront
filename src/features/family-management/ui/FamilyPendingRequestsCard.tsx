@@ -17,18 +17,9 @@ function getStatusLabel(status: FamilyPendingUser['status']) {
 }
 
 function getStatusClassName(status: FamilyPendingUser['status']) {
-  if (status === 'PENDING') {
-    return 'bg-amber-50 text-amber-600';
-  }
-
-  if (status === 'REJECTED') {
-    return 'bg-rose-50 text-rose-500';
-  }
-
-  if (status === 'APPROVED') {
-    return 'bg-emerald-50 text-emerald-600';
-  }
-
+  if (status === 'PENDING') return 'bg-amber-50 text-amber-600';
+  if (status === 'REJECTED') return 'bg-rose-50 text-rose-500';
+  if (status === 'APPROVED') return 'bg-emerald-50 text-emerald-600';
   return 'bg-neutral-100 text-neutral-500';
 }
 
@@ -140,6 +131,8 @@ export function FamilyPendingRequestsCard({
         const requestKey = `${request.targetPetId}-${request.userId}`;
         const isProcessing = activeRequestKey === requestKey;
         const canManage = mode === 'manage' && request.status === 'PENDING';
+        const timestamp =
+          request.status === 'REJECTED' && request.rejectedAt ? request.rejectedAt : request.requestedAt;
 
         return (
           <div key={requestKey} className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
@@ -147,43 +140,43 @@ export function FamilyPendingRequestsCard({
               <ProfileImage src={request.profileUrl || null} alt={request.nickname} />
 
               <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="text-sm font-medium text-neutral-900">{request.nickname}</p>
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClassName(request.status)}`}
-                  >
-                    {getStatusLabel(request.status)}
-                  </span>
-                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="text-sm font-medium text-neutral-900">{request.nickname}</p>
+                      <span
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getStatusClassName(request.status)}`}
+                      >
+                        {getStatusLabel(request.status)}
+                      </span>
+                    </div>
 
-                <p className="mt-1 text-xs font-medium text-neutral-400">
-                  {formatRequestedAt(
-                    request.status === 'REJECTED' && request.rejectedAt ? request.rejectedAt : request.requestedAt,
-                  )}
-                </p>
-
-                {canManage ? (
-                  <div className="mt-4 flex items-center gap-2">
-                    <ActionButton
-                      label={isProcessing ? '처리 중' : '승인'}
-                      kind="approve"
-                      disabled={isProcessing}
-                      onClick={() => onApprove?.(request)}
-                    />
-                    <ActionButton
-                      label="거절"
-                      kind="reject"
-                      disabled={isProcessing}
-                      onClick={() => onReject?.(request)}
-                    />
-                    <ActionButton
-                      label="차단"
-                      kind="block"
-                      disabled={isProcessing}
-                      onClick={() => onBlock?.(request)}
-                    />
+                    <p className="mt-1 text-xs font-medium text-neutral-400">{formatRequestedAt(timestamp)}</p>
                   </div>
-                ) : null}
+
+                  {canManage ? (
+                    <div className="flex shrink-0 items-center gap-2">
+                      <ActionButton
+                        label={isProcessing ? '처리 중' : '승인'}
+                        kind="approve"
+                        disabled={isProcessing}
+                        onClick={() => onApprove?.(request)}
+                      />
+                      <ActionButton
+                        label="거절"
+                        kind="reject"
+                        disabled={isProcessing}
+                        onClick={() => onReject?.(request)}
+                      />
+                      <ActionButton
+                        label="차단"
+                        kind="block"
+                        disabled={isProcessing}
+                        onClick={() => onBlock?.(request)}
+                      />
+                    </div>
+                  ) : null}
+                </div>
               </div>
             </div>
           </div>
