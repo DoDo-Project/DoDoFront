@@ -5,6 +5,7 @@ export function formatSpeciesLabel(species: string) {
 }
 
 export function formatBirthLabel(birth: string) {
+  if (!birth) return '';
   const [year = '', month = '', day = ''] = birth.slice(0, 10).split('-');
   return [year, month, day].filter(Boolean).join('. ');
 }
