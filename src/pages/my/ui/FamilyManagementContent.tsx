@@ -28,8 +28,10 @@ import {
   useFamilyJoinForm,
 } from '@/features/family-management';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
+import { Modal } from '@/shared/ui/Modal';
 
 type FamilyStatusFilter = 'ALL' | 'PENDING' | 'REJECTED';
+type PendingRequestAction = 'APPROVED' | 'REJECTED' | 'BLOCKED';
 
 function parseStatusFilter(value: string | null): FamilyStatusFilter {
   if (value === 'PENDING' || value === 'REJECTED') {
@@ -73,6 +75,74 @@ function StatusFilterTabs({
         );
       })}
     </div>
+  );
+}
+
+function PendingRequestActionConfirmModal({
+  request,
+  action,
+  isProcessing,
+  onClose,
+  onConfirm,
+}: {
+  request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number] | null;
+  action: PendingRequestAction | null;
+  isProcessing: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!request || !action) {
+    return null;
+  }
+
+  const actionLabel = action === 'APPROVED' ? '승인' : action === 'REJECTED' ? '거절' : '차단';
+  const actionDescription =
+    action === 'APPROVED'
+      ? `${request.nickname}님의 가족 신청을 승인할까요?`
+      : action === 'REJECTED'
+        ? `${request.nickname}님의 가족 신청을 거절할까요?`
+        : `${request.nickname}님을 차단할까요?`;
+  const detailDescription =
+    action === 'BLOCKED'
+      ? '차단하면 받은 신청 목록에서는 사라지고, 차단 목록에서 별도로 관리할 수 있어요.'
+      : '처리 후에는 받은 신청 상태가 즉시 갱신돼요.';
+
+  return (
+    <Modal open={Boolean(request && action)} onClose={onClose} ariaLabel={`가족 신청 ${actionLabel} 확인`}>
+      <div className="space-y-5">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.18em] text-neutral-400">FAMILY</p>
+          <h2 className="mt-2 text-lg font-semibold text-neutral-950">{actionLabel}하시겠어요?</h2>
+          <p className="mt-2 text-sm leading-6 text-neutral-500">{actionDescription}</p>
+          <p className="mt-2 text-sm leading-6 text-neutral-400">{detailDescription}</p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isProcessing}
+            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-neutral-300 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isProcessing}
+            className={`inline-flex h-11 flex-1 items-center justify-center rounded-xl px-4 text-sm font-medium text-white transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${
+              action === 'APPROVED'
+                ? 'bg-emerald-500 hover:bg-emerald-600'
+                : action === 'REJECTED'
+                  ? 'bg-rose-500 hover:bg-rose-600'
+                  : 'bg-neutral-900 hover:bg-neutral-800'
+            }`}
+          >
+            {isProcessing ? '처리 중...' : actionLabel}
+          </button>
+        </div>
+      </div>
+    </Modal>
   );
 }
 
@@ -236,6 +306,10 @@ export function FamilyManagementContent() {
 
   const { data, isLoading, isError, refetch } = usePetList({ page: 0, size: 10 });
   const [selectedPetId, setSelectedPetId] = useState<number | null>(initialSelectedPetId);
+  const [pendingActionRequest, setPendingActionRequest] = useState<
+    Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number] | null
+  >(null);
+  const [pendingActionType, setPendingActionType] = useState<PendingRequestAction | null>(null);
 
   const pets = data?.pets ?? [];
   const selectedPet = (selectedPetId ? pets.find((pet) => pet.petId === selectedPetId) : null) ?? pets[0] ?? null;
@@ -261,7 +335,7 @@ export function FamilyManagementContent() {
     () => pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
     [pendingUsersQuery.data?.users, selectedPet?.petId],
   );
-  const pendingPreviewUsers = useMemo(() => filteredPendingUsers.slice(0, 1), [filteredPendingUsers]);
+  const pendingPreviewUsers = useMemo(() => filteredPendingUsers.slice(0, 2), [filteredPendingUsers]);
   const filteredBlockedUsers = useMemo(
     () => blockedUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
     [blockedUsersQuery.data?.users, selectedPet?.petId],
@@ -293,28 +367,47 @@ export function FamilyManagementContent() {
     ? getApiErrorMessage(blockedUsersQuery.error, '차단 목록을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.')
     : null;
 
-  const handleApprove = (request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number]) => {
-    if (!window.confirm(`${request.nickname}님을 승인하시겠습니까?`)) {
+  const openPendingActionModal = (
+    request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number],
+    action: PendingRequestAction,
+  ) => {
+    setPendingActionRequest(request);
+    setPendingActionType(action);
+  };
+
+  const closePendingActionModal = () => {
+    if (familyApprovalAction.activeRequestKey) {
       return;
     }
 
-    void familyApprovalAction.handleApproveAction(request, 'APPROVED');
+    setPendingActionRequest(null);
+    setPendingActionType(null);
+  };
+
+  const handleConfirmPendingAction = async () => {
+    if (!pendingActionRequest || !pendingActionType) {
+      return;
+    }
+
+    try {
+      await familyApprovalAction.handleApproveAction(pendingActionRequest, pendingActionType);
+      setPendingActionRequest(null);
+      setPendingActionType(null);
+    } catch {
+      // Keep the modal open so the user can see the error feedback and retry if needed.
+    }
+  };
+
+  const handleApprove = (request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number]) => {
+    openPendingActionModal(request, 'APPROVED');
   };
 
   const handleReject = (request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number]) => {
-    if (!window.confirm(`${request.nickname}님을 거절하시겠습니까?`)) {
-      return;
-    }
-
-    void familyApprovalAction.handleApproveAction(request, 'REJECTED');
+    openPendingActionModal(request, 'REJECTED');
   };
 
   const handleBlock = (request: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number]) => {
-    if (!window.confirm(`${request.nickname}님을 차단하시겠습니까?`)) {
-      return;
-    }
-
-    void familyApprovalAction.handleApproveAction(request, 'BLOCKED');
+    openPendingActionModal(request, 'BLOCKED');
   };
 
   const handleReleaseBlockedUser = (user: Parameters<typeof FamilyBlockedUsersCard>[0]['users'][number]) => {
@@ -344,25 +437,35 @@ export function FamilyManagementContent() {
 
   if (isReceivedView) {
     return (
-      <FamilyReceivedManagementView
-        pendingRequests={filteredPendingUsers}
-        pendingLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
-        pendingErrorMessage={pendingErrorMessage}
-        activeRequestKey={familyApprovalAction.activeRequestKey}
-        feedbackMessage={familyApprovalAction.feedbackMessage}
-        feedbackTone={familyApprovalAction.feedbackTone}
-        onApprove={handleApprove}
-        onReject={handleReject}
-        onBlock={handleBlock}
-        blockedUsers={filteredBlockedUsers}
-        blockedLoading={blockedUsersQuery.isLoading || blockedUsersQuery.isFetching}
-        blockedErrorMessage={blockedUsersErrorMessage}
-        activeBlockedUserKey={familyBlockedAction.activeBlockedUserKey}
-        blockedFeedbackMessage={familyBlockedAction.feedbackMessage}
-        blockedFeedbackTone={familyBlockedAction.feedbackTone}
-        onReleaseBlockedUser={handleReleaseBlockedUser}
-        statusFilter={statusFilter}
-      />
+      <>
+        <FamilyReceivedManagementView
+          pendingRequests={filteredPendingUsers}
+          pendingLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
+          pendingErrorMessage={pendingErrorMessage}
+          activeRequestKey={familyApprovalAction.activeRequestKey}
+          feedbackMessage={familyApprovalAction.feedbackMessage}
+          feedbackTone={familyApprovalAction.feedbackTone}
+          onApprove={handleApprove}
+          onReject={handleReject}
+          onBlock={handleBlock}
+          blockedUsers={filteredBlockedUsers}
+          blockedLoading={blockedUsersQuery.isLoading || blockedUsersQuery.isFetching}
+          blockedErrorMessage={blockedUsersErrorMessage}
+          activeBlockedUserKey={familyBlockedAction.activeBlockedUserKey}
+          blockedFeedbackMessage={familyBlockedAction.feedbackMessage}
+          blockedFeedbackTone={familyBlockedAction.feedbackTone}
+          onReleaseBlockedUser={handleReleaseBlockedUser}
+          statusFilter={statusFilter}
+        />
+
+        <PendingRequestActionConfirmModal
+          request={pendingActionRequest}
+          action={pendingActionType}
+          isProcessing={Boolean(familyApprovalAction.activeRequestKey)}
+          onClose={closePendingActionModal}
+          onConfirm={() => void handleConfirmPendingAction()}
+        />
+      </>
     );
   }
 
