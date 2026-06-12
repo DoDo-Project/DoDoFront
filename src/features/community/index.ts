@@ -18,6 +18,7 @@ export { useDeleteBoard } from './model/useDeleteBoard';
 export { useTempSaveBoard } from './model/useTempSaveBoard';
 export { useTempSavedBoard } from './model/useTempSavedBoard';
 export { useUpdateBoard } from './model/useUpdateBoard';
+export { BoardEditorForm } from './ui/BoardEditorForm';
 export type {
   BoardDetailResponse,
   BoardPayload,

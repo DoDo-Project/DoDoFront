@@ -6,6 +6,8 @@ import { RequireAuth } from '@/app/guards/RequireAuth';
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { SignupPage } from '@/pages/auth/SignupPage';
+import { BoardCreatePage } from '@/pages/community/BoardCreatePage';
+import { BoardEditPage } from '@/pages/community/BoardEditPage';
 import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
 import { MainPage } from '@/pages/main/MainPage';
@@ -26,6 +28,22 @@ export const router = createBrowserRouter([
       { path: '/', element: <MainPage /> },
       { path: '/walk', element: <WalkPage /> },
       { path: '/community', element: <CommunityPage /> },
+      {
+        path: '/community/new',
+        element: (
+          <RequireAuth>
+            <BoardCreatePage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/community/:boardId/edit',
+        element: (
+          <RequireAuth>
+            <BoardEditPage />
+          </RequireAuth>
+        ),
+      },
       {
         path: '/my',
         element: (
