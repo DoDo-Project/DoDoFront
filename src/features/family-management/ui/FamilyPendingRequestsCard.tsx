@@ -114,7 +114,7 @@ export function FamilyPendingRequestsCard({
   }
 
   if (requests.length === 0) {
-    return <EmptySectionMessage message="선택한 반려동물에는 아직 가족 신청이 없어요." />;
+    return <EmptySectionMessage message="아직 받은 신청이 없어요." />;
   }
 
   return (

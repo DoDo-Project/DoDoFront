@@ -22,8 +22,9 @@ export function FamilyJoinCard({
       <div className="space-y-4">
         <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
           <p className="text-sm leading-7 text-neutral-600">
-            가족 코드로 다른 반려동물의 가족 신청을 할 수 있어요. 신청 입력과 내 신청 내역 확인은 전체 보기에서 이어서
-            관리할 수 있어요.
+            새로운 가족을 만나보세요!
+            <br />
+            전체 보기에서 확인할 수 있어요.
           </p>
         </div>
       </div>
@@ -34,8 +35,9 @@ export function FamilyJoinCard({
     <div className="space-y-4">
       <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
         <p className="text-sm leading-7 text-neutral-600">
-          가족 코드를 입력하면 다른 반려동물의 가족으로 신청할 수 있어요. 승인 전까지는 내 신청 내역에서 상태를 확인할
-          수 있어요.
+          가족 코드를 입력하면 신청할 수 있어요.
+          <br />
+          신청 상태는 내 신청 내역에서 확인해요.
         </p>
       </div>
 

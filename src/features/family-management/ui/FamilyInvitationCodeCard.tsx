@@ -87,7 +87,8 @@ export function FamilyInvitationCodeCard({
     <div className="space-y-4">
       <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
         <p className="text-sm leading-7 text-neutral-600">
-          {`선택한 반려동물 기준으로 초대 코드를 발급할 수 있어요. \n생성된 코드는 15분 동안 유효하고, 같은 코드로 가족 신청을 받을 수 있어요.`}
+          선택한 반려동물 기준으로 초대 코드를 발급할 수 있어요. <br />
+          생성된 코드는 15분 동안 유효하고, 같은 코드로 가족 신청을 받을 수 있어요.
         </p>
       </div>
 
@@ -124,7 +125,7 @@ export function FamilyInvitationCodeCard({
               disabled={isCreating}
               className="inline-flex h-10 min-w-28 shrink-0 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isCreating ? '재생성 중' : '다시 생성'}
+              {isCreating ? '생성 중' : '다시 생성'}
             </button>
           </div>
         </div>
