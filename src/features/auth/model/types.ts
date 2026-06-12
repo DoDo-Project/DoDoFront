@@ -87,6 +87,98 @@ export interface PetFamilyJoinResponse {
   message: string;
 }
 
+export interface CreatePetInvitationCodeResponse {
+  message: string;
+  code: string;
+  expiresIn: number;
+}
+
+export interface FamilyPendingUser {
+  userId: string;
+  nickname: string;
+  profileUrl: string;
+  targetPetId: number;
+  targetPetName: string;
+  targetPetImageUrl: string | null;
+  status: PetFamilyApplicationStatus;
+  requestedAt: string;
+  rejectedAt?: string | null;
+}
+
+export interface FamilyPendingUsersResponse {
+  message: string;
+  users: FamilyPendingUser[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export type PetFamilyApplicationStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'BLOCKED' | string;
+
+export interface FamilyApplicationItem {
+  petId: number;
+  petName: string;
+  petImageUrl: string | null;
+  status: PetFamilyApplicationStatus;
+  requestedAt: string;
+}
+
+export interface FamilyApplicationsResponse {
+  message: string;
+  applications: FamilyApplicationItem[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export type PetFamilyApprovalAction = 'APPROVED' | 'REJECTED' | 'BLOCKED';
+
+export interface PetFamilyApprovalRequest {
+  petId: number;
+  targetUserId: string;
+  action: PetFamilyApprovalAction;
+}
+
+export interface PetFamilyApprovalResponse {
+  petId: number;
+  message: string;
+}
+
+export interface LeavePetFamilyResponse {
+  message: string;
+}
+
+export interface FamilyBlockedUser {
+  userId: string;
+  nickname: string;
+  profileUrl: string;
+  targetPetId: number;
+  targetPetName: string;
+  targetPetImageUrl: string | null;
+  blockedAt: string;
+}
+
+export interface FamilyBlockedUsersResponse {
+  message: string;
+  users: FamilyBlockedUser[];
+  totalPages: number;
+  totalElements: number;
+  currentPage: number;
+  pageSize: number;
+}
+
+export interface ReleaseFamilyBlockedUserRequest {
+  petId: number;
+  targetUserId: string;
+}
+
+export interface ReleaseFamilyBlockedUserResponse {
+  petId: number;
+  message: string;
+}
+
 // ---- 알림 수신 여부 변경 (PATCH /users/me/setting/notification) ----
 
 export type PetSpecies = 'CANINE' | 'FELINE' | string;

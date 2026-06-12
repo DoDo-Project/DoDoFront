@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useCurrentUser } from '@/features/auth';
 import { PetListContent } from '@/features/pet-list';
 import { MY_DODO_CONTENT_BY_KEY, getMyDodoMenuHref, getMyDodoMenuKeyFromSearch } from '@/pages/my/model/menu';
+import { FamilyManagementContent } from '@/pages/my/ui/FamilyManagementContent';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
 import { Skeleton } from '@/shared/ui';
@@ -87,6 +88,14 @@ export function MyDodoPage() {
   const [searchParams] = useSearchParams();
   const activeKey = getMyDodoMenuKeyFromSearch(searchParams.get('menu'));
   const { user, profileUrl, displayName, isLoading } = useCurrentUser();
+  const content =
+    activeKey === 'pet-list' ? (
+      <PetListContent />
+    ) : activeKey === 'family' ? (
+      <FamilyManagementContent />
+    ) : (
+      <MyDodoContent activeKey={activeKey} isLoading={isLoading} />
+    );
 
   return (
     <MyDodoLayout
@@ -99,7 +108,7 @@ export function MyDodoPage() {
           activeKey={activeKey}
         />
       }
-      content={activeKey === 'pet-list' ? <PetListContent /> : <MyDodoContent activeKey={activeKey} />}
+      content={content}
     />
   );
 }

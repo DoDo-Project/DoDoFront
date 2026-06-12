@@ -1,12 +1,20 @@
 import { useState } from 'react';
 
+import { useRequestFamilyJoin } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 
-import { requestFamilyJoin } from '../../api/pets';
 import familyIllustration from '../../assets/family.svg';
-import { PrimaryButton, SignupStepLayout, SubButton, FormFeedback } from '../signup/SignupStepLayout';
+import { FormFeedback, PrimaryButton, SignupStepLayout, SubButton } from '../signup/SignupStepLayout';
 
 const FAMILY_CODE_REGEX = /^[A-Z0-9]{6}$/;
+
+const FAMILY_JOIN_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  400: '코드 형식을 다시 확인해 주세요.',
+  401: '로그인이 필요해요. 다시 시도해 주세요.',
+  404: '만료되었거나 존재하지 않는 초대 코드예요.',
+  409: '이미 가족으로 등록된 반려동물이에요.',
+  500: '서버 오류가 발생했어요. 잠시 후 다시 시도해 주세요.',
+};
 
 interface FamilyJoinFormProps {
   onHome: () => void;
@@ -15,14 +23,15 @@ interface FamilyJoinFormProps {
 export function FamilyJoinForm({ onHome }: FamilyJoinFormProps) {
   const [code, setCode] = useState('');
   const [applied, setApplied] = useState(false);
-  const [confirming, setConfirming] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const requestFamilyJoinMutation = useRequestFamilyJoin();
 
   const handleChangeCode = (value: string) => {
     const normalized = value
       .toUpperCase()
       .replace(/[^A-Z0-9]/g, '')
       .slice(0, 6);
+
     setCode(normalized);
     if (applied) {
       setApplied(false);
@@ -34,29 +43,24 @@ export function FamilyJoinForm({ onHome }: FamilyJoinFormProps) {
     const trimmed = code.trim();
 
     if (!FAMILY_CODE_REGEX.test(trimmed)) {
-      setErrorMessage('가족 코드는 영문 대문자와 숫자 6자리예요.');
+      setErrorMessage('가족 코드는 영문 대문자와 숫자 6자리여야 해요.');
       return;
     }
 
-    setConfirming(true);
     setErrorMessage('');
 
     try {
-      await requestFamilyJoin(trimmed);
+      await requestFamilyJoinMutation.mutateAsync(trimmed);
       setApplied(true);
     } catch (joinError) {
-      console.error('[family-join] 실패', joinError);
+      console.error('[family-join] failed', joinError);
       setErrorMessage(
-        getApiErrorMessage(joinError, '가족 신청에 실패했어요. 잠시 후 다시 시도해주세요.', {
-          400: '잘못된 요청이에요. 코드를 확인해주세요.',
-          401: '로그인이 필요해요. 다시 시도해주세요.',
-          404: '만료되었거나 존재하지 않는 초대 코드예요.',
-          409: '이미 가족으로 등록되어 있어요.',
-          500: '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
-        }),
+        getApiErrorMessage(
+          joinError,
+          '가족 신청에 실패했어요. 잠시 후 다시 시도해 주세요.',
+          FAMILY_JOIN_STATUS_MESSAGES,
+        ),
       );
-    } finally {
-      setConfirming(false);
     }
   };
 
@@ -70,7 +74,7 @@ export function FamilyJoinForm({ onHome }: FamilyJoinFormProps) {
             onClick={onHome}
             className="cursor-pointer text-sm text-neutral-500 transition-colors hover:text-neutral-700"
           >
-            나중에 할게요
+            홈으로 돌아가기
           </button>
         </div>
       }
@@ -81,9 +85,9 @@ export function FamilyJoinForm({ onHome }: FamilyJoinFormProps) {
         <h1 className="mt-8 text-xl font-semibold leading-snug text-neutral-900">
           가족 코드를 입력하면
           <br />
-          서로의 반려동물 정보를
+          새로운 반려동물 정보를
           <br />
-          공유할 수 있어요.
+          함께 볼 수 있어요
         </h1>
 
         <div className="mt-6 flex w-full gap-2">
@@ -97,13 +101,18 @@ export function FamilyJoinForm({ onHome }: FamilyJoinFormProps) {
             spellCheck={false}
             disabled={applied}
           />
-          <SubButton onClick={handleConfirmCode} loading={confirming} disabled={applied || code.trim().length === 0}>
+          <SubButton
+            onClick={handleConfirmCode}
+            loading={requestFamilyJoinMutation.isPending}
+            disabled={applied || code.trim().length === 0}
+          >
             확인
           </SubButton>
         </div>
+
         <FormFeedback
           className="mt-2 self-start text-left"
-          message={applied ? '신청이 완료되었습니다.' : errorMessage}
+          message={applied ? '가족 신청이 완료되었어요.' : errorMessage}
           tone={applied ? 'success' : 'error'}
         />
       </div>
