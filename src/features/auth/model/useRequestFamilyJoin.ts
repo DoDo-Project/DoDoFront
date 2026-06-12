@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { requestFamilyJoin } from '@/features/auth/api/pets';
 import type { PetFamilyJoinResponse } from '@/features/auth/model/types';
+import { queryKeys } from '@/shared/lib/react-query/queryKey';
 
 export function useRequestFamilyJoin() {
   const queryClient = useQueryClient();
@@ -16,7 +17,7 @@ export function useRequestFamilyJoin() {
         queryKey: ['pets', 'list'],
       });
       void queryClient.invalidateQueries({
-        queryKey: ['pets', data.petId, 'detail'],
+        queryKey: queryKeys.pets.detail(data.petId),
       });
     },
   });
