@@ -33,11 +33,7 @@ export function useUpdateBoard() {
       );
 
       void queryClient.invalidateQueries({
-        queryKey: queryKeys.boards.detail(variables.boardId),
-      });
-
-      void queryClient.invalidateQueries({
-        queryKey: ['boards'],
+        queryKey: queryKeys.boards.listInfinite(),
       });
     },
   });

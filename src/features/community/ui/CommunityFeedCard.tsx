@@ -151,7 +151,7 @@ function ListFeedItem({
   badge?: string;
 }) {
   return (
-    <article className="py-6 first:pt-0 last:pb-0">
+    <article className="py-6 first:pt-0 last:pb-0 last:[&>.item-divider]:hidden">
       <div className="flex items-start gap-5 sm:gap-6">
         <div className="min-w-0 flex-1">
           {badge ? (
@@ -197,7 +197,7 @@ function ListFeedItem({
         ) : null}
       </div>
 
-      <div className="mt-6 border-b border-neutral-300/90 last:hidden" />
+      <div className="item-divider mt-6 border-b border-neutral-300/90" />
     </article>
   );
 }
@@ -224,6 +224,11 @@ function SocialStat({ kind, value }: { kind: 'like' | 'comment' | 'view'; value:
 function formatRelativeDate(iso: string): string {
   const now = Date.now();
   const date = new Date(iso).getTime();
+
+  if (Number.isNaN(date)) {
+    return '';
+  }
+
   const diff = now - date;
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);

@@ -17,6 +17,9 @@ export function useDeleteBoard() {
       void queryClient.removeQueries({
         queryKey: queryKeys.boards.detail(variables.boardId),
       });
+      void queryClient.invalidateQueries({
+        queryKey: ['boards'],
+      });
     },
   });
 }

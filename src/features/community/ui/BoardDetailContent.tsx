@@ -53,8 +53,8 @@ function formatDateTime(value: string) {
 }
 
 export function BoardDetailContent({ board, canManage, currentUserProfileUrl, onDelete }: BoardDetailContentProps) {
-  const likeCount = Math.max(12, Math.round(board.viewCount * 1.7));
-  const commentCount = Math.max(MOCK_COMMENTS.length, Math.round(board.viewCount / 3));
+  const likeCount = board.likeCount ?? 0;
+  const commentCount = board.commentCount ?? MOCK_COMMENTS.length;
   const authorName = board.nickname.trim() || DETAIL_COPY.authorFallback;
   const imageUrls = board.imageFileUrls.filter((imageUrl) => imageUrl.trim().length > 0);
 

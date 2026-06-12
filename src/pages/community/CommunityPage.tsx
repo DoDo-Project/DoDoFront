@@ -215,7 +215,7 @@ function EmptyRecentState() {
 
 function ListRowSkeleton() {
   return (
-    <div className="py-6 first:pt-0 last:pb-0">
+    <div className="py-6 first:pt-0 last:pb-0 last:[&>.item-divider]:hidden">
       <div className="flex gap-4">
         <div className="min-w-0 flex-1 space-y-3">
           <div className="h-6 w-2/3 animate-pulse rounded-md bg-neutral-100" />
@@ -225,7 +225,7 @@ function ListRowSkeleton() {
         </div>
         <div className="h-16 w-16 shrink-0 animate-pulse rounded-[10px] bg-neutral-100 sm:h-[72px] sm:w-[72px]" />
       </div>
-      <div className="mt-6 border-b border-neutral-300/90 last:hidden" />
+      <div className="item-divider mt-6 border-b border-neutral-300/90" />
     </div>
   );
 }

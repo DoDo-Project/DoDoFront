@@ -59,6 +59,8 @@ export interface BoardDetailResponse {
   imageFileUrls: string[];
   profileUrl: string | null;
   nickname: string;
+  likeCount?: number;
+  commentCount?: number;
   viewCount: number;
   boardCreatedAt: string;
   modifiedAt: string;
