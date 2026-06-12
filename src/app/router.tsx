@@ -7,6 +7,7 @@ import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { SignupPage } from '@/pages/auth/SignupPage';
 import { BoardCreatePage } from '@/pages/community/BoardCreatePage';
+import { BoardDetailPage } from '@/pages/community/BoardDetailPage';
 import { BoardEditPage } from '@/pages/community/BoardEditPage';
 import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
@@ -33,6 +34,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <BoardCreatePage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/community/:boardId',
+        element: (
+          <RequireAuth>
+            <BoardDetailPage />
           </RequireAuth>
         ),
       },
