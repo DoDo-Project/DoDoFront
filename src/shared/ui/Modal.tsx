@@ -12,9 +12,10 @@ interface ModalProps {
   children: ReactNode;
   /** 스크린리더용 대화상자 라벨 */
   ariaLabel?: string;
+  panelClassName?: string;
 }
 
-export function Modal({ open, onClose, children, ariaLabel }: ModalProps) {
+export function Modal({ open, onClose, children, ariaLabel, panelClassName = '' }: ModalProps) {
   const { isRendered, isVisible, handleTransitionEnd } = usePresence(open);
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export function Modal({ open, onClose, children, ariaLabel }: ModalProps) {
       <div className="flex min-h-full items-center justify-center">
         <div
           onTransitionEnd={handleTransitionEnd}
-          className={`relative w-full max-w-sm max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl transition-all duration-500 ease-out ${
+          className={`relative w-full max-w-sm max-h-[calc(100vh-2rem)] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl transition-all duration-500 ease-out ${panelClassName} ${
             isVisible ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-95 opacity-0'
           }`}
         >

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import { Modal } from '@/shared/ui';
 import {
   formatRegionLabel,
   getSigunguList,
@@ -8,6 +7,7 @@ import {
   parseRegionLabel,
   SIDO_LIST,
 } from '@/shared/lib/regions';
+import { Modal } from '@/shared/ui';
 
 import { PrimaryButton } from './SignupStepLayout';
 import { SignupSelect } from './SignupSelect';
@@ -33,9 +33,8 @@ function RegionSelectForm({
   const [sigungu, setSigungu] = useState(parsed.sigungu ?? '');
 
   const sigunguOptions = sido ? getSigunguList(sido) : [];
-  const showSigungu = sido && hasSigunguOptions(sido);
-
-  const canConfirm = sido && (!showSigungu || sigungu);
+  const showSigungu = Boolean(sido) && hasSigunguOptions(sido);
+  const canConfirm = Boolean(sido) && (!showSigungu || Boolean(sigungu));
 
   const handleSidoChange = (nextSido: string) => {
     setSido(nextSido);
@@ -49,7 +48,7 @@ function RegionSelectForm({
   };
 
   return (
-    <>
+    <div className="max-h-[calc(100vh-8rem)] overflow-y-auto pr-1">
       <h2 className="pr-8 text-lg font-semibold text-neutral-900">지역 선택</h2>
       <p className="mt-1 text-sm text-neutral-500">활동 지역을 선택해주세요.</p>
 
@@ -57,7 +56,7 @@ function RegionSelectForm({
         <SignupSelect
           id="region-sido"
           label="시/도"
-          placeholder="시/도 선택"
+          placeholder="시/도를 선택해주세요"
           value={sido}
           options={SIDO_LIST}
           onChange={handleSidoChange}
@@ -67,7 +66,7 @@ function RegionSelectForm({
           <SignupSelect
             id="region-sigungu"
             label="시/군/구"
-            placeholder="시/군/구 선택"
+            placeholder="시/군/구를 선택해주세요"
             value={sigungu}
             options={sigunguOptions}
             onChange={setSigungu}
@@ -82,13 +81,13 @@ function RegionSelectForm({
           선택 완료
         </PrimaryButton>
       </div>
-    </>
+    </div>
   );
 }
 
 export function RegionSelectModal({ open, initialRegion, onClose, onConfirm }: RegionSelectModalProps) {
   return (
-    <Modal open={open} onClose={onClose} ariaLabel="지역 선택">
+    <Modal open={open} onClose={onClose} ariaLabel="지역 선택" panelClassName="max-h-none overflow-visible">
       {open ? (
         <RegionSelectForm key={initialRegion} initialRegion={initialRegion} onClose={onClose} onConfirm={onConfirm} />
       ) : null}

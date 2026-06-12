@@ -4,6 +4,7 @@ const LEGACY_REFRESH_TOKEN_KEY = 'refreshToken';
 const REFRESH_TOKEN_KEY = 'dodo.refreshToken';
 const PROFILE_URL_KEY = 'profileUrl';
 const NICKNAME_KEY = 'nickname';
+const REGION_KEY = 'region';
 const NOTIFICATION_ENABLED_KEY = 'notificationEnabled';
 const ACCESS_TOKEN_EXPIRES_AT_KEY = 'accessTokenExpiresAt';
 const ACCESS_TOKEN_TTL_MS_KEY = 'accessTokenTtlMs';
@@ -85,6 +86,7 @@ export function subscribeAuthState(listener: () => void): () => void {
       event.key === LEGACY_REFRESH_TOKEN_KEY ||
       event.key === PROFILE_URL_KEY ||
       event.key === NICKNAME_KEY ||
+      event.key === REGION_KEY ||
       event.key === NOTIFICATION_ENABLED_KEY ||
       event.key === ACCESS_TOKEN_EXPIRES_AT_KEY ||
       event.key === ACCESS_TOKEN_TTL_MS_KEY
@@ -156,6 +158,10 @@ export function getNickname(): string | null {
   return localStorage.getItem(NICKNAME_KEY);
 }
 
+export function getRegion(): string | null {
+  return localStorage.getItem(REGION_KEY);
+}
+
 export function setNotificationEnabled(enabled: boolean): void {
   localStorage.setItem(NOTIFICATION_ENABLED_KEY, enabled ? 'true' : 'false');
   notifyAuthStateChanged();
@@ -171,6 +177,7 @@ export function getNotificationEnabled(): boolean | null {
 export function syncUserProfile(profile: {
   profileUrl?: string;
   nickname?: string;
+  region?: string;
   notificationEnabled?: boolean;
 }): void {
   const profileUrl = profile.profileUrl?.trim();
@@ -181,6 +188,11 @@ export function syncUserProfile(profile: {
   const nickname = profile.nickname?.trim();
   if (nickname) {
     localStorage.setItem(NICKNAME_KEY, nickname);
+  }
+
+  const region = profile.region?.trim();
+  if (region) {
+    localStorage.setItem(REGION_KEY, region);
   }
 
   if (profile.notificationEnabled !== undefined) {
@@ -200,6 +212,7 @@ export function clearTokens(): void {
   sessionStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(PROFILE_URL_KEY);
   localStorage.removeItem(NICKNAME_KEY);
+  localStorage.removeItem(REGION_KEY);
   localStorage.removeItem(NOTIFICATION_ENABLED_KEY);
   localStorage.removeItem(ACCESS_TOKEN_EXPIRES_AT_KEY);
   localStorage.removeItem(ACCESS_TOKEN_TTL_MS_KEY);

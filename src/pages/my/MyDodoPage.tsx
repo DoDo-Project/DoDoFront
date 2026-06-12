@@ -5,6 +5,7 @@ import { PetListContent } from '@/features/pet-list';
 import { MY_DODO_CONTENT_BY_KEY, getMyDodoMenuHref, getMyDodoMenuKeyFromSearch } from '@/pages/my/model/menu';
 import { FamilyManagementContent } from '@/pages/my/ui/FamilyManagementContent';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
+import { MyProfileEditContent } from '@/pages/my/ui/MyProfileEditContent';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
 import { Skeleton } from '@/shared/ui';
 
@@ -88,11 +89,14 @@ export function MyDodoPage() {
   const [searchParams] = useSearchParams();
   const activeKey = getMyDodoMenuKeyFromSearch(searchParams.get('menu'));
   const { user, profileUrl, displayName, isLoading } = useCurrentUser();
+
   const content =
     activeKey === 'pet-list' ? (
       <PetListContent />
     ) : activeKey === 'family' ? (
       <FamilyManagementContent />
+    ) : activeKey === 'profile-edit' ? (
+      <MyProfileEditContent user={user} isLoading={isLoading} />
     ) : (
       <MyDodoContent activeKey={activeKey} isLoading={isLoading} />
     );

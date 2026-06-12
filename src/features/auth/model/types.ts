@@ -389,6 +389,25 @@ export interface NotificationUpdateResponse {
 
 // ---- 내 정보 조회 (GET /users/me) ----
 
+export interface UpdateMyProfileRequest {
+  nickname: string;
+  region: string;
+  hasFamily: boolean;
+  profileUrl?: string | null;
+}
+
+export interface UpdateMyProfileResponse {
+  message: string;
+  email: string;
+  name: string;
+  nickname: string;
+  region: string;
+  hasFamily: boolean;
+  profileUrl: string;
+  notificationEnabled: boolean;
+  userCreatedAt: string;
+}
+
 export interface UserProfile {
   message: string;
   email: string;
