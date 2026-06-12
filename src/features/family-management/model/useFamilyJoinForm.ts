@@ -31,17 +31,17 @@ export function useFamilyJoinForm() {
       return;
     }
 
-    const result = await requestFamilyJoinMutation.mutateAsync(trimmed).catch((error: unknown) => {
+    try {
+      const result = await requestFamilyJoinMutation.mutateAsync(trimmed);
+      setJoinSuccessMessage(`가족 신청이 완료되었어요. 반려동물 ID ${result.petId}의 승인을 기다려 주세요.`);
+      setJoinErrorMessage('');
+      setJoinCode('');
+    } catch (error) {
       setJoinSuccessMessage('');
       setJoinErrorMessage(
         getApiErrorMessage(error, '가족 신청에 실패했어요. 잠시 후 다시 시도해 주세요.', FAMILY_JOIN_STATUS_MESSAGES),
       );
-      throw error;
-    });
-
-    setJoinSuccessMessage(`가족 신청이 완료되었어요. 반려동물 ID ${result.petId}의 승인을 기다려 주세요.`);
-    setJoinErrorMessage('');
-    setJoinCode('');
+    }
   };
 
   return {
