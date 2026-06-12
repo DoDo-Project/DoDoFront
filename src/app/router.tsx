@@ -6,8 +6,12 @@ import { RequireAuth } from '@/app/guards/RequireAuth';
 import { AuthCallbackPage } from '@/pages/auth/AuthCallbackPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { SignupPage } from '@/pages/auth/SignupPage';
-import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
+import { BoardCreatePage } from '@/pages/community/BoardCreatePage';
+import { BoardDetailPage } from '@/pages/community/BoardDetailPage';
+import { BoardEditPage } from '@/pages/community/BoardEditPage';
+import { CommunityMyActivityPage } from '@/pages/community/CommunityMyActivityPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
+import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { MainPage } from '@/pages/main/MainPage';
 import { PetDetailPage } from '@/pages/my/PetDetailPage';
 import { PetEditPage } from '@/pages/my/PetEditPage';
@@ -26,6 +30,38 @@ export const router = createBrowserRouter([
       { path: '/', element: <MainPage /> },
       { path: '/walk', element: <WalkPage /> },
       { path: '/community', element: <CommunityPage /> },
+      {
+        path: '/community/my',
+        element: (
+          <RequireAuth>
+            <CommunityMyActivityPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/community/new',
+        element: (
+          <RequireAuth>
+            <BoardCreatePage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/community/:boardId',
+        element: (
+          <RequireAuth>
+            <BoardDetailPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/community/:boardId/edit',
+        element: (
+          <RequireAuth>
+            <BoardEditPage />
+          </RequireAuth>
+        ),
+      },
       {
         path: '/my',
         element: (

@@ -1,4 +1,11 @@
 export const queryKeys = {
+  boards: {
+    list: (params?: { page?: number; size?: number }) =>
+      ['boards', 'list', params?.page ?? 0, params?.size ?? 12] as const,
+    listInfinite: () => ['boards', 'list-infinite'] as const,
+    detail: (boardId: number) => ['boards', boardId, 'detail'] as const,
+    tempSaved: (sessionKey: string) => ['boards', 'temp-save', sessionKey] as const,
+  },
   pets: {
     list: (params?: { page?: number; size?: number; sort?: string }) =>
       ['pets', 'list', params?.page ?? 0, params?.size ?? 10, params?.sort ?? 'registrationCreatedAt,desc'] as const,
