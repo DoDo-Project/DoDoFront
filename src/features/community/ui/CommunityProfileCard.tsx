@@ -27,12 +27,18 @@ export function CommunityProfileCard({ profileUrl, nickname }: CommunityProfileC
         <p className="mt-1 text-center text-sm text-neutral-500">오늘의 반려생활을 기록해보세요.</p>
       </div>
 
-      <div className="px-5 py-5">
+      <div className="flex flex-col gap-2 px-5 py-5">
         <Link
           to="/community/new"
           className="inline-flex w-full items-center justify-center rounded-xl bg-brand px-4 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
         >
           글쓰기
+        </Link>
+        <Link
+          to="/community/my"
+          className="inline-flex w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 py-2.5 text-sm font-medium text-neutral-600 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
+        >
+          내 활동
         </Link>
       </div>
     </section>

@@ -1,5 +1,7 @@
 export const queryKeys = {
   boards: {
+    list: (params?: { page?: number; size?: number }) =>
+      ['boards', 'list', params?.page ?? 0, params?.size ?? 12] as const,
     detail: (boardId: number) => ['boards', boardId, 'detail'] as const,
     tempSaved: (sessionKey: string) => ['boards', 'temp-save', sessionKey] as const,
   },

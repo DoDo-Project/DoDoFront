@@ -2,6 +2,7 @@ import { apiClient } from '@/shared/api/axios';
 
 import type {
   BoardDetailResponse,
+  BoardListResponse,
   CreateBoardRequest,
   CreateBoardResponse,
   DeleteBoardResponse,
@@ -12,13 +13,21 @@ import type {
   UpdateBoardResponse,
 } from '../model/types';
 
+export async function getBoardList(params: { page: number; size: number }): Promise<BoardListResponse> {
+  const response = await apiClient.get<BoardListResponse>('/boards', { params });
+  return response.data;
+}
+
 export async function createBoard(payload: CreateBoardRequest): Promise<CreateBoardResponse> {
   const response = await apiClient.post<CreateBoardResponse>('/boards', payload);
   return response.data;
 }
 
 export async function tempSaveBoard(payload: TempSaveBoardRequest): Promise<TempSaveBoardResponse> {
-  const response = await apiClient.post<TempSaveBoardResponse>('/boards/temp-save', payload);
+  const { boardId, ...body } = payload;
+  const response = await apiClient.post<TempSaveBoardResponse>('/boards/temp-save', body, {
+    params: boardId !== undefined ? { boardId } : undefined,
+  });
   return response.data;
 }
 

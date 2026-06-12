@@ -202,6 +202,7 @@ export function useBoardEditorForm({ mode, boardId = null }: UseBoardEditorFormO
 
     try {
       const result = await tempSaveBoardMutation.mutateAsync({
+        boardId: isEditMode && boardId !== null ? boardId : undefined,
         boardTitle: form.boardTitle.trim() || undefined,
         boardContent: form.boardContent.trim() || undefined,
         imageFileUrl: form.imageFileUrls[0] ?? undefined,

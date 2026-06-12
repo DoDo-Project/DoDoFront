@@ -1,5 +1,11 @@
 export const COMMUNITY_DRAFT_SESSION_KEY = 'community-board-draft-session-key';
 
+export const BOARD_LIST_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  400: '잘못된 요청입니다.',
+  401: '로그인이 필요합니다. 다시 로그인해주세요.',
+  500: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+};
+
 export const BOARD_MUTATION_STATUS_MESSAGES: Partial<Record<number, string>> = {
   400: '입력값을 다시 확인해주세요.',
   401: '로그인이 필요합니다. 다시 로그인해주세요.',

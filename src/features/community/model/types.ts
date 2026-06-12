@@ -1,3 +1,22 @@
+export interface BoardListItem {
+  boardId: number;
+  boardTitle: string;
+  boardContentPreview: string;
+  thumbnailImageUrl: string | null;
+  nickname: string;
+  viewCount: number;
+  commentCount: number;
+  likeCount: number;
+  dislikeCount: number;
+  createdAt: string;
+  modifiedAt: string;
+}
+
+export interface BoardListResponse {
+  message: string;
+  boards: BoardListItem[];
+}
+
 export interface BoardPayload {
   boardTitle: string;
   boardContent: string;
@@ -12,6 +31,7 @@ export interface CreateBoardResponse {
 }
 
 export interface TempSaveBoardRequest {
+  boardId?: number;
   boardTitle?: string;
   boardContent?: string;
   imageFileUrl?: string;

@@ -9,8 +9,9 @@ import { SignupPage } from '@/pages/auth/SignupPage';
 import { BoardCreatePage } from '@/pages/community/BoardCreatePage';
 import { BoardDetailPage } from '@/pages/community/BoardDetailPage';
 import { BoardEditPage } from '@/pages/community/BoardEditPage';
-import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
+import { CommunityMyActivityPage } from '@/pages/community/CommunityMyActivityPage';
 import { CommunityPage } from '@/pages/community/CommunityPage';
+import { FamilyJoinPage } from '@/pages/family/FamilyJoinPage';
 import { MainPage } from '@/pages/main/MainPage';
 import { PetDetailPage } from '@/pages/my/PetDetailPage';
 import { PetEditPage } from '@/pages/my/PetEditPage';
@@ -29,6 +30,14 @@ export const router = createBrowserRouter([
       { path: '/', element: <MainPage /> },
       { path: '/walk', element: <WalkPage /> },
       { path: '/community', element: <CommunityPage /> },
+      {
+        path: '/community/my',
+        element: (
+          <RequireAuth>
+            <CommunityMyActivityPage />
+          </RequireAuth>
+        ),
+      },
       {
         path: '/community/new',
         element: (
