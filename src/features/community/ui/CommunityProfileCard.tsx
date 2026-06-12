@@ -9,7 +9,7 @@ interface CommunityProfileCardProps {
 
 const PROFILE_COPY = {
   fallbackName: '도도 친구',
-  description: '오늘 남기고 싶은 반려생활 이야기를 글로 기록해보세요.',
+  description: '이야기를 글로 기록해보세요.',
   write: '글쓰기',
   myActivity: '내 활동',
 };
@@ -20,11 +20,11 @@ export function CommunityProfileCard({ profileUrl, nickname }: CommunityProfileC
   return (
     <section className="space-y-5">
       <div className="flex items-center gap-4">
-        <div className="h-16 w-16 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
+        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
           <img
             src={profileUrl?.trim() || profileDefaultIllustration}
             alt=""
-            className="h-full w-full object-cover"
+            className="block h-full w-full object-cover"
             onError={(event) => {
               event.currentTarget.src = profileDefaultIllustration;
             }}

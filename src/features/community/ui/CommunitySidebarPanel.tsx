@@ -7,7 +7,7 @@ interface CommunitySidebarPanelProps {
 
 export function CommunitySidebarPanel({ profileUrl, nickname }: CommunitySidebarPanelProps) {
   return (
-    <div className="rounded-[24px] border border-neutral-200 bg-white p-5 shadow-sm">
+    <div className="rounded-[24px] border border-neutral-200 bg-white p-4 shadow-sm">
       <CommunityProfileCard profileUrl={profileUrl} nickname={nickname} />
     </div>
   );

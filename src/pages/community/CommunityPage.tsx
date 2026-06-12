@@ -35,12 +35,9 @@ export function CommunityPage() {
 
   return (
     <CommunityLayout
-      eyebrow="COMMUNITY BOARD"
-      title="커뮤니티"
-      description="반려생활 이야기를 모아보고, 인기 글과 최신 글을 한번에 확인해보세요."
       sidebar={<CommunitySidebarPanel profileUrl={profileUrl} nickname={nickname} />}
       content={
-        <div className="space-y-10">
+        <div className="space-y-14">
           <PopularSection boards={popularBoards} isLoading={isLoading} isError={isError} />
           <RecentSection
             boards={boards}
@@ -66,7 +63,7 @@ function PopularSection({
   isError: boolean;
 }) {
   return (
-    <section className="space-y-4 rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+    <section className="space-y-4">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold tracking-[0.24em] text-brand">POPULAR PICKS</p>
@@ -78,9 +75,9 @@ function PopularSection({
       </div>
 
       {isLoading ? (
-        <div className="grid gap-4 lg:grid-cols-3">
+        <div className="rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
           {Array.from({ length: 3 }).map((_, i) => (
-            <PopularCardSkeleton key={i} />
+            <ListRowSkeleton key={i} />
           ))}
         </div>
       ) : isError ? (
@@ -88,67 +85,25 @@ function PopularSection({
       ) : boards.length === 0 ? (
         <EmptyPopularState />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-3">
-          {boards.map((board, index) => (
-            <PopularCard key={board.boardId} board={board} rank={index + 1} />
+        <div className="rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+          {boards.map((board) => (
+            <CommunityFeedCard
+              key={board.boardId}
+              title={board.boardTitle}
+              preview={board.boardContentPreview}
+              imageUrl={board.thumbnailImageUrl}
+              nickname={board.nickname}
+              likes={board.likeCount}
+              comments={board.commentCount}
+              views={board.viewCount}
+              createdAt={board.createdAt}
+              to={`/community/${board.boardId}`}
+              variant="list"
+            />
           ))}
         </div>
       )}
     </section>
-  );
-}
-
-function PopularCard({ board, rank }: { board: BoardListItem; rank: number }) {
-  const rankColors: Record<number, string> = {
-    1: 'bg-amber-400 text-white',
-    2: 'bg-neutral-400 text-white',
-    3: 'bg-amber-700/80 text-white',
-  };
-  const rankColor = rankColors[rank] ?? 'bg-neutral-300 text-white';
-
-  return (
-    <Link to={`/community/${board.boardId}`} className="group block">
-      <article className="overflow-hidden rounded-[24px] border border-neutral-200/80 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_22px_56px_rgba(15,23,42,0.12)]">
-        <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
-          {board.thumbnailImageUrl ? (
-            <img
-              src={board.thumbnailImageUrl}
-              alt={board.boardTitle}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center bg-linear-to-br from-brand/[0.08] via-[#fff5ea] to-neutral-100">
-              <ImagePlaceholderIcon className="h-10 w-10 text-neutral-300" />
-            </div>
-          )}
-          <span
-            className={`absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-sm font-bold shadow-sm ${rankColor}`}
-          >
-            {rank}
-          </span>
-        </div>
-
-        <div className="space-y-2.5 px-4 py-4">
-          <p className="line-clamp-2 text-base font-semibold leading-snug text-neutral-900">{board.boardTitle}</p>
-          {board.boardContentPreview ? (
-            <p className="line-clamp-2 text-sm leading-6 text-neutral-500">{board.boardContentPreview}</p>
-          ) : null}
-          <div className="flex items-center justify-between gap-3 pt-1">
-            <span className="truncate text-sm text-neutral-400">{board.nickname}</span>
-            <div className="flex shrink-0 items-center gap-3 text-sm text-neutral-500">
-              <span className="inline-flex items-center gap-1">
-                <HeartIcon className="h-4 w-4 text-[#d65d4b]" />
-                {board.likeCount}
-              </span>
-              <span className="inline-flex items-center gap-1">
-                <CommentIcon className="h-4 w-4 text-neutral-400" />
-                {board.commentCount}
-              </span>
-            </div>
-          </div>
-        </div>
-      </article>
-    </Link>
   );
 }
 
@@ -168,7 +123,7 @@ function RecentSection({
   onLoadMore: () => void;
 }) {
   return (
-    <section className="space-y-4 rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+    <section className="space-y-4">
       <div>
         <p className="text-xs font-semibold tracking-[0.24em] text-neutral-400">COMMUNITY BOARD</p>
         <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.03em] text-neutral-950">
@@ -178,9 +133,9 @@ function RecentSection({
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <div className="rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
           {Array.from({ length: 8 }).map((_, i) => (
-            <BoardCardSkeleton key={i} />
+            <ListRowSkeleton key={i} />
           ))}
         </div>
       ) : isError ? (
@@ -188,8 +143,8 @@ function RecentSection({
       ) : boards.length === 0 ? (
         <EmptyRecentState />
       ) : (
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+        <div className="space-y-8 rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+          <div>
             {boards.map((board) => (
               <CommunityFeedCard
                 key={board.boardId}
@@ -202,6 +157,7 @@ function RecentSection({
                 views={board.viewCount}
                 createdAt={board.createdAt}
                 to={`/community/${board.boardId}`}
+                variant="list"
               />
             ))}
           </div>
@@ -257,66 +213,16 @@ function EmptyRecentState() {
   );
 }
 
-function PopularCardSkeleton() {
+function ListRowSkeleton() {
   return (
-    <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.05)]">
-      <div className="aspect-[4/3] animate-pulse bg-neutral-100" />
-      <div className="space-y-2.5 px-4 py-4">
-        <div className="h-4 w-3/4 animate-pulse rounded-md bg-neutral-100" />
-        <div className="h-3 w-full animate-pulse rounded-md bg-neutral-100" />
-        <div className="h-3 w-2/3 animate-pulse rounded-md bg-neutral-100" />
-        <div className="flex justify-between pt-1">
-          <div className="h-3 w-16 animate-pulse rounded-md bg-neutral-100" />
-          <div className="h-3 w-20 animate-pulse rounded-md bg-neutral-100" />
-        </div>
+    <div className="flex gap-4 border-b border-neutral-200 py-8 first:pt-0 last:border-b-0 last:pb-0">
+      <div className="min-w-0 flex-1 space-y-3">
+        <div className="h-6 w-2/3 animate-pulse rounded-md bg-neutral-100" />
+        <div className="h-4 w-full animate-pulse rounded-md bg-neutral-100" />
+        <div className="h-4 w-4/5 animate-pulse rounded-md bg-neutral-100" />
+        <div className="h-4 w-1/2 animate-pulse rounded-md bg-neutral-100" />
       </div>
+      <div className="h-16 w-16 shrink-0 animate-pulse rounded-[10px] bg-neutral-100 sm:h-[72px] sm:w-[72px]" />
     </div>
-  );
-}
-
-function BoardCardSkeleton() {
-  return (
-    <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.05)]">
-      <div className="aspect-[4/3] animate-pulse bg-neutral-100" />
-      <div className="space-y-2.5 px-4 py-4">
-        <div className="h-4 w-3/4 animate-pulse rounded-md bg-neutral-100" />
-        <div className="h-3 w-full animate-pulse rounded-md bg-neutral-100" />
-        <div className="h-3 w-2/3 animate-pulse rounded-md bg-neutral-100" />
-        <div className="flex justify-between pt-1">
-          <div className="h-3 w-16 animate-pulse rounded-md bg-neutral-100" />
-          <div className="h-3 w-20 animate-pulse rounded-md bg-neutral-100" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function HeartIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
-      <path d="M12 21s-6.716-4.304-9.428-7.851C-.315 9.382.496 4.5 4.96 3.297A5.53 5.53 0 0 1 12 6.045a5.53 5.53 0 0 1 7.04-2.748c4.464 1.203 5.276 6.085 2.387 9.852C18.716 16.696 12 21 12 21Z" />
-    </svg>
-  );
-}
-
-function CommentIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden className={className}>
-      <path
-        d="M8 19.5 4.5 21l1.125-3.375A7.5 7.5 0 1 1 19.5 12 7.5 7.5 0 0 1 12 19.5H8Z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ImagePlaceholderIcon({ className }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden className={className}>
-      <rect x="3" y="3" width="18" height="18" rx="3" />
-      <circle cx="8.5" cy="8.5" r="1.5" />
-      <path d="m21 15-5-5L5 21" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
   );
 }
