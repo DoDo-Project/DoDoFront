@@ -18,6 +18,8 @@ export { useDeleteBoard } from './model/useDeleteBoard';
 export { useTempSaveBoard } from './model/useTempSaveBoard';
 export { useTempSavedBoard } from './model/useTempSavedBoard';
 export { useUpdateBoard } from './model/useUpdateBoard';
+export { CommunityFeedCard } from './ui/CommunityFeedCard';
+export { CommunityProfileCard } from './ui/CommunityProfileCard';
 export { BoardDetailContent } from './ui/BoardDetailContent';
 export { BoardEditorForm } from './ui/BoardEditorForm';
 export { DeleteBoardDialog } from './ui/DeleteBoardDialog';
