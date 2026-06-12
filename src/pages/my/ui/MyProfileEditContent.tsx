@@ -64,9 +64,6 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
     previousImageUrlRef.current = nextProfileUrl;
     setNicknameTouched(false);
     setRegionTouched(false);
-    setSaveError('');
-    setSaveSuccess('');
-    setImageError('');
   }, [user]);
 
   const effectiveNickname = nickname.trim() || user?.nickname.trim() || '';
