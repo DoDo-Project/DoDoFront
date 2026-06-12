@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { useApprovePetFamilyRequest, type FamilyPendingUser, type PetFamilyApprovalAction } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
@@ -32,6 +32,19 @@ export function useFamilyApprovalAction() {
   const [activeRequestKey, setActiveRequestKey] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState('');
   const [feedbackTone, setFeedbackTone] = useState<'success' | 'error' | null>(null);
+
+  useEffect(() => {
+    if (!feedbackMessage || !feedbackTone) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setFeedbackMessage('');
+      setFeedbackTone(null);
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [feedbackMessage, feedbackTone]);
 
   const handleApproveAction = async (request: FamilyPendingUser, action: PetFamilyApprovalAction) => {
     const requestKey = `${request.targetPetId}-${request.userId}`;
