@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useMemo, useState } from 'react';
 
 import { PROFILE_UPDATE_STATUS_MESSAGES, getApiErrorMessage, updateMyProfile, type UserProfile } from '@/features/auth';
 import { RegionSelectModal } from '@/features/auth/ui/signup/RegionSelectModal';
-import { FormFeedback, PrimaryButton, SubButton } from '@/features/auth/ui/signup/SignupStepLayout';
+import { FormFeedback } from '@/features/auth/ui/signup/SignupStepLayout';
 import { syncUserProfile } from '@/shared/lib/auth/token';
 import { Skeleton } from '@/shared/ui';
 
@@ -11,11 +11,6 @@ interface MyProfileEditContentProps {
   isLoading?: boolean;
   onProfileUpdated: (profile: UserProfile) => void;
 }
-
-const inputClass =
-  'h-12 w-full rounded-xl border border-neutral-200 bg-white px-4 text-sm text-neutral-800 outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/15';
-const readonlyFieldClass =
-  'flex h-12 w-full items-center rounded-xl border border-neutral-300 bg-neutral-100 px-4 text-sm text-neutral-500';
 
 function validateNickname(value: string): string {
   const trimmed = value.trim();
@@ -29,8 +24,8 @@ function validateNickname(value: string): string {
 function validateRegion(value: string): string {
   const trimmed = value.trim();
 
-  if (!trimmed) return '지역을 선택해주세요.';
-  if (trimmed.length > 50) return '지역은 50자 이하로 입력해주세요.';
+  if (!trimmed) return '활동 지역을 선택해주세요.';
+  if (trimmed.length > 50) return '활동 지역은 50자 이하로 입력해주세요.';
 
   return '';
 }
@@ -38,7 +33,6 @@ function validateRegion(value: string): string {
 export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated }: MyProfileEditContentProps) {
   const [nickname, setNickname] = useState('');
   const [region, setRegion] = useState('');
-  const [hasFamily, setHasFamily] = useState(false);
   const [regionModalOpen, setRegionModalOpen] = useState(false);
   const [nicknameTouched, setNicknameTouched] = useState(false);
   const [regionTouched, setRegionTouched] = useState(false);
@@ -51,7 +45,6 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
 
     setNickname(user.nickname ?? '');
     setRegion(user.region ?? '');
-    setHasFamily(user.hasFamily);
     setNicknameTouched(false);
     setRegionTouched(false);
     setSaveError('');
@@ -66,10 +59,8 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
   const isDirty = useMemo(() => {
     if (!user) return false;
 
-    return (
-      trimmedNickname !== user.nickname.trim() || trimmedRegion !== user.region.trim() || hasFamily !== user.hasFamily
-    );
-  }, [hasFamily, trimmedNickname, trimmedRegion, user]);
+    return trimmedNickname !== user.nickname.trim() || trimmedRegion !== user.region.trim();
+  }, [trimmedNickname, trimmedRegion, user]);
 
   const canSubmit = Boolean(user) && !saving && !nicknameError && !regionError && isDirty;
 
@@ -87,8 +78,9 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
     setSaveSuccess('');
   };
 
-  const handleFamilyChange = (next: boolean) => {
-    setHasFamily(next);
+  const handleResetNickname = () => {
+    setNickname(user?.nickname ?? '');
+    setNicknameTouched(false);
     setSaveError('');
     setSaveSuccess('');
   };
@@ -111,7 +103,7 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
       const updatedProfile = await updateMyProfile({
         nickname: trimmedNickname,
         region: trimmedRegion,
-        hasFamily,
+        hasFamily: user.hasFamily,
       });
 
       syncUserProfile({
@@ -146,122 +138,124 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
       <div>
         <p className="text-xs font-semibold tracking-[0.24em] text-brand">ACCOUNT</p>
         <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">회원정보 수정</h1>
-        <p className="mt-3 text-sm leading-6 text-neutral-600">
-          현재 로그인한 내 정보를 확인하고 닉네임, 활동 지역, 가족 여부를 수정할 수 있어요.
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-600">
+          닉네임과 활동 지역을 수정해 내 프로필 정보를 최신 상태로 유지할 수 있어요.
         </p>
       </div>
 
-      <section className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-[0_10px_26px_rgba(15,23,42,0.04)]">
-        <div className="border-b border-neutral-100 bg-linear-to-r from-brand/[0.04] via-white to-white px-6 py-5 sm:px-8">
-          <h2 className="text-[18px] font-medium text-neutral-950">내 프로필 정보</h2>
-          <p className="mt-2 text-sm leading-6 text-neutral-600">
-            수정한 정보는 저장 직후 마이도도 화면에 바로 반영돼요.
-          </p>
-        </div>
-
-        <div className="space-y-6 px-6 py-6 sm:px-8 sm:py-7">
-          <div className="grid gap-5 md:grid-cols-2">
-            <FieldBlock label="이메일">
-              <div className={readonlyFieldClass} aria-readonly>
-                {user?.email ?? '-'}
+      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-5 px-5 py-5 sm:px-6 sm:py-6">
+          <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-stretch">
+            <div className="flex flex-col items-center rounded-[20px] border border-neutral-200 bg-white px-5 py-5">
+              <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
+                {user?.profileUrl ? (
+                  <img src={user.profileUrl} alt="" className="h-full w-full object-cover" />
+                ) : (
+                  <div className="h-full w-full bg-neutral-100" />
+                )}
               </div>
-            </FieldBlock>
-
-            <FieldBlock label="이름">
-              <div className={readonlyFieldClass} aria-readonly>
-                {user?.name ?? '-'}
+              <div className="mt-4 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-center text-sm text-neutral-500">
+                프로필 이미지는 현재 수정 대상이 아니에요.
               </div>
-            </FieldBlock>
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-            <FieldBlock label="닉네임" required>
-              <input
-                className={inputClass}
-                value={nickname}
-                maxLength={10}
-                onChange={(event) => handleNicknameChange(event.target.value)}
-                placeholder="닉네임을 입력해주세요"
-              />
-              <FormFeedback
-                message={nicknameTouched ? nicknameError : '2자 이상 10자 이하로 입력해주세요.'}
-                tone={nicknameTouched && nicknameError ? 'error' : 'neutral'}
-              />
-            </FieldBlock>
-
-            <div className="hidden md:block">
-              <label className="mb-1.5 block text-sm font-medium text-transparent">보조 액션</label>
-              <SubButton onClick={() => setNickname((user?.nickname ?? '').trim())} disabled={!user || saving}>
-                원래대로
-              </SubButton>
             </div>
-          </div>
 
-          <div className="grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-start">
-            <FieldBlock label="활동 지역" required>
-              <button
-                type="button"
-                onClick={() => setRegionModalOpen(true)}
-                className={`${readonlyFieldClass} cursor-pointer justify-between text-left ${
-                  region ? 'text-neutral-800' : 'text-neutral-400'
-                }`}
-              >
-                <span className="truncate">{region || '지역을 선택해주세요'}</span>
-                <span className="ml-4 text-xs font-medium text-neutral-400">선택</span>
-              </button>
-              <FormFeedback
-                message={regionTouched ? regionError : '현재 활동 중인 지역을 선택해주세요.'}
-                tone={regionTouched && regionError ? 'error' : 'neutral'}
-              />
-            </FieldBlock>
-
-            <div className="hidden md:block">
-              <label className="mb-1.5 block text-sm font-medium text-transparent">지역 선택</label>
-              <SubButton onClick={() => setRegionModalOpen(true)} disabled={saving}>
-                지역 선택
-              </SubButton>
+            <div className="flex h-full flex-col justify-center rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-5 py-5">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[17px] font-medium text-neutral-950">프로필 정보</span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
+                  닉네임
+                </span>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
+                  활동 지역
+                </span>
+              </div>
+              <p className="mt-3 text-sm leading-7 text-neutral-600">
+                현재 계정의 기본 프로필 정보를 차분하게 정리하고 바로 저장할 수 있어요.
+              </p>
+              <p className="mt-1 text-sm leading-7 text-neutral-500">
+                저장한 정보는 마이도도 화면과 프로필 카드에 즉시 반영됩니다.
+              </p>
             </div>
-          </div>
-
-          <FieldBlock label="가족 여부">
-            <div className="grid gap-3 md:grid-cols-2">
-              <FamilyChoiceCard
-                title="가족이 있어요"
-                description="가족 계정과 함께 반려동물 정보를 관리하고 있어요."
-                selected={hasFamily}
-                disabled={saving}
-                onClick={() => handleFamilyChange(true)}
-              />
-              <FamilyChoiceCard
-                title="혼자 사용 중이에요"
-                description="현재는 가족 연동 없이 내 계정만 사용하고 있어요."
-                selected={!hasFamily}
-                disabled={saving}
-                onClick={() => handleFamilyChange(false)}
-              />
-            </div>
-          </FieldBlock>
-
-          <div className="rounded-[16px] border border-neutral-200 bg-neutral-50 px-4 py-4">
-            <p className="text-sm font-medium text-neutral-800">저장 전 확인</p>
-            <ul className="mt-2 space-y-1 text-sm leading-6 text-neutral-600">
-              <li>닉네임은 2자 이상 10자 이하로 입력해주세요.</li>
-              <li>지역은 최대 50자까지 저장할 수 있어요.</li>
-              <li>중복 닉네임 등 서버 오류가 발생하면 바로 안내해드려요.</li>
-            </ul>
-          </div>
-
-          <div className="space-y-2">
-            <FormFeedback
-              message={saveError || saveSuccess}
-              tone={saveError ? 'error' : saveSuccess ? 'success' : 'neutral'}
-            />
-            <PrimaryButton onClick={handleSubmit} disabled={!canSubmit} loading={saving}>
-              변경사항 저장
-            </PrimaryButton>
           </div>
         </div>
       </section>
+
+      <FormCard title="기본 정보" description="이메일, 이름, 닉네임, 활동 지역을 확인하고 필요한 값만 수정해 주세요.">
+        <div className="grid gap-5 lg:grid-cols-2">
+          <ReadonlyField label="이메일" value={user?.email ?? '-'} />
+          <ReadonlyField label="이름" value={user?.name ?? '-'} />
+
+          <FieldBlock label="닉네임" required>
+            <input
+              type="text"
+              value={nickname}
+              maxLength={10}
+              onChange={(event) => handleNicknameChange(event.target.value)}
+              placeholder="닉네임을 입력해주세요"
+              className={[
+                'mt-2 h-12 w-full rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400',
+                nicknameTouched && nicknameError
+                  ? 'border-red-300 focus:border-red-400'
+                  : 'border-neutral-200 focus:border-brand',
+              ].join(' ')}
+            />
+            <div className="mt-2 flex items-center justify-between gap-3">
+              <FormFeedback
+                className="min-h-0 flex-1"
+                message={nicknameTouched ? nicknameError : '2자 이상 10자 이하로 입력해주세요.'}
+                tone={nicknameTouched && nicknameError ? 'error' : 'neutral'}
+              />
+              <button
+                type="button"
+                onClick={handleResetNickname}
+                disabled={!user || saving}
+                className="shrink-0 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                원래대로
+              </button>
+            </div>
+          </FieldBlock>
+
+          <FieldBlock label="활동 지역" required>
+            <button
+              type="button"
+              onClick={() => setRegionModalOpen(true)}
+              className={[
+                'mt-2 flex h-12 w-full items-center rounded-xl border bg-white px-4 text-left text-sm outline-none transition-colors',
+                regionTouched && regionError
+                  ? 'border-red-300 focus:border-red-400'
+                  : 'border-neutral-200 hover:border-brand/60',
+                region ? 'text-neutral-900' : 'text-neutral-400',
+              ].join(' ')}
+            >
+              <span className="truncate">{region || '활동 지역을 선택해주세요'}</span>
+            </button>
+            <FormFeedback
+              message={regionTouched ? regionError : '클릭해서 활동 지역을 선택해주세요.'}
+              tone={regionTouched && regionError ? 'error' : 'neutral'}
+            />
+          </FieldBlock>
+        </div>
+      </FormCard>
+
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-sm text-neutral-500">
+          <span className="font-semibold text-brand">*</span> 표시된 항목은 필수 입력값입니다.
+        </p>
+        {saveError ? <p className="max-w-md text-right text-sm text-red-500">{saveError}</p> : null}
+      </div>
+
+      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        {saveSuccess ? <p className="self-center text-sm text-green-600">{saveSuccess}</p> : null}
+        <button
+          type="button"
+          onClick={handleSubmit}
+          disabled={!canSubmit}
+          className="inline-flex min-w-32 items-center justify-center rounded-xl bg-brand px-6 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {saving ? '수정 중...' : '변경사항 저장'}
+        </button>
+      </div>
 
       <RegionSelectModal
         open={regionModalOpen}
@@ -273,58 +267,39 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
   );
 }
 
-function FieldBlock({ label, required = false, children }: { label: string; required?: boolean; children: ReactNode }) {
+function FormCard({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label className="text-sm font-medium text-neutral-800">
-        {label}
-        {required ? <span className="ml-1 text-brand">*</span> : null}
-      </label>
-      {children}
-    </div>
+    <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+      <div className="border-b border-neutral-100 px-6 py-5 sm:px-8">
+        <h2 className="text-[18px] font-medium text-neutral-950">{title}</h2>
+        {description ? <p className="mt-1 text-sm text-neutral-500">{description}</p> : null}
+      </div>
+
+      <div className="px-6 py-6 sm:px-8">{children}</div>
+    </section>
   );
 }
 
-function FamilyChoiceCard({
-  title,
-  description,
-  selected,
-  disabled = false,
-  onClick,
-}: {
-  title: string;
-  description: string;
-  selected: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-}) {
+function FieldBlock({ label, required = false, children }: { label: string; required?: boolean; children: ReactNode }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className={[
-        'rounded-[18px] border bg-white px-5 py-5 text-left shadow-sm transition-all disabled:cursor-not-allowed disabled:opacity-60',
-        selected ? 'border-brand ring-1 ring-brand' : 'border-neutral-200 hover:border-brand/50',
-      ].join(' ')}
-    >
-      <div className="flex items-start gap-4">
-        <span
-          className={[
-            'mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px] text-white transition-colors',
-            selected ? 'bg-brand' : 'bg-neutral-300',
-          ].join(' ')}
-          aria-hidden
-        >
-          {selected ? '✓' : ''}
-        </span>
+    <label className="block">
+      <span className="text-sm font-medium text-neutral-800">
+        {label}
+        {required ? <span className="ml-1 text-brand">*</span> : null}
+      </span>
+      {children}
+    </label>
+  );
+}
 
-        <div>
-          <p className="text-base font-semibold text-neutral-900">{title}</p>
-          <p className="mt-2 text-sm leading-6 text-neutral-500">{description}</p>
-        </div>
+function ReadonlyField({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="block">
+      <span className="text-sm font-medium text-neutral-800">{label}</span>
+      <div className="mt-2 flex h-12 w-full items-center rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-sm text-neutral-700">
+        {value}
       </div>
-    </button>
+    </div>
   );
 }
 
@@ -337,24 +312,25 @@ function MyProfileEditSkeleton() {
         <Skeleton className="mt-4 h-4 w-80 rounded-md" />
       </div>
 
-      <div className="overflow-hidden rounded-[20px] border border-neutral-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+        <div className="px-5 py-5 sm:px-6 sm:py-6">
+          <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)]">
+            <Skeleton className="h-56 rounded-[20px]" />
+            <Skeleton className="h-56 rounded-[20px]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-100 px-6 py-5 sm:px-8">
-          <Skeleton className="h-6 w-36 rounded-lg" />
+          <Skeleton className="h-6 w-24 rounded-lg" />
           <Skeleton className="mt-3 h-4 w-72 rounded-md" />
         </div>
-
-        <div className="space-y-6 px-6 py-6 sm:px-8 sm:py-7">
-          <div className="grid gap-5 md:grid-cols-2">
-            <FieldSkeleton />
-            <FieldSkeleton />
-          </div>
+        <div className="grid gap-5 px-6 py-6 sm:px-8 lg:grid-cols-2">
           <FieldSkeleton />
           <FieldSkeleton />
-          <div className="grid gap-3 md:grid-cols-2">
-            <ChoiceSkeleton />
-            <ChoiceSkeleton />
-          </div>
-          <Skeleton className="h-12 w-full rounded-xl" />
+          <FieldSkeleton />
+          <FieldSkeleton />
         </div>
       </div>
     </div>
@@ -366,22 +342,7 @@ function FieldSkeleton() {
     <div className="space-y-2">
       <Skeleton className="h-4 w-20 rounded-md" />
       <Skeleton className="h-12 w-full rounded-xl" />
-      <Skeleton className="h-4 w-52 rounded-md" />
-    </div>
-  );
-}
-
-function ChoiceSkeleton() {
-  return (
-    <div className="rounded-[18px] border border-neutral-200 bg-white px-5 py-5 shadow-sm">
-      <div className="flex items-start gap-4">
-        <Skeleton className="mt-0.5 h-5 w-5 rounded-full" />
-        <div className="flex-1 space-y-3">
-          <Skeleton className="h-5 w-28 rounded-md" />
-          <Skeleton className="h-4 w-full rounded-md" />
-          <Skeleton className="h-4 w-10/12 rounded-md" />
-        </div>
-      </div>
+      <Skeleton className="h-4 w-48 rounded-md" />
     </div>
   );
 }
