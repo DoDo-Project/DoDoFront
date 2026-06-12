@@ -65,7 +65,6 @@ export function FamilyPendingRequestsCard({
                     승인 대기
                   </span>
                 </div>
-                <p className="mt-2 text-sm leading-7 text-neutral-600">{request.targetPetName} 가족으로 신청했어요.</p>
                 <p className="mt-1 text-xs font-medium text-neutral-400">{formatRequestedAt(request.requestedAt)}</p>
 
                 {mode === 'manage' ? (
