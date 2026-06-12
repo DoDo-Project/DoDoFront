@@ -25,6 +25,7 @@ export function SignupSelect({ id, label, placeholder, value, options, onChange,
   const selectId = id ?? autoId;
   const rootRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLUListElement>(null);
   const [open, setOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState<DropdownPosition | null>(null);
 
@@ -61,7 +62,7 @@ export function SignupSelect({ id, label, placeholder, value, options, onChange,
 
     const handlePointerDown = (event: MouseEvent) => {
       const target = event.target as Node;
-      if (!rootRef.current?.contains(target)) {
+      if (!rootRef.current?.contains(target) && !dropdownRef.current?.contains(target)) {
         setOpen(false);
       }
     };
@@ -99,6 +100,7 @@ export function SignupSelect({ id, label, placeholder, value, options, onChange,
       {open && !disabled && dropdownPosition
         ? createPortal(
             <ul
+              ref={dropdownRef}
               role="listbox"
               aria-labelledby={`${selectId}-label`}
               className="fixed z-[70] max-h-52 overflow-auto rounded-xl border border-neutral-200 bg-white py-1.5 shadow-lg"
