@@ -76,8 +76,12 @@ export function FamilyInvitationCodeCard({
     }
 
     try {
-      await navigator.clipboard.writeText(activeCode.code);
-      setIsCopied(true);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(activeCode.code);
+        setIsCopied(true);
+      } else {
+        setIsCopied(false);
+      }
     } catch {
       setIsCopied(false);
     }
