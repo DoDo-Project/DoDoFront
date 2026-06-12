@@ -1,11 +1,12 @@
-import type { ReactNode } from 'react';
-import { Link } from 'react-router-dom';
+import { useState, type ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-import type { PetDetailResponse } from '@/features/auth';
+import { getApiErrorMessage, useLeavePetFamily, type PetDetailResponse } from '@/features/auth';
 import { PetSpecialNotesPreview } from '@/features/pet-special-notes';
 import { PetWeightPreview } from '@/features/pet-weight';
 import petDefaultCatIllustration from '@/shared/assets/images/pet-default-cat.svg';
 import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
+import { Modal } from '@/shared/ui/Modal';
 
 import {
   formatPetDateLabel,
@@ -86,6 +87,94 @@ function DetailRows({ rows }: { rows: Array<{ label: string; value: string }> })
         ))}
       </div>
     </div>
+  );
+}
+
+function FamilyLeaveCard({ pet }: { pet: PetDetailResponse }) {
+  const navigate = useNavigate();
+  const leavePetFamilyMutation = useLeavePetFamily();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const errorMessage = leavePetFamilyMutation.isError
+    ? getApiErrorMessage(leavePetFamilyMutation.error, '가족 나가기에 실패했어요. 잠시 후 다시 시도해 주세요.')
+    : null;
+
+  const handleLeaveFamily = async () => {
+    try {
+      await leavePetFamilyMutation.mutateAsync({ petId: pet.petId });
+      setIsModalOpen(false);
+      void navigate('/my?menu=pet-list');
+    } catch {
+      // Error messaging is handled by the mutation state shown in the card/modal.
+    }
+  };
+
+  return (
+    <>
+      <InfoCard title="펫 가족 나가기" fullWidth tone="muted" contentClassName="mt-4">
+        <div className="rounded-[16px] border border-rose-100 bg-white/90 px-4 py-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-neutral-900">
+                현재 <span className="text-brand">{pet.petName}</span>의 가족으로 연결되어 있어요.
+              </p>
+              <p className="text-sm leading-6 text-neutral-500">
+                가족에서 나가면 이 반려동물의 가족 구성원 목록과 관련 관리 화면에서 제외돼요. 다시 참여하려면 초대
+                코드를 통해 다시 신청해야 할 수 있어요.
+              </p>
+              {errorMessage ? <p className="text-sm font-medium text-rose-500">{errorMessage}</p> : null}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              disabled={leavePetFamilyMutation.isPending}
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl border border-rose-200 bg-white px-4 text-sm font-medium text-rose-500 transition-colors hover:border-rose-300 hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-36"
+            >
+              {leavePetFamilyMutation.isPending ? '처리 중...' : '가족 나가기'}
+            </button>
+          </div>
+        </div>
+      </InfoCard>
+
+      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)} ariaLabel="펫 가족 나가기 확인">
+        <div className="space-y-5">
+          <div>
+            <p className="text-xs font-semibold tracking-[0.18em] text-neutral-400">FAMILY</p>
+            <h2 className="mt-2 text-lg font-semibold text-neutral-950">정말 가족에서 나갈까요?</h2>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              <span className="font-medium text-neutral-800">{pet.petName}</span>의 가족에서 나가면 관련 관리 권한이
+              해제되고, 다시 들어오려면 초대 코드가 다시 필요할 수 있어요.
+            </p>
+          </div>
+
+          {errorMessage ? (
+            <div className="rounded-2xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-medium text-rose-500">
+              {errorMessage}
+            </div>
+          ) : null}
+
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(false)}
+              disabled={leavePetFamilyMutation.isPending}
+              className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-neutral-300 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              onClick={() => void handleLeaveFamily()}
+              disabled={leavePetFamilyMutation.isPending}
+              className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-rose-200 bg-rose-500 px-4 text-sm font-medium text-white transition-colors hover:bg-rose-600 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {leavePetFamilyMutation.isPending ? '처리 중...' : '가족 나가기'}
+            </button>
+          </div>
+        </div>
+      </Modal>
+    </>
   );
 }
 
@@ -201,12 +290,13 @@ export function PetDetailContent({ pet }: { pet: PetDetailResponse }) {
               className="inline-flex h-9 items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 text-sm font-medium text-neutral-800 transition-colors hover:border-brand/50 hover:text-brand"
             >
               전체 보기
-              {/* <span aria-hidden>{'>'}</span> */}
             </Link>
           }
         >
           <PetSpecialNotesPreview petId={pet.petId} fallbackCount={pet.specialNotesCount} />
         </InfoCard>
+
+        <FamilyLeaveCard pet={pet} />
       </div>
     </div>
   );
