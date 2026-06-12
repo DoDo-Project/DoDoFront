@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 import {
   useFamilyApplications,
@@ -29,6 +29,53 @@ import {
 } from '@/features/family-management';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 
+type FamilyStatusFilter = 'ALL' | 'PENDING' | 'REJECTED';
+
+function parseStatusFilter(value: string | null): FamilyStatusFilter {
+  if (value === 'PENDING' || value === 'REJECTED') {
+    return value;
+  }
+
+  return 'ALL';
+}
+
+function StatusFilterTabs({
+  current,
+  buildHref,
+}: {
+  current: FamilyStatusFilter;
+  buildHref: (next: FamilyStatusFilter) => string;
+}) {
+  const filters: Array<{ value: FamilyStatusFilter; label: string }> = [
+    { value: 'ALL', label: '전체' },
+    { value: 'PENDING', label: '승인 대기' },
+    { value: 'REJECTED', label: '거절됨' },
+  ];
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {filters.map((filter) => {
+        const isActive = current === filter.value;
+
+        return (
+          <Link
+            key={filter.value}
+            to={buildHref(filter.value)}
+            className={[
+              'inline-flex h-9 items-center rounded-full border px-3 text-sm font-medium transition-colors',
+              isActive
+                ? 'border-neutral-900 bg-neutral-900 text-white'
+                : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-300 hover:text-neutral-900',
+            ].join(' ')}
+          >
+            {filter.label}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 function FamilyJoinManagementView({
   joinCode,
   isSubmitting,
@@ -39,6 +86,7 @@ function FamilyJoinManagementView({
   applications,
   applicationsLoading,
   applicationsErrorMessage,
+  statusFilter,
 }: {
   joinCode: string;
   isSubmitting: boolean;
@@ -49,7 +97,11 @@ function FamilyJoinManagementView({
   applications: Parameters<typeof FamilyApplicationsCard>[0]['applications'];
   applicationsLoading: boolean;
   applicationsErrorMessage: string | null;
+  statusFilter: FamilyStatusFilter;
 }) {
+  const buildStatusHref = (next: FamilyStatusFilter) =>
+    next === 'ALL' ? '/my?menu=family&section=join' : `/my?menu=family&section=join&status=${next}`;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -72,7 +124,11 @@ function FamilyJoinManagementView({
         />
       </SectionCard>
 
-      <SectionCard badge="INFO" title="내 신청 내역">
+      <SectionCard
+        badge="INFO"
+        title="내 신청 내역"
+        action={<StatusFilterTabs current={statusFilter} buildHref={buildStatusHref} />}
+      >
         <FamilyApplicationsCard
           applications={applications}
           isLoading={applicationsLoading}
@@ -100,6 +156,7 @@ function FamilyReceivedManagementView({
   blockedFeedbackMessage,
   blockedFeedbackTone,
   onReleaseBlockedUser,
+  statusFilter,
 }: {
   pendingRequests: Parameters<typeof FamilyPendingRequestsCard>[0]['requests'];
   pendingLoading: boolean;
@@ -117,7 +174,11 @@ function FamilyReceivedManagementView({
   blockedFeedbackMessage: string;
   blockedFeedbackTone: 'success' | 'error' | null;
   onReleaseBlockedUser: Parameters<typeof FamilyBlockedUsersCard>[0]['onRelease'];
+  statusFilter: FamilyStatusFilter;
 }) {
+  const buildStatusHref = (next: FamilyStatusFilter) =>
+    next === 'ALL' ? '/my?menu=family&section=received' : `/my?menu=family&section=received&status=${next}`;
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -128,7 +189,11 @@ function FamilyReceivedManagementView({
         <SectionActionButton href="/my?menu=family">메인 보기</SectionActionButton>
       </div>
 
-      <SectionCard badge="INFO" title="받은 신청 목록">
+      <SectionCard
+        badge="INFO"
+        title="받은 신청 목록"
+        action={<StatusFilterTabs current={statusFilter} buildHref={buildStatusHref} />}
+      >
         <FamilyPendingRequestsCard
           mode="manage"
           requests={pendingRequests}
@@ -161,8 +226,10 @@ function FamilyReceivedManagementView({
 export function FamilyManagementContent() {
   const [searchParams] = useSearchParams();
   const section = searchParams.get('section');
+  const statusFilter = parseStatusFilter(searchParams.get('status'));
   const isJoinView = section === 'join';
   const isReceivedView = section === 'received';
+  const statusParam = statusFilter === 'ALL' ? undefined : statusFilter;
 
   const { data, isLoading, isError, refetch } = usePetList({ page: 0, size: 10 });
   const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
@@ -171,8 +238,16 @@ export function FamilyManagementContent() {
   const selectedPet = (selectedPetId ? pets.find((pet) => pet.petId === selectedPetId) : null) ?? pets[0] ?? null;
 
   const petDetailQuery = usePetDetail(selectedPet?.petId ?? null);
-  const pendingUsersQuery = useFamilyPendingUsers({ page: 0, size: 20 });
-  const applicationsQuery = useFamilyApplications({ page: 0, size: 20 });
+  const pendingUsersQuery = useFamilyPendingUsers({
+    status: isReceivedView ? statusParam : undefined,
+    page: 0,
+    size: 20,
+  });
+  const applicationsQuery = useFamilyApplications({
+    status: isJoinView ? statusParam : undefined,
+    page: 0,
+    size: 20,
+  });
   const blockedUsersQuery = useFamilyBlockedUsers({ page: 0, size: 20 });
   const invitationCode = useFamilyInvitationCode(selectedPet);
   const familyJoinForm = useFamilyJoinForm();
@@ -258,6 +333,7 @@ export function FamilyManagementContent() {
         applications={applicationsQuery.data?.applications ?? []}
         applicationsLoading={applicationsQuery.isLoading || applicationsQuery.isFetching}
         applicationsErrorMessage={applicationsErrorMessage}
+        statusFilter={statusFilter}
       />
     );
   }
@@ -281,6 +357,7 @@ export function FamilyManagementContent() {
         blockedFeedbackMessage={familyBlockedAction.feedbackMessage}
         blockedFeedbackTone={familyBlockedAction.feedbackTone}
         onReleaseBlockedUser={handleReleaseBlockedUser}
+        statusFilter={statusFilter}
       />
     );
   }

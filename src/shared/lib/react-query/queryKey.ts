@@ -15,8 +15,16 @@ export const queryKeys = {
           params?.size ?? 10,
           params?.sort ?? '',
         ] as const,
-      applications: (params?: { page?: number; size?: number; sort?: string }) =>
-        ['pets', 'family', 'applications', params?.page ?? 0, params?.size ?? 10, params?.sort ?? ''] as const,
+      applications: (params?: { status?: string; page?: number; size?: number; sort?: string }) =>
+        [
+          'pets',
+          'family',
+          'applications',
+          params?.status ?? '',
+          params?.page ?? 0,
+          params?.size ?? 10,
+          params?.sort ?? '',
+        ] as const,
       blockedUsers: (params?: { page?: number; size?: number; sort?: string }) =>
         ['pets', 'family', 'blocked-users', params?.page ?? 0, params?.size ?? 10, params?.sort ?? ''] as const,
     },
