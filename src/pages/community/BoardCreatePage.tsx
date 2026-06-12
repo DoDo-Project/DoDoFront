@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 
 import { BoardEditorForm, useBoardEditorForm } from '@/features/community';
 import { LoadingSpinner } from '@/shared/ui';
@@ -58,7 +58,7 @@ function LoadingState() {
   return (
     <div className="flex min-h-[360px] flex-col items-center justify-center rounded-[24px] border border-neutral-200 bg-white px-6 py-16 text-center shadow-sm">
       <LoadingSpinner size="lg" />
-      <p className="mt-4 text-sm text-neutral-500">임시 저장된 게시글을 확인하고 있어요.</p>
+      <p className="mt-4 text-sm text-neutral-500">{'임시 저장한 게시글을 확인하고 있어요.'}</p>
     </div>
   );
 }
@@ -84,14 +84,14 @@ function ErrorState({
           onClick={onRetry}
           className="inline-flex items-center justify-center rounded-xl bg-brand px-5 py-3 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
         >
-          다시 시도
+          {'다시 시도'}
         </button>
         <button
           type="button"
           onClick={onReset}
           className="inline-flex items-center justify-center rounded-xl border border-neutral-200 bg-white px-5 py-3 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
         >
-          임시 저장본 초기화
+          {'임시 저장본 초기화'}
         </button>
       </div>
     </div>

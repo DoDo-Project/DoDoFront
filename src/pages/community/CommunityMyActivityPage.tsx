@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+﻿import type { ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
 import { useCurrentUser } from '@/features/auth';
@@ -7,19 +7,16 @@ import { CommunityLayout, CommunitySidebarPanel } from '@/features/community';
 type ActivityTab = 'posts' | 'comments';
 
 const ACTIVITY_COPY = {
-  heading: '\uB0B4 \uD65C\uB3D9',
-  description:
-    '\uB0B4\uAC00 \uB0A8\uAE34 \uAC8C\uC2DC\uAE00\uACFC \uB313\uAE00 \uD65C\uB3D9\uC744 \uD55C\uACF3\uC5D0\uC11C \uD655\uC778\uD574\uBCF4\uC138\uC694.',
-  myPosts: '\uB0B4 \uAC8C\uC2DC\uAE00',
-  myComments: '\uB0B4 \uB313\uAE00',
-  emptyPostsTitle: '\uC544\uC9C1 \uC791\uC131\uD55C \uAC8C\uC2DC\uAE00\uC774 \uC5C6\uC5B4\uC694.',
-  emptyPostsDescription:
-    '\uCCAB \uBC88\uC9F8 \uBC18\uB824\uC0DD\uD65C \uC774\uC57C\uAE30\uB97C \uCEE4\uBBA4\uB2C8\uD2F0\uC5D0 \uACF5\uC720\uD574\uBCF4\uC138\uC694.',
-  emptyCommentsTitle: '\uC544\uC9C1 \uC791\uC131\uD55C \uB313\uAE00\uC774 \uC5C6\uC5B4\uC694.',
-  emptyCommentsDescription:
-    '\uB2E4\uB978 \uCE5C\uAD6C\uB4E4\uC758 \uAC8C\uC2DC\uAE00\uC5D0 \uB313\uAE00\uC744 \uB0A8\uAE30\uBA70 \uC18C\uD1B5\uD574\uBCF4\uC138\uC694.',
-  writePost: '\uAE00\uC4F0\uAE30',
-  browseCommunity: '\uCEE4\uBBA4\uB2C8\uD2F0 \uB458\uB7EC\uBCF4\uAE30',
+  heading: '내 활동',
+  description: '내가 남긴 게시글과 댓글 활동을 한곳에서 확인해보세요.',
+  myPosts: '내 게시글',
+  myComments: '내 댓글',
+  emptyPostsTitle: '아직 작성한 게시글이 없어요.',
+  emptyPostsDescription: '첫 번째 반려생활 이야기를 커뮤니티에 공유해보세요.',
+  emptyCommentsTitle: '아직 작성한 댓글이 없어요.',
+  emptyCommentsDescription: '다른 친구들의 게시글에 댓글을 남기며 소통해보세요.',
+  writePost: '글쓰기',
+  browseCommunity: '커뮤니티 둘러보기',
 };
 
 function getTabFromSearch(value: string | null): ActivityTab {
@@ -34,17 +31,12 @@ export function CommunityMyActivityPage() {
 
   return (
     <CommunityLayout
+      eyebrow="MY COMMUNITY"
+      title={ACTIVITY_COPY.heading}
+      description={ACTIVITY_COPY.description}
       sidebar={<CommunitySidebarPanel profileUrl={profileUrl} nickname={nickname} />}
       content={
         <div className="space-y-6">
-          <div>
-            <p className="text-xs font-semibold tracking-[0.24em] text-brand">MY COMMUNITY</p>
-            <h1 className="mt-2 text-[26px] font-semibold tracking-[-0.03em] text-neutral-950">
-              {ACTIVITY_COPY.heading}
-            </h1>
-            <p className="mt-1 text-sm text-neutral-500">{ACTIVITY_COPY.description}</p>
-          </div>
-
           <div className="overflow-hidden rounded-[24px] border border-neutral-200/80 bg-white shadow-[0_18px_42px_rgba(15,23,42,0.06)]">
             <div className="flex border-b border-neutral-100 bg-neutral-50/70">
               <TabButton to="/community/my?tab=posts" isActive={activeTab === 'posts'}>

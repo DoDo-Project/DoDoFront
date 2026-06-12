@@ -1,4 +1,4 @@
-import type { ChangeEventHandler, FormEventHandler } from 'react';
+﻿import type { ChangeEventHandler, FormEventHandler } from 'react';
 import { Link } from 'react-router-dom';
 
 import { IMAGE_UPLOAD_POLICY_DESCRIPTION } from '@/shared/lib/files/imageUploadPolicy';
@@ -46,13 +46,14 @@ export function BoardEditorForm({
   const eyebrow = isEditMode ? 'BOARD EDIT' : 'BOARD WRITE';
   const heading = isEditMode ? '게시글 수정' : '게시글 작성';
   const description = isEditMode
-    ? '제목과 내용을 다듬고, 필요한 경우 이미지를 다시 구성해 게시글을 업데이트하세요.'
+    ? '제목과 내용을 다듬고, 필요한 경우 이미지도 함께 수정해보세요.'
     : '반려생활 이야기를 자유롭게 기록해보세요. 임시 저장 후 나중에 이어서 작성할 수도 있어요.';
   const submitLabel = isEditMode ? '수정 완료' : '게시하기';
   const pendingLabel = isEditMode ? '수정 중...' : '게시 중...';
   const helperMessage = storedDraftSessionKey
-    ? '임시 저장된 작성본이 이 브라우저에 연결되어 있어요.'
+    ? '임시 저장한 작성 본이 이 브라우저에 연결되어 있어요.'
     : '작성 중인 내용은 임시 저장 후 다시 이어서 편집할 수 있어요.';
+  const statusBadge = storedDraftSessionKey ? '임시 저장본 연결됨' : '새 게시글';
 
   return (
     <form className="space-y-6" onSubmit={onSubmit}>
@@ -66,11 +67,11 @@ export function BoardEditorForm({
         <div className="border-b border-neutral-100 px-6 py-5 sm:px-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-[18px] font-medium text-neutral-950">작성 상태</h2>
+              <h2 className="text-[18px] font-medium text-neutral-950">{'작성 상태'}</h2>
               <p className="mt-1 text-sm text-neutral-500">{helperMessage}</p>
             </div>
             <span className="inline-flex items-center rounded-full bg-brand/8 px-3 py-1 text-xs font-medium text-brand">
-              {storedDraftSessionKey ? '임시 저장본 연결됨' : '새 게시글'}
+              {statusBadge}
             </span>
           </div>
         </div>
@@ -95,9 +96,9 @@ export function BoardEditorForm({
           </div>
 
           <div className="rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-5 py-5">
-            <h3 className="text-[16px] font-medium text-neutral-950">임시 저장</h3>
+            <h3 className="text-[16px] font-medium text-neutral-950">{'임시 저장'}</h3>
             <p className="mt-1 text-sm leading-6 text-neutral-500">
-              지금 상태를 저장하고 나중에 다시 이어서 쓸 수 있어요.
+              {'지금 상태를 저장하고 나중에 다시 이어서 쓸 수 있어요.'}
             </p>
 
             <button
@@ -111,7 +112,7 @@ export function BoardEditorForm({
 
             {tempSaveError ? <p className="mt-3 text-sm text-red-500">{tempSaveError}</p> : null}
             {!tempSaveError && storedDraftSessionKey ? (
-              <p className="mt-3 text-sm text-brand">임시 저장된 게시글이 준비되어 있어요.</p>
+              <p className="mt-3 text-sm text-brand">{'임시 저장한 게시글을 다시 불러올 수 있어요.'}</p>
             ) : null}
           </div>
         </div>
@@ -119,7 +120,7 @@ export function BoardEditorForm({
 
       <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-100 px-6 py-5 sm:px-8">
-          <h2 className="text-[18px] font-medium text-neutral-950">이미지 첨부</h2>
+          <h2 className="text-[18px] font-medium text-neutral-950">{'이미지 첨부'}</h2>
           <p className="mt-1 text-sm text-neutral-500">{IMAGE_UPLOAD_POLICY_DESCRIPTION}</p>
         </div>
 
@@ -151,13 +152,13 @@ export function BoardEditorForm({
                 >
                   <img src={imageUrl} alt={`첨부 이미지 ${index + 1}`} className="aspect-[4/3] w-full object-cover" />
                   <div className="flex items-center justify-between gap-3 px-4 py-3">
-                    <span className="text-sm text-neutral-500">이미지 {index + 1}</span>
+                    <span className="text-sm text-neutral-500">{`이미지 ${index + 1}`}</span>
                     <button
                       type="button"
                       onClick={() => onRemoveImage(index)}
                       className="text-sm font-medium text-red-500 transition-opacity hover:opacity-80"
                     >
-                      삭제
+                      {'삭제'}
                     </button>
                   </div>
                 </article>
@@ -165,7 +166,7 @@ export function BoardEditorForm({
             </div>
           ) : (
             <div className="rounded-[20px] border border-dashed border-neutral-200 bg-neutral-50 px-5 py-8 text-center text-sm text-neutral-500">
-              아직 첨부된 이미지가 없어요.
+              {'아직 첨부된 이미지가 없어요.'}
             </div>
           )}
         </div>
@@ -173,7 +174,7 @@ export function BoardEditorForm({
 
       <div className="flex items-start justify-between gap-4">
         <p className="text-sm text-neutral-500">
-          <span className="font-semibold text-brand">*</span> 필수 입력 항목입니다.
+          <span className="font-semibold text-brand">*</span> {'필수 입력 항목입니다.'}
         </p>
         {submitError ? <p className="max-w-md text-right text-sm text-red-500">{submitError}</p> : null}
       </div>
@@ -183,7 +184,7 @@ export function BoardEditorForm({
           to={cancelTo}
           className="inline-flex min-w-28 items-center justify-center rounded-xl border border-neutral-200 bg-white px-5 py-3 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50"
         >
-          취소
+          {'취소'}
         </Link>
         <button
           type="submit"

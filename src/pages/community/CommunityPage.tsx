@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+﻿import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 
 import { useCurrentUser } from '@/features/auth';
@@ -12,21 +12,18 @@ import {
 import { LoadingSpinner } from '@/shared/ui';
 
 const COMMUNITY_COPY = {
-  popularTitle: '\uC778\uAE30 \uAC8C\uC2DC\uBB3C',
-  popularDescription:
-    '\uC9C0\uAE08 \uCEE4\uBBA4\uB2C8\uD2F0\uC5D0\uC11C \uBC18\uC751\uC774 \uC88B\uC740 \uC774\uC57C\uAE30\uB97C \uBA3C\uC800 \uB9CC\uB098\uBCF4\uC138\uC694.',
-  recentTitle: '\uCD5C\uADFC \uAC8C\uC2DC\uBB3C',
-  recentDescription:
-    '\uBC18\uB824\uC0DD\uD65C \uC18D \uC18C\uC18C\uD55C \uAE30\uB85D\uBD80\uD130 \uC720\uC6A9\uD55C \uD301\uAE4C\uC9C0 \uD55C\uB208\uC5D0 \uB458\uB7EC\uBCF4\uC138\uC694.',
-  loadMore: '\uB354 \uBCF4\uAE30',
-  loadingMore: '\uAC8C\uC2DC\uAE00\uC744 \uBD88\uB7EC\uC624\uB294 \uC911...',
-  loadErrorTitle: '\uAC8C\uC2DC\uAE00\uC744 \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC5B4\uC694.',
-  loadErrorDescription: '\uC7A0\uC2DC \uD6C4 \uB2E4\uC2DC \uC2DC\uB3C4\uD574\uC8FC\uC138\uC694.',
-  emptyPopular: '\uC544\uC9C1 \uC778\uAE30 \uAC8C\uC2DC\uBB3C\uC774 \uC5C6\uC5B4\uC694.',
-  emptyRecentTitle: '\uC544\uC9C1 \uB4F1\uB85D\uB41C \uAC8C\uC2DC\uAE00\uC774 \uC5C6\uC5B4\uC694.',
-  emptyRecentDescription:
-    '\uCCAB \uBC88\uC9F8 \uBC18\uB824\uC0DD\uD65C \uC774\uC57C\uAE30\uB97C \uB0A8\uACA8\uBCF4\uC138\uC694.',
-  writePost: '\uAE00\uC4F0\uAE30',
+  popularTitle: '인기 게시물',
+  popularDescription: '지금 커뮤니티에서 반응이 좋은 이야기를 먼저 만나보세요.',
+  recentTitle: '최근 게시물',
+  recentDescription: '반려생활 속 소소한 기록부터 유용한 팁까지 한눈에 둘러보세요.',
+  loadMore: '더 보기',
+  loadingMore: '게시글을 불러오는 중...',
+  loadErrorTitle: '게시글을 불러오지 못했어요.',
+  loadErrorDescription: '잠시 후 다시 시도해주세요.',
+  emptyPopular: '아직 인기 게시물이 없어요.',
+  emptyRecentTitle: '아직 등록된 게시글이 없어요.',
+  emptyRecentDescription: '첫 번째 반려생활 이야기를 남겨보세요.',
+  writePost: '글쓰기',
 };
 
 export function CommunityPage() {
@@ -38,6 +35,9 @@ export function CommunityPage() {
 
   return (
     <CommunityLayout
+      eyebrow="COMMUNITY BOARD"
+      title="커뮤니티"
+      description="반려생활 이야기를 모아보고, 인기 글과 최신 글을 한번에 확인해보세요."
       sidebar={<CommunitySidebarPanel profileUrl={profileUrl} nickname={nickname} />}
       content={
         <div className="space-y-10">
@@ -66,7 +66,7 @@ function PopularSection({
   isError: boolean;
 }) {
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-xs font-semibold tracking-[0.24em] text-brand">POPULAR PICKS</p>
@@ -168,7 +168,7 @@ function RecentSection({
   onLoadMore: () => void;
 }) {
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
       <div>
         <p className="text-xs font-semibold tracking-[0.24em] text-neutral-400">COMMUNITY BOARD</p>
         <h2 className="mt-2 text-[24px] font-semibold tracking-[-0.03em] text-neutral-950">

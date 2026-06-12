@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 
 import type { BoardDetailResponse } from '../model/types';
 
@@ -7,6 +7,33 @@ interface BoardDetailContentProps {
   canManage: boolean;
   onDelete: () => void;
 }
+
+const DETAIL_COPY = {
+  authorFallback: '작성자',
+  report: '신고',
+  edit: '수정',
+  delete: '삭제',
+  commentsTitle: '댓글',
+  commentsDescription: '댓글 API 연동 전이라 형식 목업을 먼저 맞춰두었어요.',
+  total: '총',
+  placeholder: '댓글을 입력해주세요',
+  placeholderAria: '댓글 등록 예정 버튼',
+};
+
+const MOCK_COMMENTS = [
+  {
+    id: 1,
+    nickname: '배웅배웅',
+    dateTime: '2025-10-14 11:25:00',
+    content: '어머~^^ 좋은 정보 감사드려요! 행복하세요 :D',
+  },
+  {
+    id: 2,
+    nickname: '배웅배웅',
+    dateTime: '2025-10-14 11:25:00',
+    content: '어머~^^ 좋은 정보 감사드려요! 행복하세요 :D',
+  },
+];
 
 function formatDateTime(value: string) {
   const date = new Date(value);
@@ -26,17 +53,21 @@ function formatDateTime(value: string) {
 
 export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailContentProps) {
   const likeCount = Math.max(12, Math.round(board.viewCount * 1.7));
-  const commentCount = Math.max(2, Math.round(board.viewCount / 3));
+  const commentCount = Math.max(MOCK_COMMENTS.length, Math.round(board.viewCount / 3));
+  const authorName = board.nickname.trim() || DETAIL_COPY.authorFallback;
+  const primaryImage = board.imageFileUrls[0] ?? null;
 
   return (
     <article className="space-y-6">
-      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[24px] border border-neutral-300 bg-white shadow-sm">
         <div className="px-6 py-6 sm:px-8">
           <div className="flex items-start justify-between gap-5">
             <div className="flex items-start gap-4">
-              <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-linear-to-br from-brand/[0.16] via-[#f6e1d0] to-white" />
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f7e5bf] text-lg font-semibold text-neutral-700">
+                {authorName.slice(0, 1)}
+              </div>
               <div>
-                <p className="text-[22px] font-semibold tracking-[-0.02em] text-neutral-950">{board.nickname}</p>
+                <p className="text-[22px] font-semibold tracking-[-0.02em] text-neutral-950">{authorName}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
                   <span>{formatDateTime(board.boardCreatedAt)}</span>
                   <span className="inline-flex items-center gap-1">
@@ -47,31 +78,33 @@ export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailCo
               </div>
             </div>
 
-            {canManage ? (
-              <div className="flex items-center gap-4 text-sm text-neutral-400">
-                <button type="button">Report</button>
-                <Link to={`/community/${board.boardId}/edit`}>Edit</Link>
-                <button type="button" onClick={onDelete}>
-                  Delete
-                </button>
-              </div>
-            ) : null}
+            <div className="flex items-center gap-4 text-sm text-neutral-400">
+              {!canManage ? <button type="button">{DETAIL_COPY.report}</button> : null}
+              {canManage ? (
+                <>
+                  <Link to={`/community/${board.boardId}/edit`}>{DETAIL_COPY.edit}</Link>
+                  <button type="button" onClick={onDelete}>
+                    {DETAIL_COPY.delete}
+                  </button>
+                </>
+              ) : null}
+            </div>
           </div>
 
           <h1 className="mt-8 text-[26px] font-semibold tracking-[-0.03em] text-neutral-950 sm:text-[34px]">
             {board.boardTitle}
           </h1>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-[156px_minmax(0,1fr)] lg:items-start">
+          <div className="mt-6 grid gap-6 lg:grid-cols-[180px_minmax(0,1fr)] lg:items-start">
             <div>
-              {board.imageFileUrls[0] ? (
+              {primaryImage ? (
                 <img
-                  src={board.imageFileUrls[0]}
+                  src={primaryImage}
                   alt={board.boardTitle}
                   className="aspect-square w-full rounded-[20px] object-cover"
                 />
               ) : (
-                <div className="aspect-square w-full rounded-[20px] bg-linear-to-br from-neutral-200 via-neutral-100 to-neutral-200" />
+                <div className="aspect-square w-full rounded-[20px] bg-neutral-100" />
               )}
             </div>
 
@@ -89,32 +122,28 @@ export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailCo
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
-        <div className="border-b border-neutral-100 px-6 py-5 sm:px-8">
+      <section className="overflow-hidden rounded-[24px] border border-neutral-300 bg-white shadow-sm">
+        <div className="border-b border-neutral-200 px-6 py-5 sm:px-8">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <h2 className="text-[18px] font-medium text-neutral-950">Comments</h2>
-              <p className="mt-1 text-sm text-neutral-500">
-                Comment layout is prepared first before the API is connected.
-              </p>
+              <h2 className="text-[18px] font-medium text-neutral-950">{DETAIL_COPY.commentsTitle}</h2>
+              <p className="mt-1 text-sm text-neutral-500">{DETAIL_COPY.commentsDescription}</p>
             </div>
             <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
-              Total {commentCount}
+              {DETAIL_COPY.total} {commentCount}
             </span>
           </div>
         </div>
 
         <div className="space-y-0 px-6 py-4 sm:px-8">
-          <CommentRow
-            nickname="Baeyong"
-            dateTime="2025-10-14 11:25:00"
-            content="Lovely post. Thanks for sharing this warm tip with everyone :D"
-          />
-          <CommentRow
-            nickname="Baeyong"
-            dateTime="2025-10-14 11:25:00"
-            content="Lovely post. Thanks for sharing this warm tip with everyone :D"
-          />
+          {MOCK_COMMENTS.map((comment) => (
+            <CommentRow
+              key={comment.id}
+              nickname={comment.nickname}
+              dateTime={comment.dateTime}
+              content={comment.content}
+            />
+          ))}
           <div className="flex items-center justify-center gap-2 px-2 py-4 text-sm text-neutral-500">
             <span className="text-brand">&lt;</span>
             <span>1, 2, 3</span>
@@ -123,16 +152,16 @@ export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailCo
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+      <section className="overflow-hidden rounded-[24px] border border-neutral-300 bg-white shadow-sm">
         <div className="flex items-center gap-4 px-6 py-4 sm:px-8">
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-linear-to-br from-brand/[0.16] via-[#f6e1d0] to-white" />
-          <div className="flex min-w-0 flex-1 items-center rounded-full border border-neutral-200 bg-neutral-50 px-4 py-3">
-            <span className="truncate text-sm text-neutral-500">Write a comment</span>
+          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-neutral-200" />
+          <div className="flex min-w-0 flex-1 items-center rounded-full bg-neutral-100 px-4 py-3">
+            <span className="truncate text-sm text-neutral-500">{DETAIL_COPY.placeholder}</span>
           </div>
           <button
             type="button"
-            className="h-12 w-12 shrink-0 rounded-full bg-[#c97a72] transition-opacity hover:opacity-90"
-            aria-label="Comment action placeholder"
+            className="h-12 w-12 shrink-0 rounded-full bg-[#bf6e67] transition-opacity hover:opacity-90"
+            aria-label={DETAIL_COPY.placeholderAria}
           />
         </div>
       </section>
@@ -158,16 +187,18 @@ function CommentRow({ nickname, dateTime, content }: { nickname: string; dateTim
     <div className="border-b border-neutral-200 py-5 last:border-b-0">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-linear-to-br from-brand/[0.16] via-[#f6e1d0] to-white" />
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f7e5bf] text-sm font-semibold text-neutral-700">
+            {nickname.slice(0, 1)}
+          </div>
           <div>
             <p className="text-sm font-semibold text-neutral-900">{nickname}</p>
             <p className="mt-0.5 text-xs text-neutral-400">{dateTime}</p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-neutral-400">
-          <button type="button">Report</button>
-          <button type="button">Edit</button>
-          <button type="button">Delete</button>
+          <button type="button">{DETAIL_COPY.report}</button>
+          <button type="button">{DETAIL_COPY.edit}</button>
+          <button type="button">{DETAIL_COPY.delete}</button>
         </div>
       </div>
       <p className="mt-4 text-sm leading-7 text-neutral-700">{content}</p>
