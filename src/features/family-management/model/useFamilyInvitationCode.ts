@@ -89,14 +89,18 @@ export function useFamilyInvitationCode(selectedPet: PetListItem | null) {
   const handleCreateInvitationCode = async () => {
     if (!selectedPet) return;
 
-    const created = await createInvitationCodeMutation.mutateAsync(selectedPet.petId);
-    setInvitationCodeByPetId((current) => ({
-      ...current,
-      [selectedPet.petId]: {
-        ...created,
-        createdAt: Date.now(),
-      },
-    }));
+    try {
+      const created = await createInvitationCodeMutation.mutateAsync(selectedPet.petId);
+      setInvitationCodeByPetId((current) => ({
+        ...current,
+        [selectedPet.petId]: {
+          ...created,
+          createdAt: Date.now(),
+        },
+      }));
+    } catch {
+      // Error UI is driven by the mutation state via createErrorMessage.
+    }
   };
 
   return {
