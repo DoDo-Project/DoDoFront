@@ -50,13 +50,6 @@ export function FamilySelectedPetOverview({
           >
             상세 정보
           </Link>
-          <button
-            type="button"
-            disabled
-            className="inline-flex h-10 w-full items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-500 disabled:cursor-not-allowed sm:w-28"
-          >
-            준비 중
-          </button>
         </div>
       </div>
     </article>
