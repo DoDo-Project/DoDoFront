@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 import { useCreatePetInvitationCode, type PetListItem } from '@/features/auth';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
@@ -42,6 +42,7 @@ export function useFamilyInvitationCode(selectedPet: PetListItem | null) {
     readStoredInvitationCodes(),
   );
   const createInvitationCodeMutation = useCreatePetInvitationCode();
+  const previousPetIdRef = useRef<number | null>(selectedPet?.petId ?? null);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -53,6 +54,15 @@ export function useFamilyInvitationCode(selectedPet: PetListItem | null) {
       JSON.stringify(pruneInvitationCodes(invitationCodeByPetId)),
     );
   }, [invitationCodeByPetId]);
+
+  useEffect(() => {
+    const nextPetId = selectedPet?.petId ?? null;
+
+    if (previousPetIdRef.current !== nextPetId) {
+      createInvitationCodeMutation.reset();
+      previousPetIdRef.current = nextPetId;
+    }
+  }, [createInvitationCodeMutation, selectedPet?.petId]);
 
   const activeInvitationCode = useMemo(() => {
     if (!selectedPet) {
