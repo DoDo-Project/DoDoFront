@@ -58,7 +58,7 @@ export function CommunityFeedCard({
 
   if (to) {
     return (
-      <Link to={to} className="block h-full">
+      <Link to={to} className="block h-full cursor-pointer">
         {content}
       </Link>
     );
@@ -151,8 +151,8 @@ function ListFeedItem({
   badge?: string;
 }) {
   return (
-    <article className="group/list border-b border-neutral-200 py-8 first:pt-0 last:border-b-0 last:pb-0">
-      <div className="flex items-start gap-4 sm:gap-5">
+    <article className="py-6 first:pt-0 last:pb-0">
+      <div className="flex items-start gap-5 sm:gap-6">
         <div className="min-w-0 flex-1">
           {badge ? (
             <span className="inline-flex rounded-full bg-brand/8 px-3 py-1 text-[11px] font-semibold tracking-[0.12em] text-brand">
@@ -160,15 +160,15 @@ function ListFeedItem({
             </span>
           ) : null}
 
-          <p className="mt-2 line-clamp-1 text-[16px] font-semibold tracking-[-0.03em] text-neutral-900 transition-colors group-hover/list:text-brand sm:text-[18px]">
+          <p className="mt-2 line-clamp-1 text-[16px] font-semibold tracking-[-0.03em] text-neutral-900 sm:text-[18px]">
             {title}
           </p>
 
           {preview ? (
-            <p className="mt-1 line-clamp-2 text-[15px] leading-[1.6] text-neutral-600 sm:text-[16px]">{preview}</p>
+            <p className="mt-1.5 line-clamp-2 text-[15px] leading-[1.65] text-neutral-600 sm:text-[16px]">{preview}</p>
           ) : null}
 
-          <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-[14px] text-neutral-400 sm:text-[15px]">
+          <div className="mt-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-[14px] text-neutral-400 sm:text-[15px]">
             <span className="inline-flex items-center gap-1.5 text-[#ef3c32]">
               <ThumbsUpIcon className="h-5 w-5" />
               <span className="font-medium">{likes}</span>
@@ -191,11 +191,13 @@ function ListFeedItem({
             <img
               src={imageUrl}
               alt={title}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover/list:scale-[1.03]"
+              className="h-full w-full object-cover transition-transform duration-300 hover:scale-[1.03]"
             />
           </div>
         ) : null}
       </div>
+
+      <div className="mt-6 border-b border-neutral-300/90 last:hidden" />
     </article>
   );
 }

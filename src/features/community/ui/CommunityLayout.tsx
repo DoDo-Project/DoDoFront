@@ -22,9 +22,9 @@ export function CommunityLayout({ eyebrow, title, description, sidebar, content 
         </div>
       ) : null}
 
-      <div className={[hasHeader ? 'mt-10' : '', 'grid gap-6', contentGridClass].join(' ').trim()}>
+      <div className={[hasHeader ? 'mt-10' : '', 'grid items-start gap-6', contentGridClass].join(' ').trim()}>
         <div className="min-w-0 space-y-6">{content}</div>
-        {sidebar ? <aside className="space-y-6">{sidebar}</aside> : null}
+        {sidebar ? <aside className="space-y-6 lg:sticky lg:top-8">{sidebar}</aside> : null}
       </div>
     </div>
   );

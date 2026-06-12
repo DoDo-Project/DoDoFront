@@ -143,7 +143,7 @@ function RecentSection({
       ) : boards.length === 0 ? (
         <EmptyRecentState />
       ) : (
-        <div className="space-y-8 rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
+        <div className="space-y-10 rounded-[24px] border border-neutral-200 bg-white px-6 py-6 shadow-sm sm:px-8">
           <div>
             {boards.map((board) => (
               <CommunityFeedCard
@@ -215,14 +215,17 @@ function EmptyRecentState() {
 
 function ListRowSkeleton() {
   return (
-    <div className="flex gap-4 border-b border-neutral-200 py-8 first:pt-0 last:border-b-0 last:pb-0">
-      <div className="min-w-0 flex-1 space-y-3">
-        <div className="h-6 w-2/3 animate-pulse rounded-md bg-neutral-100" />
-        <div className="h-4 w-full animate-pulse rounded-md bg-neutral-100" />
-        <div className="h-4 w-4/5 animate-pulse rounded-md bg-neutral-100" />
-        <div className="h-4 w-1/2 animate-pulse rounded-md bg-neutral-100" />
+    <div className="py-6 first:pt-0 last:pb-0">
+      <div className="flex gap-4">
+        <div className="min-w-0 flex-1 space-y-3">
+          <div className="h-6 w-2/3 animate-pulse rounded-md bg-neutral-100" />
+          <div className="h-4 w-full animate-pulse rounded-md bg-neutral-100" />
+          <div className="h-4 w-4/5 animate-pulse rounded-md bg-neutral-100" />
+          <div className="h-4 w-1/2 animate-pulse rounded-md bg-neutral-100" />
+        </div>
+        <div className="h-16 w-16 shrink-0 animate-pulse rounded-[10px] bg-neutral-100 sm:h-[72px] sm:w-[72px]" />
       </div>
-      <div className="h-16 w-16 shrink-0 animate-pulse rounded-[10px] bg-neutral-100 sm:h-[72px] sm:w-[72px]" />
+      <div className="mt-6 border-b border-neutral-300/90 last:hidden" />
     </div>
   );
 }
