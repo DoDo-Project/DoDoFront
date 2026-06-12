@@ -202,9 +202,6 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
       <div>
         <p className="text-xs font-semibold tracking-[0.24em] text-brand">ACCOUNT</p>
         <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">회원정보 수정</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-600">
-          프로필 이미지, 닉네임, 활동 지역을 수정하고 내 계정 정보를 최신 상태로 유지할 수 있어요.
-        </p>
       </div>
 
       <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
@@ -252,12 +249,8 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
                   최대 {MAX_IMAGE_FILE_SIZE_MB}MB
                 </span>
               </div>
-              <p className="mt-3 text-sm leading-7 text-neutral-600">
-                사진이나 버튼을 눌러 프로필 이미지를 변경할 수 있어요.
-              </p>
-              <p className="mt-1 text-sm leading-7 text-neutral-500">
-                변경 후 저장하면 마이도도와 프로필 메뉴에도 바로 반영돼요.
-              </p>
+              <p className="mt-3 text-sm leading-7 text-neutral-600">사진을 선택해 프로필 이미지를 변경할 수 있어요.</p>
+              <p className="mt-1 text-sm leading-7 text-neutral-500">변경한 이미지는 저장 후 바로 반영돼요.</p>
             </div>
           </div>
         </div>
