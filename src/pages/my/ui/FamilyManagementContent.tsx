@@ -258,6 +258,7 @@ export function FamilyManagementContent() {
     () => pendingUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
     [pendingUsersQuery.data?.users, selectedPet?.petId],
   );
+  const pendingPreviewUsers = useMemo(() => filteredPendingUsers.slice(0, 1), [filteredPendingUsers]);
   const filteredBlockedUsers = useMemo(
     () => blockedUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
     [blockedUsersQuery.data?.users, selectedPet?.petId],
@@ -400,7 +401,8 @@ export function FamilyManagementContent() {
         >
           <FamilyPendingRequestsCard
             mode="summary"
-            requests={filteredPendingUsers}
+            requests={pendingPreviewUsers}
+            totalCount={filteredPendingUsers.length}
             isLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
             errorMessage={pendingErrorMessage}
           />

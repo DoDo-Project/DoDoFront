@@ -14,6 +14,7 @@ export function FamilyPendingRequestsCard({
   requests,
   isLoading,
   errorMessage,
+  totalCount,
   activeRequestKey,
   feedbackMessage,
   feedbackTone,
@@ -25,6 +26,7 @@ export function FamilyPendingRequestsCard({
   requests: FamilyPendingUser[];
   isLoading: boolean;
   errorMessage: string | null;
+  totalCount?: number;
   activeRequestKey?: string | null;
   feedbackMessage?: string;
   feedbackTone?: 'success' | 'error' | null;
@@ -46,6 +48,10 @@ export function FamilyPendingRequestsCard({
 
   return (
     <div className="space-y-3">
+      {mode === 'summary' && typeof totalCount === 'number' ? (
+        <p className="text-xs font-medium text-neutral-400">총 {totalCount}건의 신청이 있어요.</p>
+      ) : null}
+
       {mode === 'manage' && feedbackMessage && feedbackTone ? (
         <InlineFeedback tone={feedbackTone} message={feedbackMessage} />
       ) : null}

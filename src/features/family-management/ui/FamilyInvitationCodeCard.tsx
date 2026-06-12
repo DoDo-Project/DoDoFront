@@ -87,8 +87,7 @@ export function FamilyInvitationCodeCard({
     <div className="space-y-4">
       <div className="rounded-[16px] border border-neutral-200/80 bg-white/90 px-4 py-4">
         <p className="text-sm leading-7 text-neutral-600">
-          선택한 반려동물 기준으로 초대 코드를 발급할 수 있어요. 생성된 코드는 15분 동안 유효하고, 같은 코드로 가족
-          신청을 받을 수 있어요.
+          {`선택한 반려동물 기준으로 초대 코드를 발급할 수 있어요. \n생성된 코드는 15분 동안 유효하고, 같은 코드로 가족 신청을 받을 수 있어요.`}
         </p>
       </div>
 
