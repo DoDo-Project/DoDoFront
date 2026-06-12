@@ -12,7 +12,6 @@ import { Skeleton } from '@/shared/ui';
 interface MyProfileEditContentProps {
   user: UserProfile | null;
   isLoading?: boolean;
-  onProfileUpdated: (profile: UserProfile) => void;
 }
 
 function validateNickname(value: string, fallback: string): string {
@@ -38,7 +37,7 @@ function resolveProfileUrl(url: string | null | undefined): string | null {
   return trimmed ? trimmed : null;
 }
 
-export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated }: MyProfileEditContentProps) {
+export function MyProfileEditContent({ user, isLoading = false }: MyProfileEditContentProps) {
   const [nickname, setNickname] = useState('');
   const [region, setRegion] = useState('');
   const [regionModalOpen, setRegionModalOpen] = useState(false);
@@ -173,7 +172,6 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
       });
 
       previousImageUrlRef.current = resolveProfileUrl(nextProfile.profileUrl);
-      onProfileUpdated(nextProfile);
       setNickname('');
       setSaveSuccess('회원정보를 수정했어요.');
     } catch (error) {
