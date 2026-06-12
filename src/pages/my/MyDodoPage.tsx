@@ -1,10 +1,12 @@
+import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 
-import { useCurrentUser } from '@/features/auth';
+import { useCurrentUser, type UserProfile } from '@/features/auth';
 import { PetListContent } from '@/features/pet-list';
 import { MY_DODO_CONTENT_BY_KEY, getMyDodoMenuHref, getMyDodoMenuKeyFromSearch } from '@/pages/my/model/menu';
 import { FamilyManagementContent } from '@/pages/my/ui/FamilyManagementContent';
 import { MyDodoLayout } from '@/pages/my/ui/MyDodoLayout';
+import { MyProfileEditContent } from '@/pages/my/ui/MyProfileEditContent';
 import { MyDodoSidebarPanel } from '@/pages/my/ui/MyDodoSidebarPanel';
 import { Skeleton } from '@/shared/ui';
 
@@ -88,11 +90,19 @@ export function MyDodoPage() {
   const [searchParams] = useSearchParams();
   const activeKey = getMyDodoMenuKeyFromSearch(searchParams.get('menu'));
   const { user, profileUrl, displayName, isLoading } = useCurrentUser();
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(user);
+
+  useEffect(() => {
+    setCurrentUser(user);
+  }, [user]);
+
   const content =
     activeKey === 'pet-list' ? (
       <PetListContent />
     ) : activeKey === 'family' ? (
       <FamilyManagementContent />
+    ) : activeKey === 'profile-edit' ? (
+      <MyProfileEditContent user={currentUser} isLoading={isLoading} onProfileUpdated={setCurrentUser} />
     ) : (
       <MyDodoContent activeKey={activeKey} isLoading={isLoading} />
     );
@@ -101,7 +111,7 @@ export function MyDodoPage() {
     <MyDodoLayout
       sidebar={
         <MyDodoSidebarPanel
-          user={user}
+          user={currentUser}
           profileUrl={profileUrl}
           displayName={displayName}
           isLoading={isLoading}

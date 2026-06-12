@@ -5,6 +5,7 @@ import {
   getNickname,
   getNotificationEnabled,
   getProfileUrl,
+  getRegion,
   syncUserProfile,
 } from '@/shared/lib/auth/token';
 
@@ -66,7 +67,7 @@ export function useCurrentUser(): UseCurrentUserResult {
   const activeUser = hasToken ? user : null;
   const profileUrl = activeUser?.profileUrl?.trim() || getProfileUrl();
   const nickname = activeUser?.nickname?.trim() || getNickname();
-  const region = activeUser?.region?.trim() || null;
+  const region = activeUser?.region?.trim() || getRegion();
   const notificationEnabled = activeUser?.notificationEnabled ?? getNotificationEnabled();
   const displayName = nickname ? `${nickname}님` : '회원님';
 

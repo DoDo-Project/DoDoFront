@@ -20,7 +20,7 @@ export type { AuthErrorPresentation, AuthClientErrorCode, AuthErrorContext } fro
 export { AuthLoadingScreen } from './ui/status/AuthLoadingScreen';
 export { AuthErrorScreen } from './ui/status/AuthErrorScreen';
 export { socialLogin, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
-export { getMyProfile } from './api/users';
+export { getMyProfile, updateMyProfile } from './api/users';
 export { useCreatePet } from './model/useCreatePet';
 export { useCreatePetInvitationCode } from './model/useCreatePetInvitationCode';
 export { useCreatePetSpecialNote } from './model/useCreatePetSpecialNote';
@@ -76,6 +76,8 @@ export type {
   NicknameCheckResponse,
   NotificationUpdateRequest,
   NotificationUpdateResponse,
+  UpdateMyProfileRequest,
+  UpdateMyProfileResponse,
   PetDetailResponse,
   PetFamilyApprovalAction,
   PetFamilyApprovalRequest,
@@ -102,5 +104,6 @@ export {
   SOCIAL_LOGIN_STATUS_MESSAGES,
   REGISTER_PROFILE_STATUS_MESSAGES,
   NOTIFICATION_SETTING_STATUS_MESSAGES,
+  PROFILE_UPDATE_STATUS_MESSAGES,
   NICKNAME_CHECK_STATUS_MESSAGES,
 } from './lib/apiErrorMessages';
