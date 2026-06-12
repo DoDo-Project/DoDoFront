@@ -1,10 +1,11 @@
-﻿import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 
 import type { BoardDetailResponse } from '../model/types';
 
 interface BoardDetailContentProps {
   board: BoardDetailResponse;
   canManage: boolean;
+  currentUserProfileUrl?: string | null;
   onDelete: () => void;
 }
 
@@ -14,10 +15,10 @@ const DETAIL_COPY = {
   edit: '수정',
   delete: '삭제',
   commentsTitle: '댓글',
-  commentsDescription: '댓글 API 연동 전이라 형식 목업을 먼저 맞춰두었어요.',
-  total: '총',
   placeholder: '댓글을 입력해주세요',
-  placeholderAria: '댓글 등록 예정 버튼',
+  submit: '등록',
+  submitAria: '댓글 등록 예정 버튼',
+  viewLabel: '조회',
 };
 
 const MOCK_COMMENTS = [
@@ -51,39 +52,46 @@ function formatDateTime(value: string) {
   }).format(date);
 }
 
-export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailContentProps) {
+export function BoardDetailContent({ board, canManage, currentUserProfileUrl, onDelete }: BoardDetailContentProps) {
   const likeCount = Math.max(12, Math.round(board.viewCount * 1.7));
   const commentCount = Math.max(MOCK_COMMENTS.length, Math.round(board.viewCount / 3));
   const authorName = board.nickname.trim() || DETAIL_COPY.authorFallback;
-  const primaryImage = board.imageFileUrls[0] ?? null;
+  const imageUrls = board.imageFileUrls.filter((imageUrl) => imageUrl.trim().length > 0);
 
   return (
-    <article className="space-y-6">
-      <section className="overflow-hidden rounded-[24px] border border-neutral-300 bg-white shadow-sm">
-        <div className="px-6 py-6 sm:px-8">
-          <div className="flex items-start justify-between gap-5">
+    <article className="space-y-6 pb-28">
+      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
+        <div className="px-6 py-7 sm:px-8 sm:py-8">
+          <div className="flex flex-col gap-5 border-b border-neutral-200 pb-6 sm:flex-row sm:items-start sm:justify-between">
             <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#f7e5bf] text-lg font-semibold text-neutral-700">
-                {authorName.slice(0, 1)}
-              </div>
-              <div>
-                <p className="text-[22px] font-semibold tracking-[-0.02em] text-neutral-950">{authorName}</p>
-                <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-neutral-400">
+              <AuthorBadge name={authorName} size="lg" profileUrl={board.profileUrl} />
+              <div className="min-w-0">
+                <p className="text-[22px] font-semibold tracking-[-0.03em] text-neutral-950">{authorName}</p>
+                <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-neutral-400">
                   <span>{formatDateTime(board.boardCreatedAt)}</span>
-                  <span className="inline-flex items-center gap-1">
+                  <MetaDivider />
+                  <span className="inline-flex items-center gap-1.5">
                     <EyeIcon className="h-4 w-4" />
-                    {board.viewCount}
+                    <span>
+                      {DETAIL_COPY.viewLabel} {board.viewCount}
+                    </span>
                   </span>
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-4 text-sm text-neutral-400">
-              {!canManage ? <button type="button">{DETAIL_COPY.report}</button> : null}
+              {!canManage ? (
+                <button type="button" className="transition-colors hover:text-neutral-700">
+                  {DETAIL_COPY.report}
+                </button>
+              ) : null}
               {canManage ? (
                 <>
-                  <Link to={`/community/${board.boardId}/edit`}>{DETAIL_COPY.edit}</Link>
-                  <button type="button" onClick={onDelete}>
+                  <Link to={`/community/${board.boardId}/edit`} className="transition-colors hover:text-neutral-700">
+                    {DETAIL_COPY.edit}
+                  </Link>
+                  <button type="button" onClick={onDelete} className="transition-colors hover:text-red-500">
                     {DETAIL_COPY.delete}
                   </button>
                 </>
@@ -91,29 +99,19 @@ export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailCo
             </div>
           </div>
 
-          <h1 className="mt-8 text-[26px] font-semibold tracking-[-0.03em] text-neutral-950 sm:text-[34px]">
-            {board.boardTitle}
-          </h1>
+          <div className="pt-7">
+            <h1 className="text-[24px] font-semibold tracking-[-0.04em] text-neutral-950 sm:text-[28px]">
+              {board.boardTitle}
+            </h1>
 
-          <div className="mt-6 grid gap-6 lg:grid-cols-[180px_minmax(0,1fr)] lg:items-start">
-            <div>
-              {primaryImage ? (
-                <img
-                  src={primaryImage}
-                  alt={board.boardTitle}
-                  className="aspect-square w-full rounded-[20px] object-cover"
-                />
-              ) : (
-                <div className="aspect-square w-full rounded-[20px] bg-neutral-100" />
-              )}
-            </div>
+            <div className="mt-6 space-y-6">
+              {imageUrls.length > 0 ? <BoardImageGallery title={board.boardTitle} imageUrls={imageUrls} /> : null}
 
-            <div className="flex min-h-full flex-col">
-              <p className="whitespace-pre-wrap break-words text-[15px] leading-8 text-neutral-800">
+              <p className="whitespace-pre-wrap break-words text-[17px] leading-8 text-neutral-700 sm:text-[18px]">
                 {board.boardContent}
               </p>
 
-              <div className="mt-6 flex items-center justify-end gap-5">
+              <div className="flex items-center justify-end gap-5 border-t border-neutral-200 pt-5">
                 <SocialStat kind="like" value={likeCount} />
                 <SocialStat kind="comment" value={commentCount} />
               </div>
@@ -122,20 +120,14 @@ export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailCo
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-neutral-300 bg-white shadow-sm">
-        <div className="border-b border-neutral-200 px-6 py-5 sm:px-8">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="text-[18px] font-medium text-neutral-950">{DETAIL_COPY.commentsTitle}</h2>
-              <p className="mt-1 text-sm text-neutral-500">{DETAIL_COPY.commentsDescription}</p>
-            </div>
-            <span className="rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-600">
-              {DETAIL_COPY.total} {commentCount}
-            </span>
-          </div>
+      <section className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white px-6 py-4 shadow-sm sm:px-8">
+        <div className="flex items-center justify-between gap-4 border-b border-neutral-200 pb-4">
+          <h2 className="text-[18px] font-semibold text-neutral-950">
+            {DETAIL_COPY.commentsTitle} {commentCount}
+          </h2>
         </div>
 
-        <div className="space-y-0 px-6 py-4 sm:px-8">
+        <div>
           {MOCK_COMMENTS.map((comment) => (
             <CommentRow
               key={comment.id}
@@ -144,28 +136,73 @@ export function BoardDetailContent({ board, canManage, onDelete }: BoardDetailCo
               content={comment.content}
             />
           ))}
-          <div className="flex items-center justify-center gap-2 px-2 py-4 text-sm text-neutral-500">
-            <span className="text-brand">&lt;</span>
-            <span>1, 2, 3</span>
-            <span className="text-brand">&gt;</span>
-          </div>
         </div>
       </section>
 
-      <section className="overflow-hidden rounded-[24px] border border-neutral-300 bg-white shadow-sm">
-        <div className="flex items-center gap-4 px-6 py-4 sm:px-8">
-          <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-neutral-200" />
-          <div className="flex min-w-0 flex-1 items-center rounded-full bg-neutral-100 px-4 py-3">
-            <span className="truncate text-sm text-neutral-500">{DETAIL_COPY.placeholder}</span>
+      <section className="sticky bottom-4 z-10">
+        <div className="rounded-[24px] border border-neutral-200 bg-white/96 shadow-[0_18px_42px_rgba(15,23,42,0.10)] backdrop-blur">
+          <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
+            <AuthorBadge name="나" size="sm" profileUrl={currentUserProfileUrl} />
+            <div className="flex min-w-0 flex-1 items-center rounded-full border border-neutral-200 bg-neutral-50 px-4 py-3">
+              <span className="truncate text-sm text-neutral-500">{DETAIL_COPY.placeholder}</span>
+            </div>
+            <button
+              type="button"
+              className="inline-flex shrink-0 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
+              aria-label={DETAIL_COPY.submitAria}
+            >
+              {DETAIL_COPY.submit}
+            </button>
           </div>
-          <button
-            type="button"
-            className="h-12 w-12 shrink-0 rounded-full bg-[#bf6e67] transition-opacity hover:opacity-90"
-            aria-label={DETAIL_COPY.placeholderAria}
-          />
         </div>
       </section>
     </article>
+  );
+}
+
+function BoardImageGallery({ title, imageUrls }: { title: string; imageUrls: string[] }) {
+  if (imageUrls.length === 1) {
+    return (
+      <div className="max-w-[220px] overflow-hidden rounded-[18px] border border-neutral-100 bg-neutral-50">
+        <img src={imageUrls[0]} alt={title} className="aspect-square w-full object-cover" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid max-w-[720px] grid-cols-2 gap-3 sm:grid-cols-3">
+      {imageUrls.map((imageUrl, index) => (
+        <div
+          key={`${imageUrl}-${index}`}
+          className="overflow-hidden rounded-[18px] border border-neutral-100 bg-neutral-50"
+        >
+          <img src={imageUrl} alt={`${title} 이미지 ${index + 1}`} className="aspect-square w-full object-cover" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AuthorBadge({ name, size, profileUrl }: { name: string; size: 'sm' | 'lg'; profileUrl?: string | null }) {
+  const wrapperSizeClass = size === 'lg' ? 'h-14 w-14' : 'h-10 w-10';
+  const textSizeClass = size === 'lg' ? 'text-lg' : 'text-sm';
+  const normalizedProfileUrl = profileUrl?.trim();
+
+  return (
+    <div className={['shrink-0 overflow-hidden rounded-full bg-[#f7e5bf]', wrapperSizeClass].join(' ')}>
+      {normalizedProfileUrl ? (
+        <img src={normalizedProfileUrl} alt={name} className="block h-full w-full object-cover" />
+      ) : (
+        <div
+          className={[
+            'flex h-full w-full items-center justify-center font-semibold text-neutral-700',
+            textSizeClass,
+          ].join(' ')}
+        >
+          {name.slice(0, 1)}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -173,9 +210,9 @@ function SocialStat({ kind, value }: { kind: 'like' | 'comment'; value: number }
   return (
     <span className="inline-flex items-center gap-2 text-base font-medium text-neutral-700">
       {kind === 'like' ? (
-        <HeartIcon className="h-7 w-7 text-[#d65d4b]" />
+        <ThumbsUpIcon className="h-6 w-6 text-[#ef3c32]" />
       ) : (
-        <CommentIcon className="h-6 w-6 text-neutral-500" />
+        <CommentIcon className="h-5.5 w-5.5 text-[#1ab7c4]" />
       )}
       <span>{value}</span>
     </span>
@@ -184,21 +221,25 @@ function SocialStat({ kind, value }: { kind: 'like' | 'comment'; value: number }
 
 function CommentRow({ nickname, dateTime, content }: { nickname: string; dateTime: string; content: string }) {
   return (
-    <div className="border-b border-neutral-200 py-5 last:border-b-0">
+    <div className="border-b border-neutral-200 py-6 first:pt-5 last:border-b-0 last:pb-2">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#f7e5bf] text-sm font-semibold text-neutral-700">
-            {nickname.slice(0, 1)}
-          </div>
+          <AuthorBadge name={nickname} size="sm" />
           <div>
             <p className="text-sm font-semibold text-neutral-900">{nickname}</p>
             <p className="mt-0.5 text-xs text-neutral-400">{dateTime}</p>
           </div>
         </div>
         <div className="flex items-center gap-4 text-sm text-neutral-400">
-          <button type="button">{DETAIL_COPY.report}</button>
-          <button type="button">{DETAIL_COPY.edit}</button>
-          <button type="button">{DETAIL_COPY.delete}</button>
+          <button type="button" className="transition-colors hover:text-neutral-700">
+            {DETAIL_COPY.report}
+          </button>
+          <button type="button" className="transition-colors hover:text-neutral-700">
+            {DETAIL_COPY.edit}
+          </button>
+          <button type="button" className="transition-colors hover:text-red-500">
+            {DETAIL_COPY.delete}
+          </button>
         </div>
       </div>
       <p className="mt-4 text-sm leading-7 text-neutral-700">{content}</p>
@@ -206,10 +247,18 @@ function CommentRow({ nickname, dateTime, content }: { nickname: string; dateTim
   );
 }
 
-function HeartIcon({ className }: { className?: string }) {
+function MetaDivider() {
+  return <span className="text-neutral-300">|</span>;
+}
+
+function ThumbsUpIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden className={className}>
-      <path d="M12 21s-6.716-4.304-9.428-7.851C-.315 9.382.496 4.5 4.96 3.297A5.53 5.53 0 0 1 12 6.045a5.53 5.53 0 0 1 7.04-2.748c4.464 1.203 5.276 6.085 2.387 9.852C18.716 16.696 12 21 12 21Z" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden className={className}>
+      <path
+        d="M9.5 10.5 12.5 4a2 2 0 0 1 3.8.8V9h2.2a2 2 0 0 1 2 2.4l-1 5A2 2 0 0 1 17.5 18H9.5m0-7.5V18m0-7.5H6a1.5 1.5 0 0 0-1.5 1.5v4A1.5 1.5 0 0 0 6 17.5h3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
@@ -217,11 +266,7 @@ function HeartIcon({ className }: { className?: string }) {
 function CommentIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden className={className}>
-      <path
-        d="M8 19.5 4.5 21l1.125-3.375A7.5 7.5 0 1 1 19.5 12 7.5 7.5 0 0 1 12 19.5H8Z"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M7.5 19.5H4.5L5.6 16A7.5 7.5 0 1 1 12 19.5H7.5Z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
