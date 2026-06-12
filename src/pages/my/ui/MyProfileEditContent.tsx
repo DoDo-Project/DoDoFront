@@ -56,10 +56,12 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
   useEffect(() => {
     if (!user) return;
 
+    const nextProfileUrl = resolveProfileUrl(user.profileUrl);
+
     setNickname('');
     setRegion(user.region ?? '');
-    setProfileImageUrl(resolveProfileUrl(user.profileUrl));
-    previousImageUrlRef.current = resolveProfileUrl(user.profileUrl);
+    setProfileImageUrl(nextProfileUrl);
+    previousImageUrlRef.current = nextProfileUrl;
     setNicknameTouched(false);
     setRegionTouched(false);
     setSaveError('');
@@ -69,6 +71,7 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
 
   const effectiveNickname = nickname.trim() || user?.nickname.trim() || '';
   const trimmedRegion = region.trim();
+  const submittedProfileUrl = resolveProfileUrl(profileImageUrl);
   const nicknameError = validateNickname(nickname, user?.nickname ?? '');
   const regionError = validateRegion(region);
 
@@ -78,9 +81,9 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
     return (
       effectiveNickname !== user.nickname.trim() ||
       trimmedRegion !== user.region.trim() ||
-      resolveProfileUrl(profileImageUrl) !== resolveProfileUrl(user.profileUrl)
+      submittedProfileUrl !== resolveProfileUrl(user.profileUrl)
     );
-  }, [effectiveNickname, profileImageUrl, trimmedRegion, user]);
+  }, [effectiveNickname, submittedProfileUrl, trimmedRegion, user]);
 
   const canSubmit = Boolean(user) && !saving && !uploadingImage && !nicknameError && !regionError && isDirty;
 
@@ -154,17 +157,26 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
         nickname: effectiveNickname,
         region: trimmedRegion,
         hasFamily: user.hasFamily,
-        profileUrl: resolveProfileUrl(profileImageUrl),
+        profileUrl: submittedProfileUrl,
       });
+
+      const nextProfile: UserProfile = {
+        ...updatedProfile,
+        nickname: effectiveNickname,
+        region: trimmedRegion,
+        hasFamily: user.hasFamily,
+        profileUrl: submittedProfileUrl ?? updatedProfile.profileUrl,
+      };
 
       syncUserProfile({
-        profileUrl: updatedProfile.profileUrl,
-        nickname: updatedProfile.nickname,
-        region: updatedProfile.region,
-        notificationEnabled: updatedProfile.notificationEnabled,
+        profileUrl: nextProfile.profileUrl,
+        nickname: nextProfile.nickname,
+        region: nextProfile.region,
+        notificationEnabled: nextProfile.notificationEnabled,
       });
 
-      onProfileUpdated(updatedProfile);
+      previousImageUrlRef.current = resolveProfileUrl(nextProfile.profileUrl);
+      onProfileUpdated(nextProfile);
       setNickname('');
       setSaveSuccess('회원정보를 수정했어요.');
     } catch (error) {
@@ -211,6 +223,7 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
                   />
                 )}
               </div>
+
               <input
                 ref={inputRef}
                 type="file"
@@ -219,38 +232,31 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
                 disabled={uploadingImage || saving}
                 onChange={handleSelectProfileImage}
               />
+
               <button
                 type="button"
                 onClick={() => inputRef.current?.click()}
                 disabled={uploadingImage || saving}
                 className="mt-4 inline-flex min-w-32 items-center justify-center rounded-xl border border-neutral-200 bg-white px-5 py-3 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {uploadingImage ? '업로드 중...' : '이미지 변경'}
+                {uploadingImage ? '이미지 업로드 중' : '이미지 변경'}
               </button>
-              {imageError || uploadingImage ? (
-                <FormFeedback
-                  className="mt-3 text-center"
-                  message={imageError || '이미지를 업로드하고 있어요...'}
-                  tone={imageError ? 'error' : 'neutral'}
-                />
-              ) : null}
+
+              {imageError ? <FormFeedback className="mt-3 text-center" message={imageError} tone="error" /> : null}
             </div>
 
             <div className="flex h-full flex-col justify-center rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-5 py-5">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="text-[17px] font-medium text-neutral-950">프로필 이미지</span>
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
-                  JPG / PNG
-                </span>
-                <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
                   최대 {MAX_IMAGE_FILE_SIZE_MB}MB
                 </span>
               </div>
               <p className="mt-3 text-sm leading-7 text-neutral-600">
-                사진이나 하단 버튼을 눌러 프로필 이미지를 변경할 수 있어요.
+                사진이나 버튼을 눌러 프로필 이미지를 변경할 수 있어요.
               </p>
               <p className="mt-1 text-sm leading-7 text-neutral-500">
-                업로드한 이미지는 저장 후 마이도도 화면에 바로 반영됩니다.
+                변경 후 저장하면 마이도도와 프로필 메뉴에도 바로 반영돼요.
               </p>
             </div>
           </div>

@@ -23,16 +23,30 @@ interface UseCurrentUserResult {
   displayName: string;
 }
 
+function trimOrNull(value?: string | null): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
 export function useCurrentUser(): UseCurrentUserResult {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [, setAuthStateVersion] = useState(0);
   const accessToken = getAccessToken();
   const hasToken = Boolean(accessToken);
 
   useEffect(() => {
     return subscribeAuthState(() => {
-      setAuthStateVersion((prev) => prev + 1);
+      setUser((current) => {
+        if (!current) return current;
+
+        return {
+          ...current,
+          nickname: trimOrNull(getNickname()) ?? current.nickname,
+          profileUrl: trimOrNull(getProfileUrl()) ?? current.profileUrl,
+          region: trimOrNull(getRegion()) ?? current.region,
+          notificationEnabled: getNotificationEnabled() ?? current.notificationEnabled,
+        };
+      });
     });
   }, []);
 
@@ -54,7 +68,7 @@ export function useCurrentUser(): UseCurrentUserResult {
         syncUserProfile(profile);
         setUser(profile);
       } catch (error) {
-        console.error('[users/me] 조회 실패', error);
+        console.error('[users/me] failed', error);
         if (!cancelled) {
           setUser(null);
         }
@@ -73,10 +87,10 @@ export function useCurrentUser(): UseCurrentUserResult {
   }, [accessToken]);
 
   const activeUser = hasToken ? user : null;
-  const profileUrl = activeUser?.profileUrl?.trim() || getProfileUrl();
-  const nickname = activeUser?.nickname?.trim() || getNickname();
-  const region = activeUser?.region?.trim() || getRegion();
-  const notificationEnabled = activeUser?.notificationEnabled ?? getNotificationEnabled();
+  const profileUrl = trimOrNull(getProfileUrl()) ?? trimOrNull(activeUser?.profileUrl) ?? null;
+  const nickname = trimOrNull(getNickname()) ?? trimOrNull(activeUser?.nickname) ?? null;
+  const region = trimOrNull(getRegion()) ?? trimOrNull(activeUser?.region) ?? null;
+  const notificationEnabled = getNotificationEnabled() ?? activeUser?.notificationEnabled ?? null;
   const displayName = nickname ? `${nickname}님` : '회원님';
 
   return {
