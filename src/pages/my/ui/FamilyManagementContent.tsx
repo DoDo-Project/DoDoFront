@@ -148,6 +148,53 @@ function PendingRequestActionConfirmModal({
   );
 }
 
+function BlockedUserReleaseConfirmModal({
+  user,
+  isProcessing,
+  onClose,
+  onConfirm,
+}: {
+  user: Parameters<typeof FamilyBlockedUsersCard>[0]['users'][number] | null;
+  isProcessing: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!user) {
+    return null;
+  }
+
+  return (
+    <Modal open={Boolean(user)} onClose={onClose} ariaLabel="차단 해제 확인">
+      <div className="space-y-5">
+        <div>
+          <p className="text-xs font-semibold tracking-[0.18em] text-neutral-400">FAMILY</p>
+          <h2 className="mt-2 text-lg font-semibold text-neutral-950">{user.nickname}님의 차단을 해제할까요?</h2>
+          <p className="mt-2 text-sm leading-6 text-neutral-400">이후 다시 가족 신청을 받거나 관리할 수 있어요.</p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isProcessing}
+            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium text-neutral-800 transition-colors hover:border-neutral-300 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            취소
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isProcessing}
+            className="inline-flex h-11 flex-1 items-center justify-center rounded-xl bg-neutral-900 px-4 text-sm font-medium text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isProcessing ? '처리 중...' : '차단 해제'}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
 function FamilyJoinManagementView({
   joinCode,
   isSubmitting,
@@ -317,6 +364,9 @@ export function FamilyManagementContent() {
     Parameters<typeof FamilyPendingRequestsCard>[0]['requests'][number] | null
   >(null);
   const [pendingActionType, setPendingActionType] = useState<PendingRequestAction | null>(null);
+  const [blockedReleaseUser, setBlockedReleaseUser] = useState<
+    Parameters<typeof FamilyBlockedUsersCard>[0]['users'][number] | null
+  >(null);
 
   const pets = data?.pets ?? [];
   const selectedPet = (selectedPetId ? pets.find((pet) => pet.petId === selectedPetId) : null) ?? pets[0] ?? null;
@@ -346,7 +396,14 @@ export function FamilyManagementContent() {
       ),
     [isReceivedView, pendingUsersQuery.data?.users, receivedStatusFilter, selectedPet?.petId],
   );
-  const pendingPreviewUsers = useMemo(() => filteredPendingUsers.slice(0, 2), [filteredPendingUsers]);
+  const pendingPreviewUsers = useMemo(
+    () => filteredPendingUsers.filter((user) => user.status === 'PENDING').slice(0, 2),
+    [filteredPendingUsers],
+  );
+  const pendingPreviewTotalCount = useMemo(
+    () => filteredPendingUsers.filter((user) => user.status === 'PENDING').length,
+    [filteredPendingUsers],
+  );
   const filteredBlockedUsers = useMemo(
     () => blockedUsersQuery.data?.users.filter((user) => user.targetPetId === selectedPet?.petId) ?? [],
     [blockedUsersQuery.data?.users, selectedPet?.petId],
@@ -422,11 +479,28 @@ export function FamilyManagementContent() {
   };
 
   const handleReleaseBlockedUser = (user: Parameters<typeof FamilyBlockedUsersCard>[0]['users'][number]) => {
-    if (!window.confirm(`${user.nickname}님의 차단을 해제하시겠습니까?`)) {
+    setBlockedReleaseUser(user);
+  };
+
+  const closeBlockedReleaseModal = () => {
+    if (familyBlockedAction.activeBlockedUserKey) {
       return;
     }
 
-    void familyBlockedAction.handleReleaseBlockedUser(user);
+    setBlockedReleaseUser(null);
+  };
+
+  const handleConfirmBlockedRelease = async () => {
+    if (!blockedReleaseUser) {
+      return;
+    }
+
+    try {
+      await familyBlockedAction.handleReleaseBlockedUser(blockedReleaseUser);
+      setBlockedReleaseUser(null);
+    } catch {
+      // Keep the modal open so the user can retry if needed.
+    }
   };
 
   if (isJoinView) {
@@ -476,6 +550,13 @@ export function FamilyManagementContent() {
           onClose={closePendingActionModal}
           onConfirm={() => void handleConfirmPendingAction()}
         />
+
+        <BlockedUserReleaseConfirmModal
+          user={blockedReleaseUser}
+          isProcessing={Boolean(familyBlockedAction.activeBlockedUserKey)}
+          onClose={closeBlockedReleaseModal}
+          onConfirm={() => void handleConfirmBlockedRelease()}
+        />
       </>
     );
   }
@@ -519,7 +600,7 @@ export function FamilyManagementContent() {
           <FamilyPendingRequestsCard
             mode="summary"
             requests={pendingPreviewUsers}
-            totalCount={filteredPendingUsers.length}
+            totalCount={pendingPreviewTotalCount}
             isLoading={pendingUsersQuery.isLoading || pendingUsersQuery.isFetching}
             errorMessage={pendingErrorMessage}
           />
