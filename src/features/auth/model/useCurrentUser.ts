@@ -6,6 +6,7 @@ import {
   getNotificationEnabled,
   getProfileUrl,
   getRegion,
+  subscribeAuthState,
   syncUserProfile,
 } from '@/shared/lib/auth/token';
 
@@ -25,8 +26,15 @@ interface UseCurrentUserResult {
 export function useCurrentUser(): UseCurrentUserResult {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [, setAuthStateVersion] = useState(0);
   const accessToken = getAccessToken();
   const hasToken = Boolean(accessToken);
+
+  useEffect(() => {
+    return subscribeAuthState(() => {
+      setAuthStateVersion((prev) => prev + 1);
+    });
+  }, []);
 
   useEffect(() => {
     if (!accessToken) {

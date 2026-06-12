@@ -1,9 +1,12 @@
-import { type ReactNode, useEffect, useMemo, useState } from 'react';
+import { type ChangeEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
 
+import profileDefaultIllustration from '@/features/auth/assets/profile-default.svg';
 import { PROFILE_UPDATE_STATUS_MESSAGES, getApiErrorMessage, updateMyProfile, type UserProfile } from '@/features/auth';
 import { RegionSelectModal } from '@/features/auth/ui/signup/RegionSelectModal';
 import { FormFeedback } from '@/features/auth/ui/signup/SignupStepLayout';
+import { uploadImage } from '@/shared/api/files';
 import { syncUserProfile } from '@/shared/lib/auth/token';
+import { IMAGE_UPLOAD_ACCEPT, MAX_IMAGE_FILE_SIZE_MB, validateImageFile } from '@/shared/lib/files/imageUploadPolicy';
 import { Skeleton } from '@/shared/ui';
 
 interface MyProfileEditContentProps {
@@ -12,8 +15,8 @@ interface MyProfileEditContentProps {
   onProfileUpdated: (profile: UserProfile) => void;
 }
 
-function validateNickname(value: string): string {
-  const trimmed = value.trim();
+function validateNickname(value: string, fallback: string): string {
+  const trimmed = value.trim() || fallback.trim();
 
   if (!trimmed) return '닉네임을 입력해주세요.';
   if (trimmed.length < 2 || trimmed.length > 10) return '닉네임은 2자 이상 10자 이하로 입력해주세요.';
@@ -30,6 +33,11 @@ function validateRegion(value: string): string {
   return '';
 }
 
+function resolveProfileUrl(url: string | null | undefined): string | null {
+  const trimmed = url?.trim();
+  return trimmed ? trimmed : null;
+}
+
 export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated }: MyProfileEditContentProps) {
   const [nickname, setNickname] = useState('');
   const [region, setRegion] = useState('');
@@ -39,30 +47,42 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
   const [saveError, setSaveError] = useState('');
   const [saveSuccess, setSaveSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageError, setImageError] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const previousImageUrlRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!user) return;
 
-    setNickname(user.nickname ?? '');
+    setNickname('');
     setRegion(user.region ?? '');
+    setProfileImageUrl(resolveProfileUrl(user.profileUrl));
+    previousImageUrlRef.current = resolveProfileUrl(user.profileUrl);
     setNicknameTouched(false);
     setRegionTouched(false);
     setSaveError('');
     setSaveSuccess('');
+    setImageError('');
   }, [user]);
 
-  const trimmedNickname = nickname.trim();
+  const effectiveNickname = nickname.trim() || user?.nickname.trim() || '';
   const trimmedRegion = region.trim();
-  const nicknameError = validateNickname(nickname);
+  const nicknameError = validateNickname(nickname, user?.nickname ?? '');
   const regionError = validateRegion(region);
 
   const isDirty = useMemo(() => {
     if (!user) return false;
 
-    return trimmedNickname !== user.nickname.trim() || trimmedRegion !== user.region.trim();
-  }, [trimmedNickname, trimmedRegion, user]);
+    return (
+      effectiveNickname !== user.nickname.trim() ||
+      trimmedRegion !== user.region.trim() ||
+      resolveProfileUrl(profileImageUrl) !== resolveProfileUrl(user.profileUrl)
+    );
+  }, [effectiveNickname, profileImageUrl, trimmedRegion, user]);
 
-  const canSubmit = Boolean(user) && !saving && !nicknameError && !regionError && isDirty;
+  const canSubmit = Boolean(user) && !saving && !uploadingImage && !nicknameError && !regionError && isDirty;
 
   const handleNicknameChange = (value: string) => {
     setNickname(value);
@@ -78,11 +98,41 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
     setSaveSuccess('');
   };
 
-  const handleResetNickname = () => {
-    setNickname(user?.nickname ?? '');
-    setNicknameTouched(false);
+  const handleSelectProfileImage = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = '';
+
+    if (!file || uploadingImage) return;
+
+    try {
+      validateImageFile(file);
+    } catch (error) {
+      setImageError(error instanceof Error ? error.message : '이미지 파일을 다시 확인해주세요.');
+      return;
+    }
+
+    setUploadingImage(true);
+    setImageError('');
     setSaveError('');
     setSaveSuccess('');
+
+    const previewUrl = URL.createObjectURL(file);
+    setProfileImageUrl(previewUrl);
+
+    try {
+      const uploadedUrl = await uploadImage(file);
+      URL.revokeObjectURL(previewUrl);
+      const resolvedUrl = resolveProfileUrl(uploadedUrl);
+      setProfileImageUrl(resolvedUrl);
+      previousImageUrlRef.current = resolvedUrl;
+    } catch (error) {
+      URL.revokeObjectURL(previewUrl);
+      setProfileImageUrl(previousImageUrlRef.current);
+      setImageError('프로필 이미지 업로드에 실패했어요. 다시 시도해주세요.');
+      console.error('[my-profile] image upload failed', error);
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleSubmit = async () => {
@@ -101,9 +151,10 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
 
     try {
       const updatedProfile = await updateMyProfile({
-        nickname: trimmedNickname,
+        nickname: effectiveNickname,
         region: trimmedRegion,
         hasFamily: user.hasFamily,
+        profileUrl: resolveProfileUrl(profileImageUrl),
       });
 
       syncUserProfile({
@@ -114,6 +165,7 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
       });
 
       onProfileUpdated(updatedProfile);
+      setNickname('');
       setSaveSuccess('회원정보를 수정했어요.');
     } catch (error) {
       console.error('[my-profile] update failed', error);
@@ -139,7 +191,7 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
         <p className="text-xs font-semibold tracking-[0.24em] text-brand">ACCOUNT</p>
         <h1 className="mt-2 text-[18px] font-medium text-neutral-950 sm:text-[20px]">회원정보 수정</h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-neutral-600">
-          닉네임과 활동 지역을 수정해 내 프로필 정보를 최신 상태로 유지할 수 있어요.
+          프로필 이미지, 닉네임, 활동 지역을 수정하고 내 계정 정보를 최신 상태로 유지할 수 있어요.
         </p>
       </div>
 
@@ -148,39 +200,67 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
           <div className="grid gap-6 lg:grid-cols-[220px_minmax(0,1fr)] lg:items-stretch">
             <div className="flex flex-col items-center rounded-[20px] border border-neutral-200 bg-white px-5 py-5">
               <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border border-neutral-200 bg-neutral-100">
-                {user?.profileUrl ? (
-                  <img src={user.profileUrl} alt="" className="h-full w-full object-cover" />
+                {profileImageUrl ? (
+                  <img src={profileImageUrl} alt="" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="h-full w-full bg-neutral-100" />
+                  <img
+                    src={profileDefaultIllustration}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    draggable={false}
+                  />
                 )}
               </div>
-              <div className="mt-4 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-center text-sm text-neutral-500">
-                프로필 이미지는 현재 수정 대상이 아니에요.
-              </div>
+              <input
+                ref={inputRef}
+                type="file"
+                accept={IMAGE_UPLOAD_ACCEPT}
+                className="sr-only"
+                disabled={uploadingImage || saving}
+                onChange={handleSelectProfileImage}
+              />
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                disabled={uploadingImage || saving}
+                className="mt-4 inline-flex min-w-32 items-center justify-center rounded-xl border border-neutral-200 bg-white px-5 py-3 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {uploadingImage ? '업로드 중...' : '이미지 변경'}
+              </button>
+              {imageError || uploadingImage ? (
+                <FormFeedback
+                  className="mt-3 text-center"
+                  message={imageError || '이미지를 업로드하고 있어요...'}
+                  tone={imageError ? 'error' : 'neutral'}
+                />
+              ) : null}
             </div>
 
             <div className="flex h-full flex-col justify-center rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-5 py-5">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[17px] font-medium text-neutral-950">프로필 정보</span>
+                <span className="text-[17px] font-medium text-neutral-950">프로필 이미지</span>
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
-                  닉네임
+                  JPG / PNG
                 </span>
                 <span className="rounded-full bg-white px-3 py-1 text-xs font-medium text-neutral-500 ring-1 ring-neutral-200">
-                  활동 지역
+                  최대 {MAX_IMAGE_FILE_SIZE_MB}MB
                 </span>
               </div>
               <p className="mt-3 text-sm leading-7 text-neutral-600">
-                현재 계정의 기본 프로필 정보를 차분하게 정리하고 바로 저장할 수 있어요.
+                사진이나 하단 버튼을 눌러 프로필 이미지를 변경할 수 있어요.
               </p>
               <p className="mt-1 text-sm leading-7 text-neutral-500">
-                저장한 정보는 마이도도 화면과 프로필 카드에 즉시 반영됩니다.
+                업로드한 이미지는 저장 후 마이도도 화면에 바로 반영됩니다.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      <FormCard title="기본 정보" description="이메일, 이름, 닉네임, 활동 지역을 확인하고 필요한 값만 수정해 주세요.">
+      <FormCard
+        title="기본 정보"
+        description="이메일과 이름은 조회만 가능하고, 닉네임과 활동 지역은 이 화면에서 수정할 수 있어요."
+      >
         <div className="grid gap-5 lg:grid-cols-2">
           <ReadonlyField label="이메일" value={user?.email ?? '-'} />
           <ReadonlyField label="이름" value={user?.name ?? '-'} />
@@ -191,7 +271,7 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
               value={nickname}
               maxLength={10}
               onChange={(event) => handleNicknameChange(event.target.value)}
-              placeholder="닉네임을 입력해주세요"
+              placeholder={user?.nickname ?? '닉네임을 입력해주세요'}
               className={[
                 'mt-2 h-12 w-full rounded-xl border bg-white px-4 text-sm text-neutral-900 outline-none transition-colors placeholder:text-neutral-400',
                 nicknameTouched && nicknameError
@@ -199,21 +279,10 @@ export function MyProfileEditContent({ user, isLoading = false, onProfileUpdated
                   : 'border-neutral-200 focus:border-brand',
               ].join(' ')}
             />
-            <div className="mt-2 flex items-center justify-between gap-3">
-              <FormFeedback
-                className="min-h-0 flex-1"
-                message={nicknameTouched ? nicknameError : '2자 이상 10자 이하로 입력해주세요.'}
-                tone={nicknameTouched && nicknameError ? 'error' : 'neutral'}
-              />
-              <button
-                type="button"
-                onClick={handleResetNickname}
-                disabled={!user || saving}
-                className="shrink-0 rounded-lg border border-neutral-200 bg-white px-3 py-2 text-xs font-medium text-neutral-600 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                원래대로
-              </button>
-            </div>
+            <FormFeedback
+              message={nicknameTouched ? nicknameError : '비워두면 현재 닉네임을 그대로 유지해요.'}
+              tone={nicknameTouched && nicknameError ? 'error' : 'neutral'}
+            />
           </FieldBlock>
 
           <FieldBlock label="활동 지역" required>

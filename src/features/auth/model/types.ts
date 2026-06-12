@@ -393,6 +393,7 @@ export interface UpdateMyProfileRequest {
   nickname: string;
   region: string;
   hasFamily: boolean;
+  profileUrl?: string | null;
 }
 
 export interface UpdateMyProfileResponse {
