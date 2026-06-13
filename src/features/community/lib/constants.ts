@@ -43,3 +43,9 @@ export const COMMENT_MUTATION_STATUS_MESSAGES: Partial<Record<number, string>> =
   404: '대상 댓글 또는 게시글을 찾을 수 없어요.',
   500: '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
 };
+
+export const MY_ACTIVITY_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  400: '내 활동 조회 요청이 올바르지 않아요.',
+  401: '로그인이 필요해요. 다시 로그인해주세요.',
+  500: '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
+};

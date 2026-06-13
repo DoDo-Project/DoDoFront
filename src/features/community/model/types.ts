@@ -76,6 +76,11 @@ export interface DeleteBoardResponse {
   message: string;
 }
 
+export interface MyBoardListResponse {
+  message: string;
+  boards: BoardListItem[];
+}
+
 export interface CommentAuthor {
   userId?: string;
   nickname: string;
@@ -133,4 +138,20 @@ export interface UpdateCommentResponse {
 
 export interface DeleteCommentResponse {
   message: string;
+}
+
+export interface MyCommentListItem {
+  commentId: number;
+  boardId: number;
+  boardTitle: string;
+  parentCommentId: number | null;
+  commentContent: string;
+  createdAt?: string;
+  modifiedAt?: string;
+}
+
+export interface MyCommentListResponse {
+  message: string;
+  pageInfo: CommentPageInfo;
+  data: MyCommentListItem[];
 }

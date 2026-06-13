@@ -5,6 +5,7 @@ import type {
   CreateCommentRequest,
   CreateCommentResponse,
   DeleteCommentResponse,
+  MyCommentListResponse,
   UpdateCommentRequest,
   UpdateCommentResponse,
 } from '../model/types';
@@ -14,6 +15,11 @@ export async function getCommentList(
   params: { page: number; size: number },
 ): Promise<CommentListResponse> {
   const response = await apiClient.get<CommentListResponse>(`/comments/${boardId}`, { params });
+  return response.data;
+}
+
+export async function getMyCommentList(params: { page: number; size: number }): Promise<MyCommentListResponse> {
+  const response = await apiClient.get<MyCommentListResponse>('/comments/me', { params });
   return response.data;
 }
 

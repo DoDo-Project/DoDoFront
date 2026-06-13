@@ -6,7 +6,13 @@ export const queryKeys = {
     detail: (boardId: number) => ['boards', boardId, 'detail'] as const,
     comments: (boardId: number, params?: { page?: number; size?: number }) =>
       ['boards', boardId, 'comments', params?.page ?? 0, params?.size ?? 20] as const,
+    mine: (params?: { page?: number; size?: number }) =>
+      ['boards', 'mine', params?.page ?? 0, params?.size ?? 10] as const,
     tempSaved: (sessionKey: string) => ['boards', 'temp-save', sessionKey] as const,
+  },
+  comments: {
+    mine: (params?: { page?: number; size?: number }) =>
+      ['comments', 'mine', params?.page ?? 0, params?.size ?? 10] as const,
   },
   pets: {
     list: (params?: { page?: number; size?: number; sort?: string }) =>
