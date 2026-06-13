@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import type { BoardComment, BoardDetailResponse, CommentPageInfo } from '../model/types';
@@ -9,7 +9,6 @@ interface BoardDetailContentProps {
   pageInfo?: CommentPageInfo;
   canManage: boolean;
   currentUserNickname?: string | null;
-  currentUserProfileUrl?: string | null;
   isCommentsLoading: boolean;
   commentsErrorMessage?: string;
   isCreatingComment: boolean;
@@ -71,7 +70,6 @@ function formatDateTime(value?: string) {
 function getCommentAuthor(comment: BoardComment) {
   return {
     nickname: comment.author?.nickname?.trim() || comment.nickname?.trim() || DETAIL_COPY.anonymousAuthor,
-    profileUrl: comment.author?.profileUrl ?? comment.profileUrl ?? null,
   };
 }
 
@@ -128,7 +126,6 @@ export function BoardDetailContent({
   pageInfo,
   canManage,
   currentUserNickname,
-  currentUserProfileUrl,
   isCommentsLoading,
   commentsErrorMessage,
   isCreatingComment,
@@ -421,23 +418,17 @@ export function BoardDetailContent({
         <div className="rounded-[24px] border border-neutral-200 bg-white/96 shadow-[0_18px_42px_rgba(15,23,42,0.10)] backdrop-blur">
           <div className="px-4 py-3 sm:px-5">
             <div className="flex items-start gap-3">
-              <AuthorBadge
-                name={currentUserNickname?.trim() || DETAIL_COPY.anonymousAuthor}
-                size="sm"
-                profileUrl={currentUserProfileUrl}
-              />
               <div className="min-w-0 flex-1">
-                <textarea
+                <AutoSizeTextarea
                   value={draftComment}
-                  onChange={(event) => {
-                    setDraftComment(event.target.value);
+                  onChange={(value) => {
+                    setDraftComment(value);
                     if (formError) {
                       setFormError('');
                     }
                   }}
-                  rows={3}
                   placeholder={DETAIL_COPY.commentPlaceholder}
-                  className="w-full resize-none rounded-[20px] border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 outline-none transition focus:border-neutral-300"
+                  className="w-full rounded-[20px] border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-800 outline-none transition focus:border-neutral-300"
                 />
                 {formError ? <p className="mt-2 text-sm text-red-500">{formError}</p> : null}
               </div>
@@ -546,7 +537,7 @@ function CommentRow({
   onDelete,
   onReplyStart,
 }: CommentRowProps) {
-  const { nickname, profileUrl } = getCommentAuthor(comment);
+  const { nickname } = getCommentAuthor(comment);
   const canManage = Boolean(
     currentUserNickname &&
     nickname.trim() &&
@@ -564,12 +555,9 @@ function CommentRow({
       ].join(' ')}
     >
       <div className="flex items-start justify-between gap-4">
-        <div className="flex items-start gap-3">
-          <AuthorBadge name={nickname} size="sm" profileUrl={profileUrl} />
-          <div>
-            <p className="text-sm font-semibold text-neutral-900">{nickname}</p>
-            {dateTime ? <p className="mt-0.5 text-xs text-neutral-400">{dateTime}</p> : null}
-          </div>
+        <div>
+          <p className="text-sm font-semibold text-neutral-900">{nickname}</p>
+          {dateTime ? <p className="mt-0.5 text-xs text-neutral-400">{dateTime}</p> : null}
         </div>
 
         {!isDeletedComment(comment) ? (
@@ -600,11 +588,10 @@ function CommentRow({
 
       {isEditing ? (
         <div className="mt-4">
-          <textarea
+          <AutoSizeTextarea
             value={editDraft}
-            onChange={(event) => onEditDraftChange(event.target.value)}
-            rows={3}
-            className="w-full resize-none rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 outline-none transition focus:border-neutral-300"
+            onChange={onEditDraftChange}
+            className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-800 outline-none transition focus:border-neutral-300"
           />
           <div className="mt-3 flex items-center justify-end gap-2">
             <button
@@ -650,12 +637,11 @@ interface ReplyComposerProps {
 function ReplyComposer({ value, placeholder, isPending, onChange, onCancel, onSubmit }: ReplyComposerProps) {
   return (
     <div className="ml-8 rounded-2xl bg-neutral-50 px-4 py-4">
-      <textarea
+      <AutoSizeTextarea
         value={value}
-        onChange={(event) => onChange(event.target.value)}
-        rows={3}
+        onChange={onChange}
         placeholder={placeholder}
-        className="w-full resize-none rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 outline-none transition focus:border-neutral-300"
+        className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm leading-6 text-neutral-800 outline-none transition focus:border-neutral-300"
       />
       <div className="mt-3 flex items-center justify-end gap-2">
         <button
@@ -675,6 +661,39 @@ function ReplyComposer({ value, placeholder, isPending, onChange, onCancel, onSu
         </button>
       </div>
     </div>
+  );
+}
+
+interface AutoSizeTextareaProps {
+  value: string;
+  placeholder?: string;
+  className?: string;
+  onChange: (value: string) => void;
+}
+
+function AutoSizeTextarea({ value, placeholder, className, onChange }: AutoSizeTextareaProps) {
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = '0px';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  }, [value]);
+
+  return (
+    <textarea
+      ref={textareaRef}
+      value={value}
+      rows={1}
+      placeholder={placeholder}
+      onChange={(event) => onChange(event.target.value)}
+      className={['min-h-[48px] resize-none overflow-hidden', className ?? ''].join(' ')}
+    />
   );
 }
 

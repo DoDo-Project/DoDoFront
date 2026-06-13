@@ -43,7 +43,7 @@ export function BoardDetailPage() {
   const params = useParams();
   const boardId = useMemo(() => parseBoardId(params.boardId), [params.boardId]);
   const { data: board, isLoading, isError, error, refetch } = useBoardDetail(boardId);
-  const { nickname, profileUrl } = useCurrentUser();
+  const { nickname } = useCurrentUser();
   const { mutateAsync: deleteBoard, isPending: isDeleting } = useDeleteBoard();
   const [commentPagination, setCommentPagination] = useState<{ boardId: number | null; page: number }>({
     boardId,
@@ -170,7 +170,6 @@ export function BoardDetailPage() {
             pageInfo={commentsQuery.data?.pageInfo}
             canManage={canManage}
             currentUserNickname={nickname}
-            currentUserProfileUrl={profileUrl}
             isCommentsLoading={commentsQuery.isLoading}
             commentsErrorMessage={
               commentsQuery.isError
