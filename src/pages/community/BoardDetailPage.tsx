@@ -6,12 +6,15 @@ import { useCurrentUser } from '@/features/auth';
 import {
   BOARD_DETAIL_STATUS_MESSAGES,
   BOARD_MUTATION_STATUS_MESSAGES,
+  BOARD_REACTION_STATUS_MESSAGES,
   BoardDetailContent,
   COMMENT_LIST_STATUS_MESSAGES,
   COMMENT_MUTATION_STATUS_MESSAGES,
   CommunityLayout,
   DeleteBoardDialog,
+  getBoardReactionType,
   useBoardDetail,
+  useBoardReaction,
   useCommentList,
   useCreateComment,
   useDeleteBoard,
@@ -56,6 +59,8 @@ export function BoardDetailPage() {
   const { mutateAsync: createComment, isPending: isCreatingComment } = useCreateComment();
   const { mutateAsync: updateComment, isPending: isUpdatingComment } = useUpdateComment();
   const { mutateAsync: deleteComment, isPending: isDeletingComment } = useDeleteComment();
+  const { mutateAsync: reactToBoard, isPending: isReacting } = useBoardReaction();
+  const [reactionError, setReactionError] = useState('');
 
   const canManage = Boolean(board && nickname && board.nickname.trim() === nickname.trim());
 
@@ -160,6 +165,25 @@ export function BoardDetailPage() {
     }
   };
 
+  const handleBoardReaction = async (reactionType: 'LIKE' | 'DISLIKE') => {
+    try {
+      setReactionError('');
+      await reactToBoard({
+        boardId,
+        nextReactionType: reactionType,
+        currentReactionType: getBoardReactionType(board),
+      });
+    } catch (reactionActionError) {
+      setReactionError(
+        getApiErrorMessage(
+          reactionActionError,
+          '반응을 처리하지 못했어요. 잠시 후 다시 시도해주세요.',
+          BOARD_REACTION_STATUS_MESSAGES,
+        ),
+      );
+    }
+  };
+
   return (
     <PageShell>
       <CommunityLayout
@@ -183,7 +207,11 @@ export function BoardDetailPage() {
             isCreatingComment={isCreatingComment}
             isUpdatingComment={isUpdatingComment}
             isDeletingComment={isDeletingComment}
+            currentReactionType={getBoardReactionType(board)}
+            isReacting={isReacting}
+            reactionErrorMessage={reactionError}
             onDelete={() => setDeleteDialogOpen(true)}
+            onReact={handleBoardReaction}
             onRetryComments={() => void commentsQuery.refetch()}
             onCreateComment={handleCreateComment}
             onUpdateComment={handleUpdateComment}
