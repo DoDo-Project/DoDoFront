@@ -6,6 +6,7 @@ import type {
   CreateBoardRequest,
   CreateBoardResponse,
   DeleteBoardResponse,
+  MyBoardListResponse,
   TempSavedBoardResponse,
   TempSaveBoardRequest,
   TempSaveBoardResponse,
@@ -15,6 +16,11 @@ import type {
 
 export async function getBoardList(params: { page: number; size: number }): Promise<BoardListResponse> {
   const response = await apiClient.get<BoardListResponse>('/boards', { params });
+  return response.data;
+}
+
+export async function getMyBoardList(params: { page: number; size: number }): Promise<MyBoardListResponse> {
+  const response = await apiClient.get<MyBoardListResponse>('/boards/me', { params });
   return response.data;
 }
 

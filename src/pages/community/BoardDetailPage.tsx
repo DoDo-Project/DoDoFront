@@ -7,10 +7,16 @@ import {
   BOARD_DETAIL_STATUS_MESSAGES,
   BOARD_MUTATION_STATUS_MESSAGES,
   BoardDetailContent,
+  COMMENT_LIST_STATUS_MESSAGES,
+  COMMENT_MUTATION_STATUS_MESSAGES,
   CommunityLayout,
   DeleteBoardDialog,
   useBoardDetail,
+  useCommentList,
+  useCreateComment,
   useDeleteBoard,
+  useDeleteComment,
+  useUpdateComment,
 } from '@/features/community';
 import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
 import { LoadingSpinner } from '@/shared/ui';
@@ -37,10 +43,19 @@ export function BoardDetailPage() {
   const params = useParams();
   const boardId = useMemo(() => parseBoardId(params.boardId), [params.boardId]);
   const { data: board, isLoading, isError, error, refetch } = useBoardDetail(boardId);
-  const { nickname, profileUrl } = useCurrentUser();
+  const { user, nickname } = useCurrentUser();
   const { mutateAsync: deleteBoard, isPending: isDeleting } = useDeleteBoard();
+  const [commentPagination, setCommentPagination] = useState<{ boardId: number | null; page: number }>({
+    boardId,
+    page: 0,
+  });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteError, setDeleteError] = useState('');
+  const activeCommentPage = commentPagination.boardId === boardId ? commentPagination.page : 0;
+  const commentsQuery = useCommentList(boardId, { page: activeCommentPage, size: 20 });
+  const { mutateAsync: createComment, isPending: isCreatingComment } = useCreateComment();
+  const { mutateAsync: updateComment, isPending: isUpdatingComment } = useUpdateComment();
+  const { mutateAsync: deleteComment, isPending: isDeletingComment } = useDeleteComment();
 
   const canManage = Boolean(board && nickname && board.nickname.trim() === nickname.trim());
 
@@ -86,15 +101,94 @@ export function BoardDetailPage() {
     );
   }
 
+  const handleCreateComment = async ({
+    commentContent,
+    parentCommentId,
+  }: {
+    commentContent: string;
+    parentCommentId?: number | null;
+  }) => {
+    try {
+      setCommentPagination({ boardId, page: 0 });
+      await createComment({
+        boardId,
+        commentContent,
+        parentCommentId,
+      });
+    } catch (commentError) {
+      throw new Error(
+        getApiErrorMessage(
+          commentError,
+          '댓글을 등록하지 못했어요. 잠시 후 다시 시도해주세요.',
+          COMMENT_MUTATION_STATUS_MESSAGES,
+        ),
+      );
+    }
+  };
+
+  const handleUpdateComment = async ({ commentId, commentContent }: { commentId: number; commentContent: string }) => {
+    try {
+      await updateComment({
+        boardId,
+        commentId,
+        payload: {
+          commentContent,
+        },
+      });
+    } catch (commentError) {
+      throw new Error(
+        getApiErrorMessage(
+          commentError,
+          '댓글을 수정하지 못했어요. 잠시 후 다시 시도해주세요.',
+          COMMENT_MUTATION_STATUS_MESSAGES,
+        ),
+      );
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    try {
+      await deleteComment({ boardId, commentId });
+    } catch (commentError) {
+      throw new Error(
+        getApiErrorMessage(
+          commentError,
+          '댓글을 삭제하지 못했어요. 잠시 후 다시 시도해주세요.',
+          COMMENT_MUTATION_STATUS_MESSAGES,
+        ),
+      );
+    }
+  };
+
   return (
     <PageShell>
       <CommunityLayout
         content={
           <BoardDetailContent
             board={board}
+            comments={commentsQuery.data?.data ?? []}
+            pageInfo={commentsQuery.data?.pageInfo}
             canManage={canManage}
-            currentUserProfileUrl={profileUrl}
+            currentUserId={user?.userId ?? null}
+            isCommentsLoading={commentsQuery.isLoading}
+            commentsErrorMessage={
+              commentsQuery.isError
+                ? getApiErrorMessage(
+                    commentsQuery.error,
+                    '댓글을 불러오지 못했어요. 잠시 후 다시 시도해주세요.',
+                    COMMENT_LIST_STATUS_MESSAGES,
+                  )
+                : undefined
+            }
+            isCreatingComment={isCreatingComment}
+            isUpdatingComment={isUpdatingComment}
+            isDeletingComment={isDeletingComment}
             onDelete={() => setDeleteDialogOpen(true)}
+            onRetryComments={() => void commentsQuery.refetch()}
+            onCreateComment={handleCreateComment}
+            onUpdateComment={handleUpdateComment}
+            onDeleteComment={handleDeleteComment}
+            onChangeCommentPage={(page) => setCommentPagination({ boardId, page })}
           />
         }
       />

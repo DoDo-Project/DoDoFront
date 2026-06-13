@@ -410,6 +410,7 @@ export interface UpdateMyProfileResponse {
 
 export interface UserProfile {
   message: string;
+  userId?: string;
   email: string;
   name: string;
   nickname: string;
