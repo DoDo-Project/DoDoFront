@@ -4,6 +4,8 @@ export const queryKeys = {
       ['boards', 'list', params?.page ?? 0, params?.size ?? 12] as const,
     listInfinite: () => ['boards', 'list-infinite'] as const,
     detail: (boardId: number) => ['boards', boardId, 'detail'] as const,
+    comments: (boardId: number, params?: { page?: number; size?: number }) =>
+      ['boards', boardId, 'comments', params?.page ?? 0, params?.size ?? 20] as const,
     tempSaved: (sessionKey: string) => ['boards', 'temp-save', sessionKey] as const,
   },
   pets: {

@@ -1,42 +1,58 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import type { BoardDetailResponse } from '../model/types';
+import type { BoardComment, BoardDetailResponse, CommentPageInfo } from '../model/types';
 
 interface BoardDetailContentProps {
   board: BoardDetailResponse;
+  comments: BoardComment[];
+  pageInfo?: CommentPageInfo;
   canManage: boolean;
+  currentUserNickname?: string | null;
   currentUserProfileUrl?: string | null;
+  isCommentsLoading: boolean;
+  commentsErrorMessage?: string;
+  isCreatingComment: boolean;
+  isUpdatingComment: boolean;
+  isDeletingComment: boolean;
   onDelete: () => void;
+  onRetryComments: () => void;
+  onCreateComment: (payload: { commentContent: string; parentCommentId?: number | null }) => Promise<void>;
+  onUpdateComment: (payload: { commentId: number; commentContent: string }) => Promise<void>;
+  onDeleteComment: (commentId: number) => Promise<void>;
+  onChangeCommentPage: (page: number) => void;
+}
+
+interface CommentThread extends BoardComment {
+  children: BoardComment[];
 }
 
 const DETAIL_COPY = {
   authorFallback: '작성자',
+  anonymousAuthor: '익명',
   report: '신고',
+  reply: '답글',
   edit: '수정',
   delete: '삭제',
+  cancel: '취소',
   commentsTitle: '댓글',
-  placeholder: '댓글을 입력해주세요',
+  commentPlaceholder: '댓글을 입력해주세요.',
+  replyPlaceholder: '답글을 입력해주세요.',
+  emptyComments: '아직 댓글이 없어요. 첫 댓글을 남겨보세요.',
   submit: '등록',
-  submitAria: '댓글 등록 예정 버튼',
+  save: '저장',
+  submitAria: '댓글 등록 버튼',
   viewLabel: '조회',
+  deletedComment: '삭제된 댓글입니다.',
+  commentsFailedTitle: '댓글을 불러오지 못했어요.',
+  retry: '다시 시도',
+  previousPage: '이전',
+  nextPage: '다음',
 };
 
-const MOCK_COMMENTS = [
-  {
-    id: 1,
-    nickname: '배웅배웅',
-    dateTime: '2025-10-14 11:25:00',
-    content: '어머~^^ 좋은 정보 감사드려요! 행복하세요 :D',
-  },
-  {
-    id: 2,
-    nickname: '배웅배웅',
-    dateTime: '2025-10-14 11:25:00',
-    content: '어머~^^ 좋은 정보 감사드려요! 행복하세요 :D',
-  },
-];
+function formatDateTime(value?: string) {
+  if (!value) return '';
 
-function formatDateTime(value: string) {
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
@@ -52,11 +68,167 @@ function formatDateTime(value: string) {
   }).format(date);
 }
 
-export function BoardDetailContent({ board, canManage, currentUserProfileUrl, onDelete }: BoardDetailContentProps) {
+function getCommentAuthor(comment: BoardComment) {
+  return {
+    nickname: comment.author?.nickname?.trim() || comment.nickname?.trim() || DETAIL_COPY.anonymousAuthor,
+    profileUrl: comment.author?.profileUrl ?? comment.profileUrl ?? null,
+  };
+}
+
+function getCommentTimestamp(comment: BoardComment) {
+  return formatDateTime(comment.modifiedAt ?? comment.createdAt);
+}
+
+function isDeletedComment(comment: BoardComment) {
+  return Boolean(comment.deleted || comment.isDeleted);
+}
+
+function buildCommentThreads(comments: BoardComment[]) {
+  const topLevelComments: CommentThread[] = [];
+  const topLevelMap = new Map<number, CommentThread>();
+
+  comments.forEach((comment) => {
+    if (comment.parentCommentId !== null) {
+      return;
+    }
+
+    const thread: CommentThread = {
+      ...comment,
+      children: [],
+    };
+
+    topLevelComments.push(thread);
+    topLevelMap.set(comment.commentId, thread);
+  });
+
+  comments.forEach((comment) => {
+    if (comment.parentCommentId === null) {
+      return;
+    }
+
+    const parent = topLevelMap.get(comment.parentCommentId);
+
+    if (parent) {
+      parent.children.push(comment);
+      return;
+    }
+
+    topLevelComments.push({
+      ...comment,
+      children: [],
+    });
+  });
+
+  return topLevelComments;
+}
+
+export function BoardDetailContent({
+  board,
+  comments,
+  pageInfo,
+  canManage,
+  currentUserNickname,
+  currentUserProfileUrl,
+  isCommentsLoading,
+  commentsErrorMessage,
+  isCreatingComment,
+  isUpdatingComment,
+  isDeletingComment,
+  onDelete,
+  onRetryComments,
+  onCreateComment,
+  onUpdateComment,
+  onDeleteComment,
+  onChangeCommentPage,
+}: BoardDetailContentProps) {
+  const [draftComment, setDraftComment] = useState('');
+  const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
+  const [replyDraft, setReplyDraft] = useState('');
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editDraft, setEditDraft] = useState('');
+  const [formError, setFormError] = useState('');
+
   const likeCount = board.likeCount ?? 0;
-  const commentCount = board.commentCount ?? MOCK_COMMENTS.length;
+  const commentCount = board.commentCount ?? pageInfo?.totalElements ?? comments.length;
   const authorName = board.nickname.trim() || DETAIL_COPY.authorFallback;
   const imageUrls = board.imageFileUrls.filter((imageUrl) => imageUrl.trim().length > 0);
+  const commentThreads = buildCommentThreads(comments);
+
+  const submitComment = async () => {
+    const trimmed = draftComment.trim();
+
+    if (!trimmed) {
+      setFormError('댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    setFormError('');
+
+    try {
+      await onCreateComment({ commentContent: trimmed });
+      setDraftComment('');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : '댓글을 등록하지 못했어요.');
+    }
+  };
+
+  const submitReply = async (parentCommentId: number) => {
+    const trimmed = replyDraft.trim();
+
+    if (!trimmed) {
+      setFormError('답글 내용을 입력해주세요.');
+      return;
+    }
+
+    setFormError('');
+
+    try {
+      await onCreateComment({ commentContent: trimmed, parentCommentId });
+      setReplyDraft('');
+      setReplyTargetId(null);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : '답글을 등록하지 못했어요.');
+    }
+  };
+
+  const submitEdit = async (commentId: number) => {
+    const trimmed = editDraft.trim();
+
+    if (!trimmed) {
+      setFormError('수정할 댓글 내용을 입력해주세요.');
+      return;
+    }
+
+    setFormError('');
+
+    try {
+      await onUpdateComment({ commentId, commentContent: trimmed });
+      setEditingCommentId(null);
+      setEditDraft('');
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : '댓글을 수정하지 못했어요.');
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    const confirmed = window.confirm('댓글을 삭제할까요?');
+
+    if (!confirmed) {
+      return;
+    }
+
+    setFormError('');
+
+    try {
+      await onDeleteComment(commentId);
+      if (editingCommentId === commentId) {
+        setEditingCommentId(null);
+        setEditDraft('');
+      }
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : '댓글을 삭제하지 못했어요.');
+    }
+  };
 
   return (
     <article className="space-y-6 pb-28">
@@ -127,32 +299,158 @@ export function BoardDetailContent({ board, canManage, currentUserProfileUrl, on
           </h2>
         </div>
 
-        <div>
-          {MOCK_COMMENTS.map((comment) => (
-            <CommentRow
-              key={comment.id}
-              nickname={comment.nickname}
-              dateTime={comment.dateTime}
-              content={comment.content}
-            />
-          ))}
-        </div>
+        {commentsErrorMessage ? (
+          <div className="py-8 text-center">
+            <p className="text-sm font-medium text-neutral-900">{DETAIL_COPY.commentsFailedTitle}</p>
+            <p className="mt-2 text-sm text-neutral-500">{commentsErrorMessage}</p>
+            <button
+              type="button"
+              onClick={onRetryComments}
+              className="mt-4 inline-flex items-center justify-center rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+            >
+              {DETAIL_COPY.retry}
+            </button>
+          </div>
+        ) : isCommentsLoading ? (
+          <div className="py-8 text-center text-sm text-neutral-500">댓글을 불러오는 중이에요...</div>
+        ) : commentThreads.length === 0 ? (
+          <div className="py-8 text-center text-sm text-neutral-500">{DETAIL_COPY.emptyComments}</div>
+        ) : (
+          <div>
+            {commentThreads.map((comment) => (
+              <div key={comment.commentId}>
+                <CommentRow
+                  comment={comment}
+                  currentUserNickname={currentUserNickname}
+                  isEditing={editingCommentId === comment.commentId}
+                  editDraft={editingCommentId === comment.commentId ? editDraft : comment.commentContent}
+                  isMutating={isUpdatingComment || isDeletingComment}
+                  onEditStart={() => {
+                    setFormError('');
+                    setReplyTargetId(null);
+                    setReplyDraft('');
+                    setEditingCommentId(comment.commentId);
+                    setEditDraft(comment.commentContent);
+                  }}
+                  onEditCancel={() => {
+                    setEditingCommentId(null);
+                    setEditDraft('');
+                  }}
+                  onEditDraftChange={setEditDraft}
+                  onEditSubmit={() => void submitEdit(comment.commentId)}
+                  onDelete={() => void handleDeleteComment(comment.commentId)}
+                  onReplyStart={() => {
+                    setFormError('');
+                    setEditingCommentId(null);
+                    setEditDraft('');
+                    setReplyTargetId((current) => (current === comment.commentId ? null : comment.commentId));
+                    setReplyDraft('');
+                  }}
+                />
+
+                {replyTargetId === comment.commentId ? (
+                  <ReplyComposer
+                    value={replyDraft}
+                    isPending={isCreatingComment}
+                    placeholder={DETAIL_COPY.replyPlaceholder}
+                    onChange={setReplyDraft}
+                    onCancel={() => {
+                      setReplyTargetId(null);
+                      setReplyDraft('');
+                    }}
+                    onSubmit={() => void submitReply(comment.commentId)}
+                  />
+                ) : null}
+
+                {comment.children.map((reply) => (
+                  <CommentRow
+                    key={reply.commentId}
+                    comment={reply}
+                    currentUserNickname={currentUserNickname}
+                    indent
+                    isEditing={editingCommentId === reply.commentId}
+                    editDraft={editingCommentId === reply.commentId ? editDraft : reply.commentContent}
+                    isMutating={isUpdatingComment || isDeletingComment}
+                    onEditStart={() => {
+                      setFormError('');
+                      setReplyTargetId(null);
+                      setReplyDraft('');
+                      setEditingCommentId(reply.commentId);
+                      setEditDraft(reply.commentContent);
+                    }}
+                    onEditCancel={() => {
+                      setEditingCommentId(null);
+                      setEditDraft('');
+                    }}
+                    onEditDraftChange={setEditDraft}
+                    onEditSubmit={() => void submitEdit(reply.commentId)}
+                    onDelete={() => void handleDeleteComment(reply.commentId)}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {pageInfo && pageInfo.totalPages > 1 ? (
+          <div className="flex items-center justify-center gap-3 border-t border-neutral-200 pt-5">
+            <button
+              type="button"
+              disabled={pageInfo.page <= 0}
+              onClick={() => onChangeCommentPage(pageInfo.page - 1)}
+              className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {DETAIL_COPY.previousPage}
+            </button>
+            <span className="text-sm text-neutral-500">
+              {pageInfo.page + 1} / {pageInfo.totalPages}
+            </span>
+            <button
+              type="button"
+              disabled={pageInfo.page >= pageInfo.totalPages - 1}
+              onClick={() => onChangeCommentPage(pageInfo.page + 1)}
+              className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {DETAIL_COPY.nextPage}
+            </button>
+          </div>
+        ) : null}
       </section>
 
       <section className="sticky bottom-4 z-10">
         <div className="rounded-[24px] border border-neutral-200 bg-white/96 shadow-[0_18px_42px_rgba(15,23,42,0.10)] backdrop-blur">
-          <div className="flex items-center gap-3 px-4 py-3 sm:px-5">
-            <AuthorBadge name="나" size="sm" profileUrl={currentUserProfileUrl} />
-            <div className="flex min-w-0 flex-1 items-center rounded-full border border-neutral-200 bg-neutral-50 px-4 py-3">
-              <span className="truncate text-sm text-neutral-500">{DETAIL_COPY.placeholder}</span>
+          <div className="px-4 py-3 sm:px-5">
+            <div className="flex items-start gap-3">
+              <AuthorBadge
+                name={currentUserNickname?.trim() || DETAIL_COPY.anonymousAuthor}
+                size="sm"
+                profileUrl={currentUserProfileUrl}
+              />
+              <div className="min-w-0 flex-1">
+                <textarea
+                  value={draftComment}
+                  onChange={(event) => {
+                    setDraftComment(event.target.value);
+                    if (formError) {
+                      setFormError('');
+                    }
+                  }}
+                  rows={3}
+                  placeholder={DETAIL_COPY.commentPlaceholder}
+                  className="w-full resize-none rounded-[20px] border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 outline-none transition focus:border-neutral-300"
+                />
+                {formError ? <p className="mt-2 text-sm text-red-500">{formError}</p> : null}
+              </div>
+              <button
+                type="button"
+                onClick={() => void submitComment()}
+                disabled={isCreatingComment}
+                className="inline-flex shrink-0 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+                aria-label={DETAIL_COPY.submitAria}
+              >
+                {DETAIL_COPY.submit}
+              </button>
             </div>
-            <button
-              type="button"
-              className="inline-flex shrink-0 items-center justify-center rounded-full bg-neutral-950 px-5 py-3 text-sm font-semibold text-white transition-colors hover:bg-neutral-800"
-              aria-label={DETAIL_COPY.submitAria}
-            >
-              {DETAIL_COPY.submit}
-            </button>
           </div>
         </div>
       </section>
@@ -219,30 +517,163 @@ function SocialStat({ kind, value }: { kind: 'like' | 'comment'; value: number }
   );
 }
 
-function CommentRow({ nickname, dateTime, content }: { nickname: string; dateTime: string; content: string }) {
+interface CommentRowProps {
+  comment: BoardComment;
+  currentUserNickname?: string | null;
+  indent?: boolean;
+  isEditing: boolean;
+  editDraft: string;
+  isMutating: boolean;
+  onEditStart?: () => void;
+  onEditCancel: () => void;
+  onEditDraftChange: (value: string) => void;
+  onEditSubmit: () => void;
+  onDelete: () => void;
+  onReplyStart?: () => void;
+}
+
+function CommentRow({
+  comment,
+  currentUserNickname,
+  indent = false,
+  isEditing,
+  editDraft,
+  isMutating,
+  onEditStart,
+  onEditCancel,
+  onEditDraftChange,
+  onEditSubmit,
+  onDelete,
+  onReplyStart,
+}: CommentRowProps) {
+  const { nickname, profileUrl } = getCommentAuthor(comment);
+  const canManage = Boolean(
+    currentUserNickname &&
+    nickname.trim() &&
+    currentUserNickname.trim() === nickname.trim() &&
+    !isDeletedComment(comment),
+  );
+  const content = isDeletedComment(comment) ? DETAIL_COPY.deletedComment : comment.commentContent;
+  const dateTime = getCommentTimestamp(comment);
+
   return (
-    <div className="border-b border-neutral-200 py-6 first:pt-5 last:border-b-0 last:pb-2">
+    <div
+      className={[
+        'border-b border-neutral-200 py-6 first:pt-5 last:border-b-0 last:pb-2',
+        indent ? 'ml-8 border-l border-l-neutral-100 pl-5' : '',
+      ].join(' ')}
+    >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <AuthorBadge name={nickname} size="sm" />
+          <AuthorBadge name={nickname} size="sm" profileUrl={profileUrl} />
           <div>
             <p className="text-sm font-semibold text-neutral-900">{nickname}</p>
-            <p className="mt-0.5 text-xs text-neutral-400">{dateTime}</p>
+            {dateTime ? <p className="mt-0.5 text-xs text-neutral-400">{dateTime}</p> : null}
           </div>
         </div>
-        <div className="flex items-center gap-4 text-sm text-neutral-400">
-          <button type="button" className="transition-colors hover:text-neutral-700">
-            {DETAIL_COPY.report}
-          </button>
-          <button type="button" className="transition-colors hover:text-neutral-700">
-            {DETAIL_COPY.edit}
-          </button>
-          <button type="button" className="transition-colors hover:text-red-500">
-            {DETAIL_COPY.delete}
-          </button>
-        </div>
+
+        {!isDeletedComment(comment) ? (
+          <div className="flex items-center gap-4 text-sm text-neutral-400">
+            {!canManage ? (
+              <button type="button" className="transition-colors hover:text-neutral-700">
+                {DETAIL_COPY.report}
+              </button>
+            ) : null}
+            {!indent && onReplyStart ? (
+              <button type="button" onClick={onReplyStart} className="transition-colors hover:text-neutral-700">
+                {DETAIL_COPY.reply}
+              </button>
+            ) : null}
+            {canManage ? (
+              <>
+                <button type="button" onClick={onEditStart} className="transition-colors hover:text-neutral-700">
+                  {DETAIL_COPY.edit}
+                </button>
+                <button type="button" onClick={onDelete} className="transition-colors hover:text-red-500">
+                  {DETAIL_COPY.delete}
+                </button>
+              </>
+            ) : null}
+          </div>
+        ) : null}
       </div>
-      <p className="mt-4 text-sm leading-7 text-neutral-700">{content}</p>
+
+      {isEditing ? (
+        <div className="mt-4">
+          <textarea
+            value={editDraft}
+            onChange={(event) => onEditDraftChange(event.target.value)}
+            rows={3}
+            className="w-full resize-none rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm text-neutral-800 outline-none transition focus:border-neutral-300"
+          />
+          <div className="mt-3 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={onEditCancel}
+              className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+            >
+              {DETAIL_COPY.cancel}
+            </button>
+            <button
+              type="button"
+              onClick={onEditSubmit}
+              disabled={isMutating}
+              className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {DETAIL_COPY.save}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <p
+          className={[
+            'mt-4 text-sm leading-7',
+            isDeletedComment(comment) ? 'text-neutral-400' : 'text-neutral-700',
+          ].join(' ')}
+        >
+          {content}
+        </p>
+      )}
+    </div>
+  );
+}
+
+interface ReplyComposerProps {
+  value: string;
+  placeholder: string;
+  isPending: boolean;
+  onChange: (value: string) => void;
+  onCancel: () => void;
+  onSubmit: () => void;
+}
+
+function ReplyComposer({ value, placeholder, isPending, onChange, onCancel, onSubmit }: ReplyComposerProps) {
+  return (
+    <div className="ml-8 rounded-2xl bg-neutral-50 px-4 py-4">
+      <textarea
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        rows={3}
+        placeholder={placeholder}
+        className="w-full resize-none rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 outline-none transition focus:border-neutral-300"
+      />
+      <div className="mt-3 flex items-center justify-end gap-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-xl border border-neutral-200 px-4 py-2 text-sm font-medium text-neutral-700 transition-colors hover:border-neutral-300 hover:text-neutral-900"
+        >
+          {DETAIL_COPY.cancel}
+        </button>
+        <button
+          type="button"
+          onClick={onSubmit}
+          disabled={isPending}
+          className="rounded-xl bg-neutral-950 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          {DETAIL_COPY.submit}
+        </button>
+      </div>
     </div>
   );
 }
