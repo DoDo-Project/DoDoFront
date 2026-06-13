@@ -8,7 +8,7 @@ interface BoardDetailContentProps {
   comments: BoardComment[];
   pageInfo?: CommentPageInfo;
   canManage: boolean;
-  currentUserNickname?: string | null;
+  currentUserId?: string | null;
   isCommentsLoading: boolean;
   commentsErrorMessage?: string;
   isCreatingComment: boolean;
@@ -44,9 +44,18 @@ const DETAIL_COPY = {
   viewLabel: '조회',
   deletedComment: '삭제된 댓글입니다.',
   commentsFailedTitle: '댓글을 불러오지 못했어요.',
+  loadingComments: '댓글을 불러오는 중이에요...',
   retry: '다시 시도',
   previousPage: '이전',
   nextPage: '다음',
+  commentRequired: '댓글 내용을 입력해주세요.',
+  replyRequired: '답글 내용을 입력해주세요.',
+  editRequired: '수정할 댓글 내용을 입력해주세요.',
+  commentCreateFailed: '댓글을 등록하지 못했어요.',
+  replyCreateFailed: '답글을 등록하지 못했어요.',
+  commentUpdateFailed: '댓글을 수정하지 못했어요.',
+  commentDeleteConfirm: '댓글을 삭제할까요?',
+  commentDeleteFailed: '댓글을 삭제하지 못했어요.',
 };
 
 function formatDateTime(value?: string) {
@@ -71,6 +80,10 @@ function getCommentAuthor(comment: BoardComment) {
   return {
     nickname: comment.author?.nickname?.trim() || comment.nickname?.trim() || DETAIL_COPY.anonymousAuthor,
   };
+}
+
+function getCommentUserId(comment: BoardComment) {
+  return comment.author?.userId ?? comment.userId ?? null;
 }
 
 function getCommentTimestamp(comment: BoardComment) {
@@ -125,7 +138,7 @@ export function BoardDetailContent({
   comments,
   pageInfo,
   canManage,
-  currentUserNickname,
+  currentUserId,
   isCommentsLoading,
   commentsErrorMessage,
   isCreatingComment,
@@ -143,7 +156,10 @@ export function BoardDetailContent({
   const [replyDraft, setReplyDraft] = useState('');
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editDraft, setEditDraft] = useState('');
-  const [formError, setFormError] = useState('');
+  const [commentError, setCommentError] = useState('');
+  const [replyError, setReplyError] = useState<{ commentId: number; message: string } | null>(null);
+  const [editError, setEditError] = useState<{ commentId: number; message: string } | null>(null);
+  const [deleteError, setDeleteError] = useState<{ commentId: number; message: string } | null>(null);
 
   const likeCount = board.likeCount ?? 0;
   const commentCount = board.commentCount ?? pageInfo?.totalElements ?? comments.length;
@@ -151,21 +167,34 @@ export function BoardDetailContent({
   const imageUrls = board.imageFileUrls.filter((imageUrl) => imageUrl.trim().length > 0);
   const commentThreads = buildCommentThreads(comments);
 
+  const clearCommentScopedErrors = (commentId?: number) => {
+    if (commentId === undefined) {
+      setReplyError(null);
+      setEditError(null);
+      setDeleteError(null);
+      return;
+    }
+
+    setReplyError((current) => (current?.commentId === commentId ? null : current));
+    setEditError((current) => (current?.commentId === commentId ? null : current));
+    setDeleteError((current) => (current?.commentId === commentId ? null : current));
+  };
+
   const submitComment = async () => {
     const trimmed = draftComment.trim();
 
     if (!trimmed) {
-      setFormError('댓글 내용을 입력해주세요.');
+      setCommentError(DETAIL_COPY.commentRequired);
       return;
     }
 
-    setFormError('');
+    setCommentError('');
 
     try {
       await onCreateComment({ commentContent: trimmed });
       setDraftComment('');
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : '댓글을 등록하지 못했어요.');
+      setCommentError(error instanceof Error ? error.message : DETAIL_COPY.commentCreateFailed);
     }
   };
 
@@ -173,18 +202,21 @@ export function BoardDetailContent({
     const trimmed = replyDraft.trim();
 
     if (!trimmed) {
-      setFormError('답글 내용을 입력해주세요.');
+      setReplyError({ commentId: parentCommentId, message: DETAIL_COPY.replyRequired });
       return;
     }
 
-    setFormError('');
+    setReplyError(null);
 
     try {
       await onCreateComment({ commentContent: trimmed, parentCommentId });
       setReplyDraft('');
       setReplyTargetId(null);
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : '답글을 등록하지 못했어요.');
+      setReplyError({
+        commentId: parentCommentId,
+        message: error instanceof Error ? error.message : DETAIL_COPY.replyCreateFailed,
+      });
     }
   };
 
@@ -192,29 +224,32 @@ export function BoardDetailContent({
     const trimmed = editDraft.trim();
 
     if (!trimmed) {
-      setFormError('수정할 댓글 내용을 입력해주세요.');
+      setEditError({ commentId, message: DETAIL_COPY.editRequired });
       return;
     }
 
-    setFormError('');
+    setEditError(null);
 
     try {
       await onUpdateComment({ commentId, commentContent: trimmed });
       setEditingCommentId(null);
       setEditDraft('');
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : '댓글을 수정하지 못했어요.');
+      setEditError({
+        commentId,
+        message: error instanceof Error ? error.message : DETAIL_COPY.commentUpdateFailed,
+      });
     }
   };
 
   const handleDeleteComment = async (commentId: number) => {
-    const confirmed = window.confirm('댓글을 삭제할까요?');
+    const confirmed = window.confirm(DETAIL_COPY.commentDeleteConfirm);
 
     if (!confirmed) {
       return;
     }
 
-    setFormError('');
+    setDeleteError(null);
 
     try {
       await onDeleteComment(commentId);
@@ -223,7 +258,10 @@ export function BoardDetailContent({
         setEditDraft('');
       }
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : '댓글을 삭제하지 못했어요.');
+      setDeleteError({
+        commentId,
+        message: error instanceof Error ? error.message : DETAIL_COPY.commentDeleteFailed,
+      });
     }
   };
 
@@ -309,7 +347,7 @@ export function BoardDetailContent({
             </button>
           </div>
         ) : isCommentsLoading ? (
-          <div className="py-8 text-center text-sm text-neutral-500">댓글을 불러오는 중이에요...</div>
+          <div className="py-8 text-center text-sm text-neutral-500">{DETAIL_COPY.loadingComments}</div>
         ) : commentThreads.length === 0 ? (
           <div className="py-8 text-center text-sm text-neutral-500">{DETAIL_COPY.emptyComments}</div>
         ) : (
@@ -318,12 +356,19 @@ export function BoardDetailContent({
               <div key={comment.commentId}>
                 <CommentRow
                   comment={comment}
-                  currentUserNickname={currentUserNickname}
+                  currentUserId={currentUserId}
                   isEditing={editingCommentId === comment.commentId}
                   editDraft={editingCommentId === comment.commentId ? editDraft : comment.commentContent}
                   isMutating={isUpdatingComment || isDeletingComment}
+                  errorMessage={
+                    editError?.commentId === comment.commentId
+                      ? editError.message
+                      : deleteError?.commentId === comment.commentId
+                        ? deleteError.message
+                        : undefined
+                  }
                   onEditStart={() => {
-                    setFormError('');
+                    clearCommentScopedErrors(comment.commentId);
                     setReplyTargetId(null);
                     setReplyDraft('');
                     setEditingCommentId(comment.commentId);
@@ -332,12 +377,16 @@ export function BoardDetailContent({
                   onEditCancel={() => {
                     setEditingCommentId(null);
                     setEditDraft('');
+                    clearCommentScopedErrors(comment.commentId);
                   }}
-                  onEditDraftChange={setEditDraft}
+                  onEditDraftChange={(value) => {
+                    setEditDraft(value);
+                    setEditError((current) => (current?.commentId === comment.commentId ? null : current));
+                  }}
                   onEditSubmit={() => void submitEdit(comment.commentId)}
                   onDelete={() => void handleDeleteComment(comment.commentId)}
                   onReplyStart={() => {
-                    setFormError('');
+                    clearCommentScopedErrors(comment.commentId);
                     setEditingCommentId(null);
                     setEditDraft('');
                     setReplyTargetId((current) => (current === comment.commentId ? null : comment.commentId));
@@ -350,10 +399,15 @@ export function BoardDetailContent({
                     value={replyDraft}
                     isPending={isCreatingComment}
                     placeholder={DETAIL_COPY.replyPlaceholder}
-                    onChange={setReplyDraft}
+                    errorMessage={replyError?.commentId === comment.commentId ? replyError.message : undefined}
+                    onChange={(value) => {
+                      setReplyDraft(value);
+                      setReplyError((current) => (current?.commentId === comment.commentId ? null : current));
+                    }}
                     onCancel={() => {
                       setReplyTargetId(null);
                       setReplyDraft('');
+                      clearCommentScopedErrors(comment.commentId);
                     }}
                     onSubmit={() => void submitReply(comment.commentId)}
                   />
@@ -363,13 +417,20 @@ export function BoardDetailContent({
                   <CommentRow
                     key={reply.commentId}
                     comment={reply}
-                    currentUserNickname={currentUserNickname}
+                    currentUserId={currentUserId}
                     indent
                     isEditing={editingCommentId === reply.commentId}
                     editDraft={editingCommentId === reply.commentId ? editDraft : reply.commentContent}
                     isMutating={isUpdatingComment || isDeletingComment}
+                    errorMessage={
+                      editError?.commentId === reply.commentId
+                        ? editError.message
+                        : deleteError?.commentId === reply.commentId
+                          ? deleteError.message
+                          : undefined
+                    }
                     onEditStart={() => {
-                      setFormError('');
+                      clearCommentScopedErrors(reply.commentId);
                       setReplyTargetId(null);
                       setReplyDraft('');
                       setEditingCommentId(reply.commentId);
@@ -378,8 +439,12 @@ export function BoardDetailContent({
                     onEditCancel={() => {
                       setEditingCommentId(null);
                       setEditDraft('');
+                      clearCommentScopedErrors(reply.commentId);
                     }}
-                    onEditDraftChange={setEditDraft}
+                    onEditDraftChange={(value) => {
+                      setEditDraft(value);
+                      setEditError((current) => (current?.commentId === reply.commentId ? null : current));
+                    }}
                     onEditSubmit={() => void submitEdit(reply.commentId)}
                     onDelete={() => void handleDeleteComment(reply.commentId)}
                   />
@@ -423,14 +488,14 @@ export function BoardDetailContent({
                   value={draftComment}
                   onChange={(value) => {
                     setDraftComment(value);
-                    if (formError) {
-                      setFormError('');
+                    if (commentError) {
+                      setCommentError('');
                     }
                   }}
                   placeholder={DETAIL_COPY.commentPlaceholder}
                   className="w-full rounded-[20px] border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-800 outline-none transition focus:border-neutral-300"
                 />
-                {formError ? <p className="mt-2 text-sm text-red-500">{formError}</p> : null}
+                {commentError ? <p className="mt-2 text-sm text-red-500">{commentError}</p> : null}
               </div>
               <button
                 type="button"
@@ -510,11 +575,12 @@ function SocialStat({ kind, value }: { kind: 'like' | 'comment'; value: number }
 
 interface CommentRowProps {
   comment: BoardComment;
-  currentUserNickname?: string | null;
+  currentUserId?: string | null;
   indent?: boolean;
   isEditing: boolean;
   editDraft: string;
   isMutating: boolean;
+  errorMessage?: string;
   onEditStart?: () => void;
   onEditCancel: () => void;
   onEditDraftChange: (value: string) => void;
@@ -525,11 +591,12 @@ interface CommentRowProps {
 
 function CommentRow({
   comment,
-  currentUserNickname,
+  currentUserId,
   indent = false,
   isEditing,
   editDraft,
   isMutating,
+  errorMessage,
   onEditStart,
   onEditCancel,
   onEditDraftChange,
@@ -538,11 +605,9 @@ function CommentRow({
   onReplyStart,
 }: CommentRowProps) {
   const { nickname } = getCommentAuthor(comment);
+  const commentUserId = getCommentUserId(comment);
   const canManage = Boolean(
-    currentUserNickname &&
-    nickname.trim() &&
-    currentUserNickname.trim() === nickname.trim() &&
-    !isDeletedComment(comment),
+    currentUserId && commentUserId && currentUserId === commentUserId && !isDeletedComment(comment),
   );
   const content = isDeletedComment(comment) ? DETAIL_COPY.deletedComment : comment.commentContent;
   const dateTime = getCommentTimestamp(comment);
@@ -593,6 +658,7 @@ function CommentRow({
             onChange={onEditDraftChange}
             className="w-full rounded-2xl border border-neutral-200 bg-neutral-50 px-4 py-3 text-sm leading-6 text-neutral-800 outline-none transition focus:border-neutral-300"
           />
+          {errorMessage ? <p className="mt-2 text-sm text-red-500">{errorMessage}</p> : null}
           <div className="mt-3 flex items-center justify-end gap-2">
             <button
               type="button"
@@ -612,14 +678,17 @@ function CommentRow({
           </div>
         </div>
       ) : (
-        <p
-          className={[
-            'mt-4 text-sm leading-7',
-            isDeletedComment(comment) ? 'text-neutral-400' : 'text-neutral-700',
-          ].join(' ')}
-        >
-          {content}
-        </p>
+        <>
+          <p
+            className={[
+              'mt-4 text-sm leading-7',
+              isDeletedComment(comment) ? 'text-neutral-400' : 'text-neutral-700',
+            ].join(' ')}
+          >
+            {content}
+          </p>
+          {errorMessage ? <p className="mt-2 text-sm text-red-500">{errorMessage}</p> : null}
+        </>
       )}
     </div>
   );
@@ -629,12 +698,21 @@ interface ReplyComposerProps {
   value: string;
   placeholder: string;
   isPending: boolean;
+  errorMessage?: string;
   onChange: (value: string) => void;
   onCancel: () => void;
   onSubmit: () => void;
 }
 
-function ReplyComposer({ value, placeholder, isPending, onChange, onCancel, onSubmit }: ReplyComposerProps) {
+function ReplyComposer({
+  value,
+  placeholder,
+  isPending,
+  errorMessage,
+  onChange,
+  onCancel,
+  onSubmit,
+}: ReplyComposerProps) {
   return (
     <div className="ml-8 rounded-2xl bg-neutral-50 px-4 py-4">
       <AutoSizeTextarea
@@ -643,6 +721,7 @@ function ReplyComposer({ value, placeholder, isPending, onChange, onCancel, onSu
         placeholder={placeholder}
         className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm leading-6 text-neutral-800 outline-none transition focus:border-neutral-300"
       />
+      {errorMessage ? <p className="mt-2 text-sm text-red-500">{errorMessage}</p> : null}
       <div className="mt-3 flex items-center justify-end gap-2">
         <button
           type="button"

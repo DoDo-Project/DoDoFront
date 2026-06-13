@@ -54,8 +54,11 @@ export function CommunityMyActivityPage() {
   const [postsPage, setPostsPage] = useState(0);
   const [commentsPage, setCommentsPage] = useState(0);
 
-  const myPostsQuery = useMyBoardList({ page: postsPage, size: PAGE_SIZE });
-  const myCommentsQuery = useMyCommentList({ page: commentsPage, size: PAGE_SIZE });
+  const myPostsQuery = useMyBoardList({ page: postsPage, size: PAGE_SIZE }, { enabled: activeTab === 'posts' });
+  const myCommentsQuery = useMyCommentList(
+    { page: commentsPage, size: PAGE_SIZE },
+    { enabled: activeTab === 'comments' },
+  );
 
   return (
     <CommunityLayout
