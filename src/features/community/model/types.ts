@@ -12,6 +12,8 @@ export interface BoardListItem {
   modifiedAt: string;
 }
 
+export type ReactionType = 'LIKE' | 'DISLIKE';
+
 export interface BoardListResponse {
   message: string;
   boards: BoardListItem[];
@@ -59,11 +61,29 @@ export interface BoardDetailResponse {
   imageFileUrls: string[];
   profileUrl: string | null;
   nickname: string;
-  likeCount?: number;
+  likeCount: number;
+  dislikeCount: number;
   commentCount?: number;
   viewCount: number;
   boardCreatedAt: string;
   modifiedAt: string;
+  reactionType?: ReactionType | null;
+  myReactionType?: ReactionType | null;
+  currentUserReactionType?: ReactionType | null;
+  userReactionType?: ReactionType | null;
+}
+
+export interface CreateBoardReactionRequest {
+  boardId: number;
+  reactionType: ReactionType;
+}
+
+export interface UpdateBoardReactionRequest {
+  reactionType: ReactionType;
+}
+
+export interface BoardReactionResponse {
+  message: string;
 }
 
 export type UpdateBoardRequest = BoardPayload;

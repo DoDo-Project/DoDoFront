@@ -9,25 +9,32 @@ export {
   updateBoard,
 } from './api/boards';
 export { createComment, deleteComment, getCommentList, getMyCommentList, updateComment } from './api/comments';
+export { deleteBoardReaction, createBoardReaction, updateBoardReaction } from './api/reactions';
 export {
   BOARD_DETAIL_STATUS_MESSAGES,
   BOARD_DRAFT_STATUS_MESSAGES,
   BOARD_LIST_STATUS_MESSAGES,
   BOARD_MUTATION_STATUS_MESSAGES,
+  BOARD_REACTION_STATUS_MESSAGES,
   COMMENT_LIST_STATUS_MESSAGES,
   COMMENT_MUTATION_STATUS_MESSAGES,
   COMMUNITY_DRAFT_SESSION_KEY,
   MY_ACTIVITY_STATUS_MESSAGES,
 } from './lib/constants';
+export { getBoardReactionType, getReactionCountDelta, normalizeReactionType } from './lib/reactions';
 export {
+  clearStoredBoardReactionType,
   clearStoredBoardDraftSessionKey,
+  getStoredBoardReactionType,
   getStoredBoardDraftSessionKey,
+  setStoredBoardReactionType,
   setStoredBoardDraftSessionKey,
 } from './lib/storage';
 export { INITIAL_BOARD_EDITOR_FORM_STATE, validateBoardEditorForm } from './lib/validation';
 export { useBoardDetail } from './model/useBoardDetail';
 export { useBoardEditorForm } from './model/useBoardEditorForm';
 export { useBoardList } from './model/useBoardList';
+export { useBoardReaction } from './model/useBoardReaction';
 export { useCommentList } from './model/useCommentList';
 export { useCreateBoard } from './model/useCreateBoard';
 export { useCreateComment } from './model/useCreateComment';
@@ -52,22 +59,26 @@ export type {
   BoardListItem,
   BoardListResponse,
   BoardPayload,
+  BoardReactionResponse,
   CommentListResponse,
   CommentPageInfo,
   CreateCommentRequest,
   CreateCommentResponse,
   CreateBoardRequest,
   CreateBoardResponse,
+  CreateBoardReactionRequest,
   DeleteCommentResponse,
   DeleteBoardResponse,
   MyBoardListResponse,
   MyCommentListItem,
   MyCommentListResponse,
+  ReactionType,
   TempSavedBoardResponse,
   TempSaveBoardRequest,
   TempSaveBoardResponse,
   UpdateCommentRequest,
   UpdateCommentResponse,
+  UpdateBoardReactionRequest,
   UpdateBoardRequest,
   UpdateBoardResponse,
 } from './model/types';

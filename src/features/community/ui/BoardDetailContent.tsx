@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 
-import type { BoardComment, BoardDetailResponse, CommentPageInfo } from '../model/types';
+import type { BoardComment, BoardDetailResponse, CommentPageInfo, ReactionType } from '../model/types';
 
 interface BoardDetailContentProps {
   board: BoardDetailResponse;
@@ -14,7 +14,13 @@ interface BoardDetailContentProps {
   isCreatingComment: boolean;
   isUpdatingComment: boolean;
   isDeletingComment: boolean;
+  displayedLikeCount: number;
+  displayedDislikeCount: number;
+  currentReactionType: ReactionType | null;
+  isReacting: boolean;
+  reactionErrorMessage?: string;
   onDelete: () => void;
+  onReact: (reactionType: ReactionType) => Promise<void>;
   onRetryComments: () => void;
   onCreateComment: (payload: { commentContent: string; parentCommentId?: number | null }) => Promise<void>;
   onUpdateComment: (payload: { commentId: number; commentContent: string }) => Promise<void>;
@@ -144,7 +150,13 @@ export function BoardDetailContent({
   isCreatingComment,
   isUpdatingComment,
   isDeletingComment,
+  displayedLikeCount,
+  displayedDislikeCount,
+  currentReactionType,
+  isReacting,
+  reactionErrorMessage,
   onDelete,
+  onReact,
   onRetryComments,
   onCreateComment,
   onUpdateComment,
@@ -161,7 +173,6 @@ export function BoardDetailContent({
   const [editError, setEditError] = useState<{ commentId: number; message: string } | null>(null);
   const [deleteError, setDeleteError] = useState<{ commentId: number; message: string } | null>(null);
 
-  const likeCount = board.likeCount ?? 0;
   const commentCount = board.commentCount ?? pageInfo?.totalElements ?? comments.length;
   const authorName = board.nickname.trim() || DETAIL_COPY.authorFallback;
   const imageUrls = board.imageFileUrls.filter((imageUrl) => imageUrl.trim().length > 0);
@@ -318,10 +329,32 @@ export function BoardDetailContent({
                 {board.boardContent}
               </p>
 
-              <div className="flex items-center justify-end gap-5 border-t border-neutral-200 pt-5">
-                <SocialStat kind="like" value={likeCount} />
-                <SocialStat kind="comment" value={commentCount} />
+              <div className="flex flex-col gap-4 border-t border-neutral-200 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-3">
+                  <ReactionButton
+                    reactionType="LIKE"
+                    label="좋아요"
+                    count={displayedLikeCount}
+                    active={currentReactionType === 'LIKE'}
+                    disabled={isReacting}
+                    onClick={() => void onReact('LIKE')}
+                  />
+                  <ReactionButton
+                    reactionType="DISLIKE"
+                    label="싫어요"
+                    count={displayedDislikeCount}
+                    active={currentReactionType === 'DISLIKE'}
+                    disabled={isReacting}
+                    onClick={() => void onReact('DISLIKE')}
+                  />
+                </div>
+
+                <div className="flex items-center gap-5">
+                  <SocialStat kind="comment" value={commentCount} />
+                </div>
               </div>
+
+              {reactionErrorMessage ? <p className="text-sm text-red-500">{reactionErrorMessage}</p> : null}
             </div>
           </div>
         </div>
@@ -573,6 +606,40 @@ function SocialStat({ kind, value }: { kind: 'like' | 'comment'; value: number }
   );
 }
 
+interface ReactionButtonProps {
+  reactionType: ReactionType;
+  label: string;
+  count: number;
+  active: boolean;
+  disabled: boolean;
+  onClick: () => void;
+}
+
+function ReactionButton({ reactionType, label, count, active, disabled, onClick }: ReactionButtonProps) {
+  const activeClass =
+    reactionType === 'LIKE'
+      ? 'border-[#ef3c32]/30 bg-[#ef3c32]/8 text-[#d93025]'
+      : 'border-[#4b5563]/30 bg-neutral-100 text-neutral-700';
+  const idleClass = 'border-neutral-200 bg-white text-neutral-500 hover:border-neutral-300 hover:text-neutral-700';
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={[
+        'inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50',
+        active ? activeClass : idleClass,
+      ].join(' ')}
+      aria-pressed={active}
+    >
+      {reactionType === 'LIKE' ? <ThumbsUpIcon className="h-5 w-5" /> : <ThumbsDownIcon className="h-5 w-5" />}
+      <span>{label}</span>
+      <span>{count}</span>
+    </button>
+  );
+}
+
 interface CommentRowProps {
   comment: BoardComment;
   currentUserId?: string | null;
@@ -785,6 +852,18 @@ function ThumbsUpIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden className={className}>
       <path
         d="M9.5 10.5 12.5 4a2 2 0 0 1 3.8.8V9h2.2a2 2 0 0 1 2 2.4l-1 5A2 2 0 0 1 17.5 18H9.5m0-7.5V18m0-7.5H6a1.5 1.5 0 0 0-1.5 1.5v4A1.5 1.5 0 0 0 6 17.5h3.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ThumbsDownIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden className={className}>
+      <path
+        d="M14.5 13.5 11.5 20a2 2 0 0 1-3.8-.8V15H5.5a2 2 0 0 1-2-2.4l1-5A2 2 0 0 1 6.5 6h8m0 7.5V6m0 7.5H18A1.5 1.5 0 0 0 19.5 12v-4A1.5 1.5 0 0 0 18 6.5h-3.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
