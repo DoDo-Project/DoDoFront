@@ -23,8 +23,11 @@ export {
 } from './lib/constants';
 export { getBoardReactionType, getReactionCountDelta, normalizeReactionType } from './lib/reactions';
 export {
+  clearStoredBoardReactionType,
   clearStoredBoardDraftSessionKey,
+  getStoredBoardReactionType,
   getStoredBoardDraftSessionKey,
+  setStoredBoardReactionType,
   setStoredBoardDraftSessionKey,
 } from './lib/storage';
 export { INITIAL_BOARD_EDITOR_FORM_STATE, validateBoardEditorForm } from './lib/validation';

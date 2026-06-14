@@ -2,7 +2,7 @@ import { useMutation, useQueryClient, type InfiniteData } from '@tanstack/react-
 
 import { createBoardReaction, deleteBoardReaction, updateBoardReaction } from '../api/reactions';
 import { applyReactionToBoardDetail, applyReactionToBoardListItem } from '../lib/reactions';
-import type { BoardDetailResponse, BoardListResponse, MyBoardListResponse, ReactionType } from './types';
+import type { BoardDetailResponse, BoardListItem, BoardListResponse, MyBoardListResponse, ReactionType } from './types';
 import { queryKeys } from '@/shared/lib/react-query/queryKey';
 
 interface BoardReactionVariables {
@@ -17,12 +17,12 @@ interface BoardReactionContext {
   previousMineQueries: Array<readonly [readonly unknown[], MyBoardListResponse | undefined]>;
 }
 
-function updateBoardListResponse(
-  data: BoardListResponse,
+function updateBoardListResponse<T extends { boards: BoardListItem[] }>(
+  data: T,
   boardId: number,
   previousReaction: ReactionType | null,
   nextReaction: ReactionType | null,
-) {
+): T {
   return {
     ...data,
     boards: data.boards.map((board) =>
@@ -52,14 +52,16 @@ export function useBoardReaction() {
       await Promise.all([
         queryClient.cancelQueries({ queryKey: queryKeys.boards.detail(boardId) }),
         queryClient.cancelQueries({ queryKey: queryKeys.boards.listInfinite() }),
-        queryClient.cancelQueries({ queryKey: ['boards', 'mine'] }),
+        queryClient.cancelQueries({ queryKey: queryKeys.boards.mineAll() }),
       ]);
 
       const previousDetail = queryClient.getQueryData<BoardDetailResponse>(queryKeys.boards.detail(boardId));
       const previousListInfinite = queryClient.getQueryData<InfiniteData<BoardListResponse, number>>(
         queryKeys.boards.listInfinite(),
       );
-      const previousMineQueries = queryClient.getQueriesData<MyBoardListResponse>({ queryKey: ['boards', 'mine'] });
+      const previousMineQueries = queryClient.getQueriesData<MyBoardListResponse>({
+        queryKey: queryKeys.boards.mineAll(),
+      });
 
       queryClient.setQueryData<BoardDetailResponse>(queryKeys.boards.detail(boardId), (current) =>
         current ? applyReactionToBoardDetail(current, currentReactionType, optimisticReactionType) : current,
@@ -76,7 +78,7 @@ export function useBoardReaction() {
           : current,
       );
 
-      queryClient.setQueriesData<MyBoardListResponse>({ queryKey: ['boards', 'mine'] }, (current) =>
+      queryClient.setQueriesData<MyBoardListResponse>({ queryKey: queryKeys.boards.mineAll() }, (current) =>
         current ? updateBoardListResponse(current, boardId, currentReactionType, optimisticReactionType) : current,
       );
 
@@ -107,7 +109,7 @@ export function useBoardReaction() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.boards.detail(variables.boardId) }),
         queryClient.invalidateQueries({ queryKey: queryKeys.boards.listInfinite() }),
-        queryClient.invalidateQueries({ queryKey: ['boards', 'mine'] }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.boards.mineAll() }),
       ]);
     },
   });

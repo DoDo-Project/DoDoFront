@@ -12,7 +12,10 @@ import {
   COMMENT_MUTATION_STATUS_MESSAGES,
   CommunityLayout,
   DeleteBoardDialog,
+  clearStoredBoardReactionType,
   getBoardReactionType,
+  getStoredBoardReactionType,
+  setStoredBoardReactionType,
   useBoardDetail,
   useBoardReaction,
   useCommentList,
@@ -39,11 +42,6 @@ const DETAIL_PAGE_COPY = {
 
 function getNextReactionType(currentReactionType: 'LIKE' | 'DISLIKE' | null, clickedReactionType: 'LIKE' | 'DISLIKE') {
   return currentReactionType === clickedReactionType ? null : clickedReactionType;
-}
-
-interface ReactionOverrideState {
-  boardId: number | null;
-  reactionType: 'LIKE' | 'DISLIKE' | null;
 }
 
 function parseBoardId(value: string | undefined): number | null {
@@ -74,12 +72,11 @@ export function BoardDetailPage() {
   const { mutateAsync: reactToBoard, isPending: isReacting } = useBoardReaction();
   const [reactionError, setReactionError] = useState('');
   const [reactionNotice, setReactionNotice] = useState('');
-  const [reactionOverride, setReactionOverride] = useState<ReactionOverrideState | null>(null);
 
   const canManage = Boolean(board && nickname && board.nickname.trim() === nickname.trim());
   const serverReactionType = getBoardReactionType(board);
   const currentReactionType =
-    reactionOverride?.boardId === boardId ? reactionOverride.reactionType : serverReactionType;
+    boardId !== null ? (serverReactionType ?? getStoredBoardReactionType(boardId)) : serverReactionType;
 
   useEffect(() => {
     const timer =
@@ -95,6 +92,14 @@ export function BoardDetailPage() {
       }
     };
   }, [reactionNotice]);
+
+  useEffect(() => {
+    if (boardId === null || serverReactionType === null) {
+      return;
+    }
+
+    setStoredBoardReactionType(boardId, serverReactionType);
+  }, [boardId, serverReactionType]);
 
   const handleDelete = async () => {
     if (boardId === null) return;
@@ -204,20 +209,22 @@ export function BoardDetailPage() {
       return;
     }
 
-    const previousReactionType = currentReactionType;
-    const nextReactionType = getNextReactionType(previousReactionType, reactionType);
+    const nextReactionType = getNextReactionType(currentReactionType, reactionType);
 
     try {
       setReactionError('');
       setReactionNotice('');
-      setReactionOverride({ boardId, reactionType: nextReactionType });
       await reactToBoard({
         boardId,
         nextReactionType: reactionType,
-        currentReactionType: previousReactionType,
+        currentReactionType,
       });
+      if (nextReactionType === null) {
+        clearStoredBoardReactionType(boardId);
+      } else {
+        setStoredBoardReactionType(boardId, nextReactionType);
+      }
     } catch (reactionActionError) {
-      setReactionOverride(null);
       const status = getApiErrorStatus(reactionActionError);
 
       if (status === 409) {
