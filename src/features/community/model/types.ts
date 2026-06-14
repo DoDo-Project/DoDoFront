@@ -61,8 +61,8 @@ export interface BoardDetailResponse {
   imageFileUrls: string[];
   profileUrl: string | null;
   nickname: string;
-  likeCount?: number;
-  dislikeCount?: number;
+  likeCount: number;
+  dislikeCount: number;
   commentCount?: number;
   viewCount: number;
   boardCreatedAt: string;

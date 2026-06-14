@@ -21,7 +21,7 @@ export {
   COMMUNITY_DRAFT_SESSION_KEY,
   MY_ACTIVITY_STATUS_MESSAGES,
 } from './lib/constants';
-export { getBoardReactionType, normalizeReactionType } from './lib/reactions';
+export { getBoardReactionType, getReactionCountDelta, normalizeReactionType } from './lib/reactions';
 export {
   clearStoredBoardDraftSessionKey,
   getStoredBoardDraftSessionKey,

@@ -14,6 +14,8 @@ interface BoardDetailContentProps {
   isCreatingComment: boolean;
   isUpdatingComment: boolean;
   isDeletingComment: boolean;
+  displayedLikeCount: number;
+  displayedDislikeCount: number;
   currentReactionType: ReactionType | null;
   isReacting: boolean;
   reactionErrorMessage?: string;
@@ -148,6 +150,11 @@ export function BoardDetailContent({
   isCreatingComment,
   isUpdatingComment,
   isDeletingComment,
+  displayedLikeCount,
+  displayedDislikeCount,
+  currentReactionType,
+  isReacting,
+  reactionErrorMessage,
   onDelete,
   onReact,
   onRetryComments,
@@ -155,9 +162,6 @@ export function BoardDetailContent({
   onUpdateComment,
   onDeleteComment,
   onChangeCommentPage,
-  currentReactionType,
-  isReacting,
-  reactionErrorMessage,
 }: BoardDetailContentProps) {
   const [draftComment, setDraftComment] = useState('');
   const [replyTargetId, setReplyTargetId] = useState<number | null>(null);
@@ -169,8 +173,6 @@ export function BoardDetailContent({
   const [editError, setEditError] = useState<{ commentId: number; message: string } | null>(null);
   const [deleteError, setDeleteError] = useState<{ commentId: number; message: string } | null>(null);
 
-  const likeCount = board.likeCount ?? 0;
-  const dislikeCount = board.dislikeCount ?? 0;
   const commentCount = board.commentCount ?? pageInfo?.totalElements ?? comments.length;
   const authorName = board.nickname.trim() || DETAIL_COPY.authorFallback;
   const imageUrls = board.imageFileUrls.filter((imageUrl) => imageUrl.trim().length > 0);
@@ -332,7 +334,7 @@ export function BoardDetailContent({
                   <ReactionButton
                     reactionType="LIKE"
                     label="좋아요"
-                    count={likeCount}
+                    count={displayedLikeCount}
                     active={currentReactionType === 'LIKE'}
                     disabled={isReacting}
                     onClick={() => void onReact('LIKE')}
@@ -340,7 +342,7 @@ export function BoardDetailContent({
                   <ReactionButton
                     reactionType="DISLIKE"
                     label="싫어요"
-                    count={dislikeCount}
+                    count={displayedDislikeCount}
                     active={currentReactionType === 'DISLIKE'}
                     disabled={isReacting}
                     onClick={() => void onReact('DISLIKE')}

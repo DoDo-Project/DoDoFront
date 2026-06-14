@@ -1,5 +1,5 @@
 ﻿import type { ReactNode } from 'react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { useCurrentUser } from '@/features/auth';
@@ -21,7 +21,7 @@ import {
   useDeleteComment,
   useUpdateComment,
 } from '@/features/community';
-import { getApiErrorMessage } from '@/shared/lib/api/errorMessage';
+import { getApiErrorMessage, getApiErrorStatus } from '@/shared/lib/api/errorMessage';
 import { LoadingSpinner } from '@/shared/ui';
 
 const DETAIL_PAGE_COPY = {
@@ -32,7 +32,19 @@ const DETAIL_PAGE_COPY = {
   loadFailedFallback: '게시글 조회에 실패했어요. 잠시 후 다시 시도해주세요.',
   retry: '다시 시도',
   deleteFailedFallback: '게시글을 삭제하지 못했어요. 잠시 후 다시 시도해주세요.',
+  ownReactionNotice: '내가 작성한 게시물에는 반응을 남길 수 없어요.',
+  likeConflictNotice: '이미 좋아요를 누른 게시물이에요.',
+  dislikeConflictNotice: '이미 싫어요를 누른 게시물이에요.',
 };
+
+function getNextReactionType(currentReactionType: 'LIKE' | 'DISLIKE' | null, clickedReactionType: 'LIKE' | 'DISLIKE') {
+  return currentReactionType === clickedReactionType ? null : clickedReactionType;
+}
+
+interface ReactionOverrideState {
+  boardId: number | null;
+  reactionType: 'LIKE' | 'DISLIKE' | null;
+}
 
 function parseBoardId(value: string | undefined): number | null {
   if (!value) return null;
@@ -61,8 +73,28 @@ export function BoardDetailPage() {
   const { mutateAsync: deleteComment, isPending: isDeletingComment } = useDeleteComment();
   const { mutateAsync: reactToBoard, isPending: isReacting } = useBoardReaction();
   const [reactionError, setReactionError] = useState('');
+  const [reactionNotice, setReactionNotice] = useState('');
+  const [reactionOverride, setReactionOverride] = useState<ReactionOverrideState | null>(null);
 
   const canManage = Boolean(board && nickname && board.nickname.trim() === nickname.trim());
+  const serverReactionType = getBoardReactionType(board);
+  const currentReactionType =
+    reactionOverride?.boardId === boardId ? reactionOverride.reactionType : serverReactionType;
+
+  useEffect(() => {
+    const timer =
+      reactionNotice.length > 0
+        ? window.setTimeout(() => {
+            setReactionNotice('');
+          }, 5000)
+        : null;
+
+    return () => {
+      if (timer !== null) {
+        window.clearTimeout(timer);
+      }
+    };
+  }, [reactionNotice]);
 
   const handleDelete = async () => {
     if (boardId === null) return;
@@ -166,14 +198,37 @@ export function BoardDetailPage() {
   };
 
   const handleBoardReaction = async (reactionType: 'LIKE' | 'DISLIKE') => {
+    if (canManage) {
+      setReactionError('');
+      setReactionNotice(DETAIL_PAGE_COPY.ownReactionNotice);
+      return;
+    }
+
+    const previousReactionType = currentReactionType;
+    const nextReactionType = getNextReactionType(previousReactionType, reactionType);
+
     try {
       setReactionError('');
+      setReactionNotice('');
+      setReactionOverride({ boardId, reactionType: nextReactionType });
       await reactToBoard({
         boardId,
         nextReactionType: reactionType,
-        currentReactionType: getBoardReactionType(board),
+        currentReactionType: previousReactionType,
       });
     } catch (reactionActionError) {
+      setReactionOverride(null);
+      const status = getApiErrorStatus(reactionActionError);
+
+      if (status === 409) {
+        setReactionError('');
+        setReactionNotice(
+          reactionType === 'LIKE' ? DETAIL_PAGE_COPY.likeConflictNotice : DETAIL_PAGE_COPY.dislikeConflictNotice,
+        );
+        void refetch();
+        return;
+      }
+
       setReactionError(
         getApiErrorMessage(
           reactionActionError,
@@ -186,6 +241,7 @@ export function BoardDetailPage() {
 
   return (
     <PageShell>
+      {reactionNotice ? <ToastMessage message={reactionNotice} /> : null}
       <CommunityLayout
         content={
           <BoardDetailContent
@@ -207,7 +263,9 @@ export function BoardDetailPage() {
             isCreatingComment={isCreatingComment}
             isUpdatingComment={isUpdatingComment}
             isDeletingComment={isDeletingComment}
-            currentReactionType={getBoardReactionType(board)}
+            displayedLikeCount={board.likeCount ?? 0}
+            displayedDislikeCount={board.dislikeCount ?? 0}
+            currentReactionType={currentReactionType}
             isReacting={isReacting}
             reactionErrorMessage={reactionError}
             onDelete={() => setDeleteDialogOpen(true)}
@@ -238,6 +296,16 @@ export function BoardDetailPage() {
 
 function PageShell({ children }: { children: ReactNode }) {
   return <>{children}</>;
+}
+
+function ToastMessage({ message }: { message: string }) {
+  return (
+    <div className="fixed left-1/2 top-6 z-50 -translate-x-1/2 px-4">
+      <div className="rounded-2xl bg-neutral-950 px-5 py-3 text-sm font-medium text-white shadow-[0_18px_42px_rgba(15,23,42,0.18)]">
+        {message}
+      </div>
+    </div>
+  );
 }
 
 function InvalidBoardState() {
