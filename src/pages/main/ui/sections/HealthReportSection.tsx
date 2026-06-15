@@ -159,9 +159,7 @@ export function HealthReportSection({
     ? extractHealthReportRecommendations(selectedReport.healthReportContent)
     : [];
   const reportPrimaryContent =
-    reportRecommendations[0] ||
-    selectedReport?.healthReportSummary ||
-    (selectedReport ? summarizeContent(selectedReport.healthReportContent, 96) : '');
+    reportRecommendations[0] || (selectedReport ? summarizeContent(selectedReport.healthReportContent, 96) : '');
 
   return (
     <section className="w-full" aria-labelledby="home-health-report-heading">
