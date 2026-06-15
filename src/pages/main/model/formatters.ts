@@ -32,10 +32,26 @@ export function formatDateLabel(value: string) {
   }).format(date);
 }
 
-export function getLatestReportByPet<T extends { petId: number; checkupDate: string }>(petId: number, reports: T[]) {
-  return [...reports]
-    .filter((report) => report.petId === petId)
-    .sort((left, right) => new Date(right.checkupDate).getTime() - new Date(left.checkupDate).getTime())[0];
+export function getLatestReportByPet<T extends { petId: number; checkupDate: string }>(
+  petId: number,
+  reports: T[],
+): T | undefined {
+  let latest: T | undefined;
+  let latestTime = -1;
+
+  for (const report of reports) {
+    if (report.petId !== petId) {
+      continue;
+    }
+
+    const time = new Date(report.checkupDate).getTime();
+    if (!Number.isNaN(time) && time > latestTime) {
+      latestTime = time;
+      latest = report;
+    }
+  }
+
+  return latest;
 }
 
 export function summarizeContent(value: string, maxLength = 140) {
@@ -50,19 +66,41 @@ export function summarizeContent(value: string, maxLength = 140) {
 
 interface ParsedHealthReportContent {
   recommendations?: unknown;
+  content?: unknown;
+  summary?: unknown;
+  analysis?: unknown;
+  message?: unknown;
 }
 
 export function extractHealthReportRecommendations(content: string): string[] {
   if (!content.trim()) return [];
 
   try {
-    const parsed = JSON.parse(content) as ParsedHealthReportContent;
-    if (!Array.isArray(parsed.recommendations)) {
+    const parsed = JSON.parse(content) as ParsedHealthReportContent | null;
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.recommendations)) {
       return [];
     }
 
     return parsed.recommendations.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
   } catch {
     return [];
+  }
+}
+
+export function extractHealthReportDisplayContent(content: string): string | null {
+  if (!content.trim()) return null;
+
+  try {
+    const parsed = JSON.parse(content) as ParsedHealthReportContent | null;
+    if (!parsed || typeof parsed !== 'object') {
+      return null;
+    }
+
+    const candidates = [parsed.content, parsed.summary, parsed.analysis, parsed.message];
+    const text = candidates.find((item): item is string => typeof item === 'string' && item.trim().length > 0);
+
+    return text?.trim() ?? null;
+  } catch {
+    return content;
   }
 }

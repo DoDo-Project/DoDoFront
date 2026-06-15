@@ -10,6 +10,7 @@ import petDefaultIllustration from '@/shared/assets/images/pet-default.svg';
 import { Skeleton } from '@/shared/ui';
 
 import {
+  extractHealthReportDisplayContent,
   extractHealthReportRecommendations,
   formatDateLabel,
   formatWeightLabel,
@@ -158,8 +159,14 @@ export function HealthReportSection({
   const reportRecommendations = selectedReport
     ? extractHealthReportRecommendations(selectedReport.healthReportContent)
     : [];
+  const reportFallbackContent = selectedReport
+    ? extractHealthReportDisplayContent(selectedReport.healthReportContent)
+    : null;
   const reportPrimaryContent =
-    reportRecommendations[0] || (selectedReport ? summarizeContent(selectedReport.healthReportContent, 96) : '');
+    reportRecommendations[0] ||
+    (reportFallbackContent
+      ? summarizeContent(reportFallbackContent, 96)
+      : '건강 분석 상세 내용이 아직 준비되지 않았어요.');
 
   return (
     <section className="w-full" aria-labelledby="home-health-report-heading">

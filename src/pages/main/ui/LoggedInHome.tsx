@@ -9,7 +9,7 @@ import { HotTopicSection } from './sections/HotTopicSection';
 import { NoticeAndQuickLinksSection } from './sections/NoticeAndQuickLinksSection';
 
 export function LoggedInHome() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useHomeDashboard();
+  const { data, isLoading, isError, error, refetch } = useHomeDashboard();
   const [selectedPetId, setSelectedPetId] = useState<number | null>(null);
 
   const petProfiles = data?.petProfiles ?? [];
@@ -28,7 +28,7 @@ export function LoggedInHome() {
   return (
     <div className="flex w-full flex-col gap-4 pb-6 sm:gap-6">
       <HealthReportSection
-        isLoading={isLoading || isFetching}
+        isLoading={isLoading}
         errorMessage={errorMessage}
         pets={petProfiles}
         selectedPet={selectedPet}
