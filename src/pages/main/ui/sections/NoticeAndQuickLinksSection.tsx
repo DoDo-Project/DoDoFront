@@ -18,10 +18,10 @@ export function NoticeAndQuickLinksSection() {
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] lg:gap-5">
         <article className="px-2 py-5 sm:px-2 sm:py-6">
           <div className="flex items-center justify-between gap-2">
-            <h3 className="text-base font-bold text-[20px] text-neutral-900">공지사항</h3>
+            <h3 className="text-[20px] font-bold text-neutral-900">공지사항</h3>
             <button
               type="button"
-              className="shrink-0 text-2xl leading-none font-light text-neutral-400 transition-colors hover:text-neutral-600 cursor-pointer"
+              className="shrink-0 cursor-pointer text-2xl leading-none font-light text-neutral-400 transition-colors hover:text-neutral-600"
               aria-label="공지사항 더보기"
             >
               +
@@ -45,7 +45,7 @@ export function NoticeAndQuickLinksSection() {
         </article>
 
         <article className="flex flex-col rounded-2xl px-5 py-5 sm:px-6 sm:py-6">
-          <h3 className="text-base font-bold text-[20px] text-neutral-900">바로가기</h3>
+          <h3 className="text-[20px] font-bold text-neutral-900">바로가기</h3>
 
           <div className="mt-4 grid flex-1 content-center grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
             {QUICK_LINKS.map(({ id, to, label, Icon }) => (
