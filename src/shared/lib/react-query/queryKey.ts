@@ -60,4 +60,9 @@ export const queryKeys = {
         params?.sort ?? 'petWeightsMeasuredAt,desc',
       ] as const,
   },
+  fence: {
+    boundaries: () => ['fence', 'boundaries'] as const,
+    boundary: (fenceId: number) => ['fence', fenceId, 'boundary'] as const,
+    status: (petId: number) => ['fence', petId, 'status'] as const,
+  },
 } as const;
