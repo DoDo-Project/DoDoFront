@@ -2,6 +2,8 @@
 declare namespace naver.maps {
   class LatLng {
     constructor(lat: number, lng: number);
+    lat(): number;
+    lng(): number;
   }
 
   interface MapOptions {
@@ -9,10 +11,19 @@ declare namespace naver.maps {
     zoom?: number;
   }
 
+  /** 지도 이벤트 핸들 (해제 시 사용) */
+  type MapEventListener = object;
+
+  /** 클릭 등 포인터 이벤트 — coord에 클릭 좌표가 담김 */
+  interface PointerEvent {
+    coord: LatLng;
+  }
+
   class Map {
     constructor(element: string | HTMLElement, options: MapOptions);
     setCenter(latlng: LatLng): void;
     setZoom(zoom: number): void;
+    addListener(eventName: string, listener: (event: PointerEvent) => void): MapEventListener;
     destroy(): void;
   }
 
@@ -24,6 +35,8 @@ declare namespace naver.maps {
     strokeColor?: string;
     strokeWeight?: number;
     strokeOpacity?: number;
+    /** 'solid' | 'shortdash' | 'dash' 등 */
+    strokeStyle?: string;
     fillColor?: string;
     fillOpacity?: number;
   }

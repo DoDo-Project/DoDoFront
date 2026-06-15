@@ -2,32 +2,59 @@ import { useEffect, useRef, useState } from 'react';
 
 import { loadNaverMap } from '@/shared/lib/naver-map/loadNaverMap';
 
-import { useFenceBoundaries } from '../model/useFenceBoundaries';
+import type { FenceBoundary } from '../model/types';
 
-const DEFAULT_CENTER = { lat: 37.5666103, lng: 126.9783882 };
+interface DraftCenter {
+  lat: number;
+  lng: number;
+}
 
-export function WalkMap() {
-  // useRef로 지도 요소와 인스턴스, 그려둔 원들 보관
-  // 리렌더돼도 같은 지도 객체를 유지하고 다시 그릴 때 이전 원을 지우기
+interface WalkMapProps {
+  /** 지도에 그릴 기존 울타리 목록 */
+  boundaries: FenceBoundary[];
+  /** 생성/수정 미리보기용 중심 (없으면 미리보기 원 숨김) */
+  draftCenter: DraftCenter | null;
+  /** 미리보기 원 반경(미터) */
+  draftRadius: number;
+  /** 지도 클릭 시 좌표 콜백 */
+  onMapClick: (lat: number, lng: number) => void;
+}
+
+const DEFAULT_CENTER = { lat: 37.5796, lng: 126.977 }; // 경복궁
+
+export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick }: WalkMapProps) {
   const mapElementRef = useRef<HTMLDivElement>(null);
-  const mapInstanceRef = useRef<naver.maps.Map | null>(null); // 생성된 지도 보관
-  const circlesRef = useRef<naver.maps.Circle[]>([]); // 그려둔 원들 보관(나중에 지우려고)
+  const mapInstanceRef = useRef<naver.maps.Map | null>(null);
+  const circlesRef = useRef<naver.maps.Circle[]>([]); // 기존 울타리 원들
+  const draftCircleRef = useRef<naver.maps.Circle | null>(null); // 미리보기 원
+  const onMapClickRef = useRef(onMapClick); // 항상 최신 콜백 보관
   const [isMapReady, setIsMapReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { data } = useFenceBoundaries();
+  // 리스너를 다시 달지 않고도 최신 onMapClick을 부르도록 ref만 갱신
+  useEffect(() => {
+    onMapClickRef.current = onMapClick;
+  }, [onMapClick]);
 
-  // 1. 지도 생성 (최초 1회)
+  // 1. 지도 생성 + 클릭 리스너 (최초 1회)
   useEffect(() => {
     let canceled = false;
 
     loadNaverMap()
       .then(() => {
         if (canceled || !mapElementRef.current) return;
-        mapInstanceRef.current = new naver.maps.Map(mapElementRef.current, {
+
+        const map = new naver.maps.Map(mapElementRef.current, {
           center: new naver.maps.LatLng(DEFAULT_CENTER.lat, DEFAULT_CENTER.lng),
           zoom: 15,
         });
+
+        // 지도를 클릭하면 그 좌표를 콜백으로 올려보냄
+        map.addListener('click', (event) => {
+          onMapClickRef.current(event.coord.lat(), event.coord.lng());
+        });
+
+        mapInstanceRef.current = map;
         setIsMapReady(true);
       })
       .catch((e: unknown) => {
@@ -41,19 +68,15 @@ export function WalkMap() {
     };
   }, []);
 
-  // 2. 울타리 원 그리기 (지도 준비됨 + 데이터 들어옴/바뀜)
-  // 울타리 데이터는 나중에 도착하고 바뀔 수 있기 때문에
-  // → [isMapReady, data] (데이터 올 때마다 다시 그림)
+  // 2. 기존 울타리 원 그리기 (데이터 바뀔 때마다)
   useEffect(() => {
     const map = mapInstanceRef.current;
-    if (!isMapReady || !map || !data) return;
+    if (!isMapReady || !map) return;
 
-    // 이전에 그린 원 모두 제거
     circlesRef.current.forEach((circle) => circle.setMap(null));
     circlesRef.current = [];
 
-    // 새로 그리기
-    data.boundaries.forEach((fence) => {
+    boundaries.forEach((fence) => {
       const circle = new naver.maps.Circle({
         map,
         center: new naver.maps.LatLng(fence.center.latitude, fence.center.longitude),
@@ -65,17 +88,45 @@ export function WalkMap() {
       });
       circlesRef.current.push(circle);
     });
+  }, [isMapReady, boundaries]);
 
-    // 첫 울타리로 지도 중심 이동
-    const first = data.boundaries[0];
-    if (first) {
-      map.setCenter(new naver.maps.LatLng(first.center.latitude, first.center.longitude));
+  // 3. 미리보기(점선) 원 그리기/갱신
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!isMapReady || !map) return;
+
+    // 중심이 없으면 미리보기 원 제거
+    if (!draftCenter) {
+      draftCircleRef.current?.setMap(null);
+      draftCircleRef.current = null;
+      return;
     }
-  }, [isMapReady, data]);
+
+    const center = new naver.maps.LatLng(draftCenter.lat, draftCenter.lng);
+
+    if (draftCircleRef.current) {
+      // 이미 있으면 위치/반경만 갱신
+      draftCircleRef.current.setCenter(center);
+      draftCircleRef.current.setRadius(draftRadius);
+    } else {
+      draftCircleRef.current = new naver.maps.Circle({
+        map,
+        center,
+        radius: draftRadius,
+        strokeColor: '#f59e0b',
+        strokeWeight: 2,
+        strokeStyle: 'shortdash',
+        fillColor: '#f59e0b',
+        fillOpacity: 0.12,
+      });
+    }
+
+    map.setCenter(center);
+  }, [isMapReady, draftCenter, draftRadius]);
 
   if (error) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded-2xl bg-red-50 p-6 text-sm text-red-500">
+      <div className="flex h-[500px] w-full items-center justify-center rounded-2xl bg-red-50 p-6 text-sm text-red-500">
         {error}
       </div>
     );
