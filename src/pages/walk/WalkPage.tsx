@@ -83,14 +83,15 @@ export function WalkPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6">
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
-        <WalkMap
-          boundaries={boundaries}
-          draftCenter={draftCenter}
-          draftRadius={radius}
-          onMapClick={(lat, lng) => setDraftCenter({ lat, lng })}
-        />
+    // 헤더(h-14) 아래로 전체 폭을 채우는 네이버 지도 스타일 레이아웃
+    // (main의 max-w-5xl·padding을 벗어나기 위해 full-bleed 처리)
+    <div className="relative left-1/2 -my-6 flex h-[calc(100vh-3.5rem)] w-screen -translate-x-1/2 overflow-hidden bg-white">
+      {/* 왼쪽 사이드바 — 울타리 설정 (추후 산책 활동 섹션 추가 예정) */}
+      <aside className="flex w-[380px] shrink-0 flex-col overflow-y-auto border-r border-neutral-200 bg-white">
+        <div className="border-b border-neutral-200 px-5 py-4">
+          <h1 className="text-lg font-bold text-neutral-900">산책</h1>
+          <p className="mt-0.5 text-xs text-neutral-500">반려동물 안전 울타리를 설정하세요.</p>
+        </div>
         <FenceControlPanel
           pets={pets}
           selectedPetId={selectedPetId}
@@ -105,6 +106,16 @@ export function WalkPage() {
           onUpdate={handleUpdate}
           onToggle={handleToggle}
           isSubmitting={isSubmitting}
+        />
+      </aside>
+
+      {/* 오른쪽 지도 영역 */}
+      <div className="relative flex-1">
+        <WalkMap
+          boundaries={boundaries}
+          draftCenter={draftCenter}
+          draftRadius={radius}
+          onMapClick={(lat, lng) => setDraftCenter({ lat, lng })}
         />
       </div>
     </div>

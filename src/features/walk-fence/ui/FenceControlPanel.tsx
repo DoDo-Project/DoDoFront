@@ -42,8 +42,8 @@ export function FenceControlPanel({
   const selectedPet = pets.find((pet) => pet.petId === selectedPetId) ?? null;
 
   return (
-    <aside className="flex flex-col gap-5 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm">
-      <h2 className="text-base font-semibold text-neutral-900">울타리 설정</h2>
+    <div className="flex flex-col gap-5 p-5">
+      <h2 className="text-sm font-semibold text-neutral-900">울타리 설정</h2>
 
       {/* 펫 선택 */}
       <div>
@@ -87,20 +87,18 @@ export function FenceControlPanel({
                 : ' (아직 미지정)'}
           </p>
 
-          {/* 이름 (생성 모드에서만) */}
-          {!existingFence && (
-            <label className="flex flex-col gap-1.5">
-              <span className="text-sm font-medium text-neutral-700">울타리 이름</span>
-              <input
-                type="text"
-                value={fenceName}
-                maxLength={255}
-                onChange={(event) => onFenceNameChange(event.target.value)}
-                placeholder="예: 집 주변 울타리"
-                className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
-              />
-            </label>
-          )}
+          {/* 이름 (생성/수정 공통) */}
+          <label className="flex flex-col gap-1.5">
+            <span className="text-sm font-medium text-neutral-700">울타리 이름</span>
+            <input
+              type="text"
+              value={fenceName}
+              maxLength={255}
+              onChange={(event) => onFenceNameChange(event.target.value)}
+              placeholder="예: 집 주변 울타리"
+              className="rounded-lg border border-neutral-300 px-3 py-2 text-sm outline-none focus:border-brand"
+            />
+          </label>
 
           {/* 반경 */}
           <label className="flex flex-col gap-1.5">
@@ -125,19 +123,20 @@ export function FenceControlPanel({
                 </span>
                 <button
                   type="button"
+                  role="switch"
                   onClick={onToggle}
                   disabled={isSubmitting}
                   className={[
-                    'relative h-6 w-11 rounded-full transition-colors disabled:opacity-50',
+                    'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:opacity-50',
                     existingFence.isActive ? 'bg-brand' : 'bg-neutral-300',
                   ].join(' ')}
-                  aria-pressed={existingFence.isActive}
+                  aria-checked={existingFence.isActive}
                   aria-label="울타리 켜기/끄기"
                 >
                   <span
                     className={[
-                      'absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform',
-                      existingFence.isActive ? 'translate-x-5' : 'translate-x-0.5',
+                      'inline-block h-5 w-5 rounded-full bg-white shadow transition-transform',
+                      existingFence.isActive ? 'translate-x-[22px]' : 'translate-x-0.5',
                     ].join(' ')}
                   />
                 </button>
@@ -163,6 +162,6 @@ export function FenceControlPanel({
           )}
         </>
       )}
-    </aside>
+    </div>
   );
 }

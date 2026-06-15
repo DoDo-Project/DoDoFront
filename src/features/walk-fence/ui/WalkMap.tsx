@@ -22,10 +22,21 @@ interface WalkMapProps {
 
 const DEFAULT_CENTER = { lat: 37.5796, lng: 126.977 }; // 경복궁
 
+// HTML 마커에 펫 이름을 넣기 전 간단한 이스케이프 (XSS 방지)
+function escapeHtml(text: string): string {
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function petLabelContent(name: string, isActive: boolean): string {
+  const color = isActive ? '#16a34a' : '#6b7280';
+  return `<div style="transform:translate(-50%,-50%);white-space:nowrap;background:#fff;border:1px solid ${color};border-radius:9999px;padding:2px 8px;font-size:12px;font-weight:600;color:${color};box-shadow:0 1px 2px rgba(0,0,0,.12)">${escapeHtml(name)}</div>`;
+}
+
 export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick }: WalkMapProps) {
   const mapElementRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<naver.maps.Map | null>(null);
   const circlesRef = useRef<naver.maps.Circle[]>([]); // 기존 울타리 원들
+  const markersRef = useRef<naver.maps.Marker[]>([]); // 펫 이름 라벨들
   const draftCircleRef = useRef<naver.maps.Circle | null>(null); // 미리보기 원
   const onMapClickRef = useRef(onMapClick); // 항상 최신 콜백 보관
   const [isMapReady, setIsMapReady] = useState(false);
@@ -68,18 +79,23 @@ export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick }: Wa
     };
   }, []);
 
-  // 2. 기존 울타리 원 그리기 (데이터 바뀔 때마다)
+  // 2. 기존 울타리 원 + 펫 이름 라벨 그리기 (데이터 바뀔 때마다)
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!isMapReady || !map) return;
 
+    // 이전 원/라벨 제거
     circlesRef.current.forEach((circle) => circle.setMap(null));
     circlesRef.current = [];
+    markersRef.current.forEach((marker) => marker.setMap(null));
+    markersRef.current = [];
 
     boundaries.forEach((fence) => {
+      const center = new naver.maps.LatLng(fence.center.latitude, fence.center.longitude);
+
       const circle = new naver.maps.Circle({
         map,
-        center: new naver.maps.LatLng(fence.center.latitude, fence.center.longitude),
+        center,
         radius: fence.radius,
         strokeColor: fence.isActive ? '#22c55e' : '#9ca3af', // 활성=초록, 비활성=회색
         strokeWeight: 2,
@@ -87,6 +103,17 @@ export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick }: Wa
         fillOpacity: 0.15,
       });
       circlesRef.current.push(circle);
+
+      // 울타리 중심에 펫 이름 라벨
+      const marker = new naver.maps.Marker({
+        map,
+        position: center,
+        icon: {
+          content: petLabelContent(fence.petName, fence.isActive),
+          anchor: new naver.maps.Point(0, 0),
+        },
+      });
+      markersRef.current.push(marker);
     });
   }, [isMapReady, boundaries]);
 
@@ -126,11 +153,9 @@ export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick }: Wa
 
   if (error) {
     return (
-      <div className="flex h-[500px] w-full items-center justify-center rounded-2xl bg-red-50 p-6 text-sm text-red-500">
-        {error}
-      </div>
+      <div className="flex h-full w-full items-center justify-center bg-red-50 p-6 text-sm text-red-500">{error}</div>
     );
   }
 
-  return <div ref={mapElementRef} className="h-[500px] w-full overflow-hidden rounded-2xl" />;
+  return <div ref={mapElementRef} className="h-full w-full" />;
 }

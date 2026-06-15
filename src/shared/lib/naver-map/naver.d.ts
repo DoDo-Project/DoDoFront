@@ -47,6 +47,29 @@ declare namespace naver.maps {
     setCenter(center: LatLng): void;
     setRadius(radius: number): void;
   }
+
+  class Point {
+    constructor(x: number, y: number);
+  }
+
+  interface MarkerIcon {
+    content: string;
+    anchor?: Point;
+  }
+
+  interface MarkerOptions {
+    map?: Map;
+    position: LatLng;
+    icon?: MarkerIcon | string;
+    title?: string;
+    clickable?: boolean;
+  }
+
+  class Marker {
+    constructor(options: MarkerOptions);
+    setMap(map: Map | null): void;
+    setPosition(position: LatLng): void;
+  }
 }
 
 // window.naver 로 접근할 수 있게 augment
