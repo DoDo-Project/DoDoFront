@@ -18,6 +18,8 @@ interface WalkMapProps {
   draftRadius: number;
   /** 지도 클릭 시 좌표 콜백 */
   onMapClick: (lat: number, lng: number) => void;
+  /** 실시간 펫 위치 (없으면 마커 숨김) */
+  livePosition: { lat: number; lng: number; insideFence: boolean } | null;
 }
 
 const DEFAULT_CENTER = { lat: 37.5796, lng: 126.977 }; // 경복궁
@@ -32,12 +34,19 @@ function petLabelContent(name: string, isActive: boolean): string {
   return `<div style="transform:translate(-50%,-50%);white-space:nowrap;background:#fff;border:1px solid ${color};border-radius:9999px;padding:2px 8px;font-size:12px;font-weight:600;color:${color};box-shadow:0 1px 2px rgba(0,0,0,.12)">${escapeHtml(name)}</div>`;
 }
 
-export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick }: WalkMapProps) {
+// 실시간 위치 점 마커 (울타리 안=초록, 밖=빨강)
+function liveMarkerContent(insideFence: boolean): string {
+  const color = insideFence ? '#22c55e' : '#ef4444';
+  return `<div style="transform:translate(-50%,-50%);width:16px;height:16px;border-radius:9999px;background:${color};border:3px solid #fff;box-shadow:0 0 0 5px ${color}33"></div>`;
+}
+
+export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick, livePosition }: WalkMapProps) {
   const mapElementRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<naver.maps.Map | null>(null);
   const circlesRef = useRef<naver.maps.Circle[]>([]); // 기존 울타리 원들
   const markersRef = useRef<naver.maps.Marker[]>([]); // 펫 이름 라벨들
   const draftCircleRef = useRef<naver.maps.Circle | null>(null); // 미리보기 원
+  const liveMarkerRef = useRef<naver.maps.Marker | null>(null); // 실시간 위치 마커
   const onMapClickRef = useRef(onMapClick); // 항상 최신 콜백 보관
   const [isMapReady, setIsMapReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -150,6 +159,27 @@ export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick }: Wa
 
     map.setCenter(center);
   }, [isMapReady, draftCenter, draftRadius]);
+
+  // 4. 실시간 펫 위치 마커 (위치 올 때마다 갱신)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!isMapReady || !map) return;
+
+    // 이전 마커 제거 후 다시 그림 (마커 1개라 부담 없음)
+    liveMarkerRef.current?.setMap(null);
+    liveMarkerRef.current = null;
+
+    if (!livePosition) return;
+
+    liveMarkerRef.current = new naver.maps.Marker({
+      map,
+      position: new naver.maps.LatLng(livePosition.lat, livePosition.lng),
+      icon: {
+        content: liveMarkerContent(livePosition.insideFence),
+        anchor: new naver.maps.Point(0, 0),
+      },
+    });
+  }, [isMapReady, livePosition]);
 
   if (error) {
     return (

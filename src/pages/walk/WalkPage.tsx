@@ -6,6 +6,7 @@ import {
   WalkMap,
   useCreateFence,
   useFenceBoundaries,
+  useLiveLocation,
   useToggleFence,
   useUpdateFenceRange,
 } from '@/features/walk-fence';
@@ -84,6 +85,14 @@ export function WalkPage() {
     });
   };
 
+  // 선택한 펫의 실시간 위치 구독
+  const { location: liveLocation } = useLiveLocation(selectedPetId);
+  const selectedPetName = pets.find((pet) => pet.petId === selectedPetId)?.petName ?? '반려동물';
+
+  // 울타리가 켜져 있고 + 실제로 벗어났을 때만 이탈로 간주
+  const fenceActive = existingFence?.isActive ?? false;
+  const isOutsideFence = !!liveLocation && fenceActive && !liveLocation.insideFence;
+
   return (
     // 네이버 지도 스타일: 지도가 화면 전체, 그 위에 둥근 레일 + 패널이 떠 있음
     <div className="relative h-screen bg-neutral-100">
@@ -94,8 +103,20 @@ export function WalkPage() {
           draftCenter={draftCenter}
           draftRadius={radius}
           onMapClick={(lat, lng) => setDraftCenter({ lat, lng })}
+          livePosition={
+            liveLocation
+              ? { lat: liveLocation.latitude, lng: liveLocation.longitude, insideFence: !isOutsideFence }
+              : null
+          }
         />
       </div>
+
+      {/* 울타리 이탈 알림 배너 (울타리 켜진 경우에만) */}
+      {liveLocation && isOutsideFence && (
+        <div className="absolute left-1/2 top-4 z-20 -translate-x-1/2 rounded-full bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-lg">
+          ⚠️ {selectedPetName}이(가) 울타리를 벗어났어요! (약 {Math.round(liveLocation.distanceMeter)}m)
+        </div>
+      )}
 
       {/* 좌측 플로팅: 세로 레일 + 울타리 패널 */}
       <div className="absolute inset-y-3 left-3 z-10 flex gap-3">
