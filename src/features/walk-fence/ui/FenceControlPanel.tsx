@@ -144,7 +144,7 @@ export function FenceControlPanel({
               <button
                 type="button"
                 onClick={onUpdate}
-                disabled={isSubmitting}
+                disabled={isSubmitting || fenceName.trim().length === 0}
                 className="inline-flex min-h-11 items-center justify-center rounded-xl bg-brand px-5 text-sm font-semibold text-brand-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
               >
                 울타리 수정 저장

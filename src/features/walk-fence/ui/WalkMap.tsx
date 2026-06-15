@@ -156,9 +156,14 @@ export function WalkMap({ boundaries, draftCenter, draftRadius, onMapClick, live
         fillOpacity: 0.12,
       });
     }
-
-    map.setCenter(center);
   }, [isMapReady, draftCenter, draftRadius]);
+
+  // 3-1. 지도 중심 이동은 draftCenter가 바뀔 때만 (반경 조절 시 스냅 방지)
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!isMapReady || !map || !draftCenter) return;
+    map.setCenter(new naver.maps.LatLng(draftCenter.lat, draftCenter.lng));
+  }, [isMapReady, draftCenter]);
 
   // 4. 실시간 펫 위치 마커 (위치 올 때마다 갱신)
   useEffect(() => {

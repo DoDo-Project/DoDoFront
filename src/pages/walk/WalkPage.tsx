@@ -55,26 +55,36 @@ export function WalkPage() {
 
   const handleCreate = () => {
     if (selectedPetId == null || !draftCenter) return;
-    createFence.mutate({
-      petId: selectedPetId,
-      centerLatitude: draftCenter.lat,
-      centerLongitude: draftCenter.lng,
-      radius,
-      fenceName: fenceName.trim(),
-    });
+    createFence.mutate(
+      {
+        petId: selectedPetId,
+        centerLatitude: draftCenter.lat,
+        centerLongitude: draftCenter.lng,
+        radius,
+        fenceName: fenceName.trim(),
+      },
+      {
+        onSuccess: () => setDraftCenter(null), // 저장 후 미리보기 원 제거
+      },
+    );
   };
 
   const handleUpdate = () => {
     if (!existingFence) return;
-    updateFenceRange.mutate({
-      fenceId: existingFence.fenceId,
-      payload: {
-        centerLatitude: draftCenter?.lat ?? existingFence.center.latitude,
-        centerLongitude: draftCenter?.lng ?? existingFence.center.longitude,
-        radius,
-        fenceName: fenceName.trim() || existingFence.fenceName,
+    updateFenceRange.mutate(
+      {
+        fenceId: existingFence.fenceId,
+        payload: {
+          centerLatitude: draftCenter?.lat ?? existingFence.center.latitude,
+          centerLongitude: draftCenter?.lng ?? existingFence.center.longitude,
+          radius,
+          fenceName: fenceName.trim() || existingFence.fenceName,
+        },
       },
-    });
+      {
+        onSuccess: () => setDraftCenter(null), // 저장 후 미리보기 원 제거
+      },
+    );
   };
 
   const handleToggle = () => {
