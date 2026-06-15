@@ -1,4 +1,7 @@
 export const queryKeys = {
+  main: {
+    home: () => ['main', 'home'] as const,
+  },
   boards: {
     list: (params?: { page?: number; size?: number }) =>
       ['boards', 'list', params?.page ?? 0, params?.size ?? 12] as const,

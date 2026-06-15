@@ -12,7 +12,7 @@ export type QuickLinkItem = {
   Icon: ComponentType<SVGProps<SVGSVGElement>>;
 };
 
-/** 홈 화면 바로가기 메뉴(정적 네비게이션 설정, API 데이터 아님) */
+/** 메인 화면 바로가기 메뉴(정적 내비게이션, API 데이터 아님) */
 export const QUICK_LINKS: QuickLinkItem[] = [
   { id: 'pet', label: '나의 반려동물', to: '/my', Icon: PetIcon },
   { id: 'walk', label: '산책 기록', to: '/walk', Icon: WalkIcon },
