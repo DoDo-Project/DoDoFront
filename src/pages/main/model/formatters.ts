@@ -3,12 +3,6 @@ const SPECIES_LABEL: Record<string, string> = {
   FELINE: '고양이',
 };
 
-const SEX_LABEL: Record<string, string> = {
-  MALE: '남아',
-  FEMALE: '여아',
-  NEUTER: '중성화',
-};
-
 export function getMainPetSpecies(profile: { species?: string; spercies?: string }) {
   return profile.species ?? profile.spercies ?? '';
 }
@@ -17,13 +11,10 @@ export function formatSpeciesLabel(species: string) {
   return SPECIES_LABEL[species] ?? species;
 }
 
-export function formatSexLabel(sex: string) {
-  return SEX_LABEL[sex] ?? sex;
-}
-
 export function formatWeightLabel(weight: number) {
   if (!Number.isFinite(weight)) return '-';
-  return `${weight.toFixed(1)}kg`;
+  if (Number.isInteger(weight)) return `${weight} kg`;
+  return `${weight.toFixed(1)} kg`;
 }
 
 export function formatDateLabel(value: string) {
@@ -55,4 +46,23 @@ export function summarizeContent(value: string, maxLength = 140) {
   }
 
   return `${normalized.slice(0, maxLength).trimEnd()}...`;
+}
+
+interface ParsedHealthReportContent {
+  recommendations?: unknown;
+}
+
+export function extractHealthReportRecommendations(content: string): string[] {
+  if (!content.trim()) return [];
+
+  try {
+    const parsed = JSON.parse(content) as ParsedHealthReportContent;
+    if (!Array.isArray(parsed.recommendations)) {
+      return [];
+    }
+
+    return parsed.recommendations.filter((item): item is string => typeof item === 'string' && item.trim().length > 0);
+  } catch {
+    return [];
+  }
 }
