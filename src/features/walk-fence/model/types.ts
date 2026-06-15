@@ -65,3 +65,24 @@ export interface FenceBoundariesResponse {
   message: string;
   boundaries: FenceBoundary[];
 }
+
+// 실시간 위치 업데이트 WebSocket 메시지 타입
+/** 실시간 위치 메시지의 payload (서버가 울타리 판정까지 해서 보냄) */
+export interface LiveLocationPayload {
+  petId: number;
+  latitude: number;
+  longitude: number;
+  measuredAt: string;
+  /** 울타리 안에 있는지 (서버 판정) */
+  insideFence: boolean;
+  /** 울타리 중심에서의 거리(미터) */
+  distanceMeter: number;
+  radius: number;
+  message: string;
+}
+
+/** WebSocket 수신 메시지 (payload가 한 겹 감싸져 있음) */
+export interface LiveLocationMessage {
+  type: string;
+  payload: LiveLocationPayload;
+}

@@ -21,6 +21,8 @@ export type {
   FenceCenter,
   FenceMessageResponse,
   FenceStatusResponse,
+  LiveLocationMessage, // 실시간 위치 업데이트 서버 메세지 전체 받기
+  LiveLocationPayload, // 실시간 위치 업데이트 서버 메세지 중 payload 부분
   ToggleFenceRequest,
   UpdateFenceRangeRequest,
 } from './model/types';
