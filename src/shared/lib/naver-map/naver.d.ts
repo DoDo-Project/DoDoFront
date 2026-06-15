@@ -15,6 +15,25 @@ declare namespace naver.maps {
     setZoom(zoom: number): void;
     destroy(): void;
   }
+
+  interface CircleOptions {
+    map?: Map;
+    center: LatLng;
+    /** 반경(미터) */
+    radius: number;
+    strokeColor?: string;
+    strokeWeight?: number;
+    strokeOpacity?: number;
+    fillColor?: string;
+    fillOpacity?: number;
+  }
+
+  class Circle {
+    constructor(options: CircleOptions);
+    setMap(map: Map | null): void;
+    setCenter(center: LatLng): void;
+    setRadius(radius: number): void;
+  }
 }
 
 // window.naver 로 접근할 수 있게 augment
