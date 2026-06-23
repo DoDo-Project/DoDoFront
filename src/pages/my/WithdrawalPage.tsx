@@ -1,9 +1,35 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { WithdrawalFlow } from '@/pages/my/ui/WithdrawalFlow';
+import { clearTokens } from '@/shared/lib/auth/token';
+
 export function WithdrawalPage() {
+  const [completed, setCompleted] = useState(false);
+
+  const handleCompleted = () => {
+    setCompleted(true);
+    clearTokens();
+  };
+
+  // TODO(Step 6): 탈퇴 완료 화면을 회원가입 완료 화면과 대칭으로 구현
+  if (completed) {
+    return (
+      <div className="mx-auto w-full max-w-xl px-4 py-10 text-center sm:py-14">
+        <h1 className="text-[20px] font-semibold text-neutral-950">회원 탈퇴가 완료되었어요.</h1>
+        <Link
+          to="/"
+          className="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-brand px-6 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
+        >
+          홈으로
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-10 sm:py-14">
-      <div className="mb-6">
+      <div className="mb-2">
         <Link
           to="/my?menu=profile-edit"
           className="text-sm text-neutral-500 underline-offset-2 hover:text-brand hover:underline"
@@ -14,15 +40,15 @@ export function WithdrawalPage() {
 
       <div className="overflow-hidden rounded-[24px] border border-neutral-200 bg-white shadow-sm">
         <div className="border-b border-neutral-100 px-6 py-6 sm:px-8">
-          <p className="text-xs font-semibold tracking-[0.24em] text-red-500">WITHDRAWAL</p>
-          <h1 className="mt-2 text-[20px] font-semibold tracking-[-0.02em] text-neutral-950">회원 탈퇴</h1>
+          <h1 className="text-[20px] font-semibold tracking-[-0.02em] text-neutral-950">회원 탈퇴</h1>
           <p className="mt-2 text-sm leading-7 text-neutral-600">
             탈퇴를 진행하려면 본인 확인이 필요해요. 가입하신 이메일로 인증번호를 보내드릴게요.
           </p>
+          {/* <p className="text-sm leading-7 text-red-500">탈퇴 시 계정과 모든 데이터가 삭제되며 되돌릴 수 없어요.</p> */}
         </div>
 
         <div className="px-6 py-6 sm:px-8">
-          {/* TODO(Step 5): 인증 메일 발송 → 6자리 인증번호 입력 → 최종 탈퇴 플로우 */}
+          <WithdrawalFlow onCompleted={handleCompleted} />
         </div>
       </div>
     </div>
