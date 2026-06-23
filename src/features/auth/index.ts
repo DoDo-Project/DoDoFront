@@ -19,8 +19,8 @@ export {
 export type { AuthErrorPresentation, AuthClientErrorCode, AuthErrorContext } from './lib/authErrorPresentation';
 export { AuthLoadingScreen } from './ui/status/AuthLoadingScreen';
 export { AuthErrorScreen } from './ui/status/AuthErrorScreen';
-export { socialLogin, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
-export { getMyProfile, updateMyProfile } from './api/users';
+export { socialLogin, logout, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
+export { getMyProfile, updateMyProfile, sendWithdrawalEmail, withdrawUser } from './api/users';
 export { useCreatePet } from './model/useCreatePet';
 export { useCreatePetInvitationCode } from './model/useCreatePetInvitationCode';
 export { useCreatePetSpecialNote } from './model/useCreatePetSpecialNote';
@@ -29,6 +29,9 @@ export { useFamilyApplications } from './model/useFamilyApplications';
 export { useFamilyBlockedUsers } from './model/useFamilyBlockedUsers';
 export { useFamilyPendingUsers } from './model/useFamilyPendingUsers';
 export { useCurrentUser } from './model/useCurrentUser';
+export { useLogout } from './model/useLogout';
+export { useSendWithdrawalEmail } from './model/useSendWithdrawalEmail';
+export { useWithdrawUser } from './model/useWithdrawUser';
 export { useApprovePetFamilyRequest } from './model/useApprovePetFamilyRequest';
 export { useDeletePetWeight } from './model/useDeletePetWeight';
 export { useDeletePetSpecialNote } from './model/useDeletePetSpecialNote';
@@ -50,6 +53,8 @@ export type {
   SocialLoginSuccess,
   SocialSignupRequired,
   SocialLoginResult,
+  LogoutRequest,
+  LogoutResponse,
   CreatePetRequest,
   CreatePetResponse,
   CreatePetSpecialNoteRequest,
@@ -78,6 +83,9 @@ export type {
   NotificationUpdateResponse,
   UpdateMyProfileRequest,
   UpdateMyProfileResponse,
+  WithdrawalEmailResponse,
+  WithdrawUserRequest,
+  WithdrawUserResponse,
   PetDetailResponse,
   PetFamilyApprovalAction,
   PetFamilyApprovalRequest,
@@ -102,8 +110,11 @@ export type {
 export { getApiErrorMessage, getErrorBodyMessage } from '@/shared/lib/api/errorMessage';
 export {
   SOCIAL_LOGIN_STATUS_MESSAGES,
+  LOGOUT_STATUS_MESSAGES,
   REGISTER_PROFILE_STATUS_MESSAGES,
   NOTIFICATION_SETTING_STATUS_MESSAGES,
   PROFILE_UPDATE_STATUS_MESSAGES,
   NICKNAME_CHECK_STATUS_MESSAGES,
+  WITHDRAWAL_EMAIL_STATUS_MESSAGES,
+  WITHDRAW_USER_STATUS_MESSAGES,
 } from './lib/apiErrorMessages';

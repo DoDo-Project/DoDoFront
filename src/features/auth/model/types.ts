@@ -22,6 +22,17 @@ export interface TokenReissueResponse {
   accessTokenExpiresIn: number;
 }
 
+// ---- 로그아웃 (POST /auth/logout) ----
+
+export interface LogoutRequest {
+  /** 삭제할 리프레시 토큰 */
+  refreshToken: string;
+}
+
+export interface LogoutResponse {
+  message: string;
+}
+
 // ---- 소셜 로그인 (POST /auth/social-login) ----
 
 export interface SocialLoginRequest {
@@ -406,6 +417,23 @@ export interface UpdateMyProfileResponse {
   profileUrl: string;
   notificationEnabled: boolean;
   userCreatedAt: string;
+}
+
+// ---- 회원 탈퇴 ----
+
+/** 탈퇴 인증 메일 발송 (POST /users/me/withdrawal/email) */
+export interface WithdrawalEmailResponse {
+  message: string;
+}
+
+/** 최종 회원 탈퇴 (DELETE /users/me) */
+export interface WithdrawUserRequest {
+  /** 메일로 받은 6자리 인증번호 */
+  authCode: string;
+}
+
+export interface WithdrawUserResponse {
+  message: string;
 }
 
 export interface UserProfile {

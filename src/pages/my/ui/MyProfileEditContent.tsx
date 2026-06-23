@@ -1,4 +1,5 @@
 import { type ChangeEvent, type ReactNode, useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 import profileDefaultIllustration from '@/features/auth/assets/profile-default.svg';
 import { PROFILE_UPDATE_STATUS_MESSAGES, getApiErrorMessage, updateMyProfile, type UserProfile } from '@/features/auth';
@@ -319,6 +320,23 @@ export function MyProfileEditContent({ user, isLoading = false }: MyProfileEditC
           {saving ? '수정 중...' : '변경사항 저장'}
         </button>
       </div>
+
+      <section className="mt-2 border-t border-neutral-200 pt-6">
+        <div className="flex flex-col gap-4 rounded-[20px] border border-neutral-200 bg-neutral-50/70 px-5 py-5 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <p className="text-sm font-medium text-neutral-800">회원 탈퇴</p>
+            <p className="mt-1 text-sm leading-6 text-neutral-500">
+              탈퇴하면 계정과 모든 데이터가 삭제되며 되돌릴 수 없어요.
+            </p>
+          </div>
+          <Link
+            to="/my/withdrawal"
+            className="inline-flex h-10 shrink-0 items-center justify-center self-start rounded-xl border border-neutral-300 bg-white px-4 text-sm font-medium text-neutral-600 transition-colors hover:border-red-300 hover:text-red-500 sm:self-auto"
+          >
+            회원 탈퇴
+          </Link>
+        </div>
+      </section>
 
       <RegionSelectModal
         open={regionModalOpen}

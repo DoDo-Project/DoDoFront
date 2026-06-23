@@ -20,6 +20,7 @@ import { NotificationSettingsPage } from '@/pages/my/NotificationSettingsPage';
 import { PetRegistrationPage } from '@/pages/my/PetRegistrationPage';
 import { PetSpecialNotesPage } from '@/pages/my/PetSpecialNotesPage';
 import { PetWeightPage } from '@/pages/my/PetWeightPage';
+import { WithdrawalPage } from '@/pages/my/WithdrawalPage';
 import { NotFoundPage } from '@/pages/not-found/NotFoundPage';
 import { WalkPage } from '@/pages/walk/WalkPage';
 
@@ -75,6 +76,14 @@ export const router = createBrowserRouter([
         element: (
           <RequireAuth>
             <NotificationSettingsPage />
+          </RequireAuth>
+        ),
+      },
+      {
+        path: '/my/withdrawal',
+        element: (
+          <RequireAuth>
+            <WithdrawalPage />
           </RequireAuth>
         ),
       },
