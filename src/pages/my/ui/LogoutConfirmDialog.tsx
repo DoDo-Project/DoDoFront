@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { LOGOUT_STATUS_MESSAGES, getApiErrorMessage, useLogout } from '@/features/auth';
+import { useLogout } from '@/features/auth';
 import { clearTokens } from '@/shared/lib/auth/token';
 import { Modal } from '@/shared/ui';
 
@@ -13,27 +12,23 @@ interface LogoutConfirmDialogProps {
 export function LogoutConfirmDialog({ open, onClose }: LogoutConfirmDialogProps) {
   const navigate = useNavigate();
   const { mutateAsync, isPending } = useLogout();
-  const [errorMessage, setErrorMessage] = useState('');
 
   const handleClose = () => {
     if (isPending) return;
-    setErrorMessage('');
     onClose();
   };
 
   const handleConfirm = async () => {
-    setErrorMessage('');
-
     try {
       await mutateAsync();
+    } catch (error) {
+      // 서버 로그아웃이 실패해도 로컬 세션은 반드시 정리해 사용자가 갇히지 않도록 한다.
+      console.error('[auth/logout] 서버 로그아웃 실패', error);
+    } finally {
       // 인증 페이지(마이도도)에서 먼저 빠져나간 뒤 토큰을 정리해야
       // 잔여 인증 쿼리의 재요청 → 401 → 세션 만료 리다이렉트를 피할 수 있다.
       navigate('/', { replace: true });
       clearTokens();
-    } catch (error) {
-      setErrorMessage(
-        getApiErrorMessage(error, '로그아웃에 실패했어요. 잠시 후 다시 시도해주세요.', LOGOUT_STATUS_MESSAGES),
-      );
     }
   };
 
@@ -45,8 +40,6 @@ export function LogoutConfirmDialog({ open, onClose }: LogoutConfirmDialogProps)
         <p className="mt-3 text-sm leading-7 text-neutral-600">
           로그아웃하면 현재 기기에서 로그인 정보가 정리돼요. 다시 이용하려면 로그인이 필요해요.
         </p>
-
-        {errorMessage ? <p className="mt-4 text-sm text-red-500">{errorMessage}</p> : null}
 
         <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
           <button
