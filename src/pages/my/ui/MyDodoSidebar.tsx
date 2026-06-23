@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 import {
@@ -7,6 +8,7 @@ import {
   type MyDodoMenuKey,
   type MyDodoMenuSection,
 } from '@/pages/my/model/menu';
+import { LogoutConfirmDialog } from '@/pages/my/ui/LogoutConfirmDialog';
 
 interface MyDodoSidebarProps {
   activeKey: MyDodoMenuKey;
@@ -21,30 +23,48 @@ function menuItemClass(active: boolean) {
   ].join(' ');
 }
 
-function SidebarSection({ section, activeKey }: { section: MyDodoMenuSection; activeKey: MyDodoMenuKey }) {
+function SidebarSection({
+  section,
+  activeKey,
+  onLogout,
+}: {
+  section: MyDodoMenuSection;
+  activeKey: MyDodoMenuKey;
+  onLogout: () => void;
+}) {
   const items = MY_DODO_MENU_ITEMS.filter((item) => item.section === section);
 
   return (
     <section>
       <h3 className="text-lg font-semibold text-neutral-900">{MY_DODO_SECTION_LABELS[section]}</h3>
       <div className="mt-4 flex flex-col gap-3">
-        {items.map((item) => (
-          <Link key={item.key} to={getMyDodoMenuHref(item.key)} className={menuItemClass(item.key === activeKey)}>
-            {item.label}
-          </Link>
-        ))}
+        {items.map((item) =>
+          item.type === 'action' ? (
+            <button key={item.key} type="button" onClick={onLogout} className={menuItemClass(false)}>
+              {item.label}
+            </button>
+          ) : (
+            <Link key={item.key} to={getMyDodoMenuHref(item.key)} className={menuItemClass(item.key === activeKey)}>
+              {item.label}
+            </Link>
+          ),
+        )}
       </div>
     </section>
   );
 }
 
 export function MyDodoSidebar({ activeKey }: MyDodoSidebarProps) {
+  const [logoutOpen, setLogoutOpen] = useState(false);
+
   return (
     <div className="mt-6 border-t border-neutral-200/80 pt-6">
       <div className="flex flex-col gap-8">
-        <SidebarSection section="pet" activeKey={activeKey} />
-        <SidebarSection section="account" activeKey={activeKey} />
+        <SidebarSection section="pet" activeKey={activeKey} onLogout={() => setLogoutOpen(true)} />
+        <SidebarSection section="account" activeKey={activeKey} onLogout={() => setLogoutOpen(true)} />
       </div>
+
+      <LogoutConfirmDialog open={logoutOpen} onClose={() => setLogoutOpen(false)} />
     </div>
   );
 }

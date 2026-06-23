@@ -2,6 +2,7 @@
 import { apiClient } from '@/shared/api/axios';
 
 import type {
+  LogoutResponse,
   NicknameCheckResponse,
   NotificationUpdateResponse,
   RegisterProfileRequest,
@@ -33,6 +34,16 @@ export async function socialLogin(provider: SocialProvider, code: string): Promi
   }
 
   return { kind: 'LOGIN', data: response.data as SocialLoginSuccess };
+}
+
+/**
+ * 로그아웃 (POST /auth/logout)
+ * - refreshToken 삭제 + accessToken 블랙리스트 처리
+ * - accessToken은 apiClient 인터셉터가 Authorization 헤더로 자동 첨부
+ */
+export async function logout(refreshToken: string): Promise<LogoutResponse> {
+  const response = await apiClient.post<LogoutResponse>('/auth/logout', { refreshToken });
+  return response.data;
 }
 
 /**
