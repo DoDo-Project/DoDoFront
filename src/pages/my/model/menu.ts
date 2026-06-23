@@ -10,10 +10,14 @@ export type MyDodoMenuKey =
   | 'notifications'
   | 'logout';
 
+/** link: 콘텐츠 패널/페이지로 이동, action: 클릭 시 동작(모달 등) 실행 */
+export type MyDodoMenuType = 'link' | 'action';
+
 export interface MyDodoMenuItem {
   key: MyDodoMenuKey;
   label: string;
   section: MyDodoMenuSection;
+  type: MyDodoMenuType;
 }
 
 export interface MyDodoContent {
@@ -31,14 +35,14 @@ export const MY_DODO_SECTION_LABELS: Record<MyDodoMenuSection, string> = {
 };
 
 export const MY_DODO_MENU_ITEMS: MyDodoMenuItem[] = [
-  { key: 'pet-list', label: '반려동물 리스트', section: 'pet' },
-  { key: 'device', label: '디바이스 관리', section: 'pet' },
-  { key: 'family', label: '가족 관리', section: 'pet' },
-  { key: 'walk-history', label: '산책 기록', section: 'pet' },
-  { key: 'ai-report', label: 'AI 레포트', section: 'pet' },
-  { key: 'profile-edit', label: '회원정보 수정', section: 'account' },
-  { key: 'notifications', label: '알림함', section: 'account' },
-  { key: 'logout', label: '로그아웃', section: 'account' },
+  { key: 'pet-list', label: '반려동물 리스트', section: 'pet', type: 'link' },
+  { key: 'device', label: '디바이스 관리', section: 'pet', type: 'link' },
+  { key: 'family', label: '가족 관리', section: 'pet', type: 'link' },
+  { key: 'walk-history', label: '산책 기록', section: 'pet', type: 'link' },
+  { key: 'ai-report', label: 'AI 레포트', section: 'pet', type: 'link' },
+  { key: 'profile-edit', label: '회원정보 수정', section: 'account', type: 'link' },
+  { key: 'notifications', label: '알림함', section: 'account', type: 'link' },
+  { key: 'logout', label: '로그아웃', section: 'account', type: 'action' },
 ];
 
 export const MY_DODO_CONTENT_BY_KEY: Record<MyDodoMenuKey, MyDodoContent> = {
