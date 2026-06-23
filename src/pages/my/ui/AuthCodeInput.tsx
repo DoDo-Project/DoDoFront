@@ -78,6 +78,13 @@ export function AuthCodeInput({ length, value, onChange, disabled = false }: Aut
           disabled={disabled}
           onChange={(event) => handleChange(index, event.target.value)}
           onKeyDown={(event) => handleKeyDown(index, event)}
+          onFocus={() => {
+            // 빈 슬롯보다 뒤쪽 칸을 클릭하면 첫 번째 빈 슬롯으로 포커스를 당겨 입력 순서를 맞춘다.
+            const firstEmptyIndex = value.length;
+            if (index > firstEmptyIndex) {
+              focusInput(firstEmptyIndex);
+            }
+          }}
           className="h-20 w-full rounded-xl border border-neutral-200 bg-white text-center text-2xl font-semibold text-neutral-900 outline-none transition-colors focus:border-brand disabled:bg-neutral-50 disabled:opacity-60"
         />
       ))}
