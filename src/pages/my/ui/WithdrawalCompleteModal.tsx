@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 
 import DoDoLogo from '@/shared/assets/images/Logo_light.svg?react';
+import { clearTokens } from '@/shared/lib/auth/token';
 import { Modal } from '@/shared/ui';
 
 interface WithdrawalCompleteModalProps {
@@ -9,7 +10,12 @@ interface WithdrawalCompleteModalProps {
 
 export function WithdrawalCompleteModal({ open }: WithdrawalCompleteModalProps) {
   const navigate = useNavigate();
-  const goHome = () => navigate('/', { replace: true });
+
+  // 홈으로 떠나는 시점에 토큰을 정리한다. (먼저 보호 페이지를 벗어난 뒤 세션 정리)
+  const goHome = () => {
+    navigate('/', { replace: true });
+    clearTokens();
+  };
 
   return (
     <Modal open={open} onClose={goHome} ariaLabel="회원 탈퇴 완료">

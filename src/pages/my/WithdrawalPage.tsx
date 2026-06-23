@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 
 import { WithdrawalCompleteModal } from '@/pages/my/ui/WithdrawalCompleteModal';
 import { WithdrawalFlow } from '@/pages/my/ui/WithdrawalFlow';
-import { clearTokens } from '@/shared/lib/auth/token';
 
 export function WithdrawalPage() {
   const [completed, setCompleted] = useState(false);
 
+  // 토큰 정리는 완료 모달을 닫고 홈으로 이동하는 시점(WithdrawalCompleteModal)으로 미룬다.
+  // RequireAuth 가드 아래에서 즉시 clearTokens 하면 모달 노출 전에 /auth로 리다이렉트될 수 있다.
   const handleCompleted = () => {
     setCompleted(true);
-    clearTokens();
   };
 
   return (
