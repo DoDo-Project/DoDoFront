@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+import { WithdrawalCompleteModal } from '@/pages/my/ui/WithdrawalCompleteModal';
 import { WithdrawalFlow } from '@/pages/my/ui/WithdrawalFlow';
 import { clearTokens } from '@/shared/lib/auth/token';
 
@@ -11,21 +12,6 @@ export function WithdrawalPage() {
     setCompleted(true);
     clearTokens();
   };
-
-  // TODO(Step 6): 탈퇴 완료 화면을 회원가입 완료 화면과 대칭으로 구현
-  if (completed) {
-    return (
-      <div className="mx-auto w-full max-w-xl px-4 py-10 text-center sm:py-14">
-        <h1 className="text-[20px] font-semibold text-neutral-950">회원 탈퇴가 완료되었어요.</h1>
-        <Link
-          to="/"
-          className="mt-6 inline-flex h-12 items-center justify-center rounded-xl bg-brand px-6 text-sm font-medium text-brand-foreground transition-opacity hover:opacity-90"
-        >
-          홈으로
-        </Link>
-      </div>
-    );
-  }
 
   return (
     <div className="mx-auto w-full max-w-xl px-4 py-10 sm:py-14">
@@ -51,6 +37,8 @@ export function WithdrawalPage() {
           <WithdrawalFlow onCompleted={handleCompleted} />
         </div>
       </div>
+
+      <WithdrawalCompleteModal open={completed} />
     </div>
   );
 }
