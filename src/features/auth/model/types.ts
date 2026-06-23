@@ -419,6 +419,23 @@ export interface UpdateMyProfileResponse {
   userCreatedAt: string;
 }
 
+// ---- 회원 탈퇴 ----
+
+/** 탈퇴 인증 메일 발송 (POST /users/me/withdrawal/email) */
+export interface WithdrawalEmailResponse {
+  message: string;
+}
+
+/** 최종 회원 탈퇴 (DELETE /users/me) */
+export interface WithdrawUserRequest {
+  /** 메일로 받은 6자리 인증번호 */
+  authCode: string;
+}
+
+export interface WithdrawUserResponse {
+  message: string;
+}
+
 export interface UserProfile {
   message: string;
   userId?: string;
