@@ -22,6 +22,17 @@ export interface TokenReissueResponse {
   accessTokenExpiresIn: number;
 }
 
+// ---- 로그아웃 (POST /auth/logout) ----
+
+export interface LogoutRequest {
+  /** 삭제할 리프레시 토큰 */
+  refreshToken: string;
+}
+
+export interface LogoutResponse {
+  message: string;
+}
+
 // ---- 소셜 로그인 (POST /auth/social-login) ----
 
 export interface SocialLoginRequest {

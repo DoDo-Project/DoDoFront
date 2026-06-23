@@ -8,6 +8,14 @@ export const SOCIAL_LOGIN_STATUS_MESSAGES: Partial<Record<number, string>> = {
   500: '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.',
 };
 
+/** 로그아웃 POST /auth/logout */
+export const LOGOUT_STATUS_MESSAGES: Partial<Record<number, string>> = {
+  400: '잘못된 요청이에요. 잠시 후 다시 시도해주세요.',
+  401: '인증 정보가 유효하지 않아요. 다시 로그인해주세요.',
+  404: '로그인 정보를 찾을 수 없어요.',
+  500: '로그아웃에 실패했어요. 잠시 후 다시 시도해주세요.',
+};
+
 /** 회원가입 완료 PUT /users/me/profile */
 export const REGISTER_PROFILE_STATUS_MESSAGES: Partial<Record<number, string>> = {
   400: '입력 정보를 다시 확인해주세요.',

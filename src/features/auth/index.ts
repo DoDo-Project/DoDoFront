@@ -19,7 +19,7 @@ export {
 export type { AuthErrorPresentation, AuthClientErrorCode, AuthErrorContext } from './lib/authErrorPresentation';
 export { AuthLoadingScreen } from './ui/status/AuthLoadingScreen';
 export { AuthErrorScreen } from './ui/status/AuthErrorScreen';
-export { socialLogin, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
+export { socialLogin, logout, registerProfile, checkNicknameAvailability, updateNotificationSetting } from './api/auth';
 export { getMyProfile, updateMyProfile } from './api/users';
 export { useCreatePet } from './model/useCreatePet';
 export { useCreatePetInvitationCode } from './model/useCreatePetInvitationCode';
@@ -50,6 +50,8 @@ export type {
   SocialLoginSuccess,
   SocialSignupRequired,
   SocialLoginResult,
+  LogoutRequest,
+  LogoutResponse,
   CreatePetRequest,
   CreatePetResponse,
   CreatePetSpecialNoteRequest,
@@ -102,6 +104,7 @@ export type {
 export { getApiErrorMessage, getErrorBodyMessage } from '@/shared/lib/api/errorMessage';
 export {
   SOCIAL_LOGIN_STATUS_MESSAGES,
+  LOGOUT_STATUS_MESSAGES,
   REGISTER_PROFILE_STATUS_MESSAGES,
   NOTIFICATION_SETTING_STATUS_MESSAGES,
   PROFILE_UPDATE_STATUS_MESSAGES,
