@@ -45,6 +45,21 @@ export function AuthCallbackPage() {
       const provider = parseProvider(providerParam);
       const code = searchParams.get('code');
       const state = searchParams.get('state');
+      const error = searchParams.get('error');
+
+      // 모바일 앱(dodo-app)이 인앱 브라우저로 이 페이지를 직접 여는 경우 — 앱이 보낸 state에만
+      // 'app_' 접두사가 붙어있어 구분한다. sessionStorage 기반 state 검증은 앱의 인앱 브라우저
+      // 세션에는 애초에 없으므로(별도 프로세스), 그 검증을 타지 않고 code/state/error를 그대로
+      // dodoapp:// 커스텀 스킴으로 넘겨준다. 실제 토큰 교환/검증은 앱(oauth.ts)이 직접 한다.
+      if (provider && state?.startsWith('app_')) {
+        const deepLinkParams = new URLSearchParams();
+        if (code) deepLinkParams.set('code', code);
+        if (state) deepLinkParams.set('state', state);
+        if (error) deepLinkParams.set('error', error);
+        window.location.replace(`dodoapp://auth/callback/${provider.toLowerCase()}?${deepLinkParams.toString()}`);
+        return;
+      }
+
       const storedState = getStoredState();
       const returnTo = getStoredReturnTo();
       clearStoredState();
